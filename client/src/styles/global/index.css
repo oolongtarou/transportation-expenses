@@ -74,6 +74,14 @@ body {
   background-color: #F7FAFC;
 }
 
+.bg-main {
+  background-color: #F7FAFC;
+}
+
+.leading-14 {
+  line-height: 3.5rem;
+}
+
 .text-basic {
   color: #0D141C;
 }
