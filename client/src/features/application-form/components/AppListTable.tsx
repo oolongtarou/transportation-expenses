@@ -11,7 +11,7 @@ const AppListTable = (props: AppListTableProps) => {
     const { appForms, className } = props;
     return (
         <div className={className}>
-            <Table className="table-basic table-fixed">
+            <Table className="table-mini">
                 <TableHeader>
                     <TableRow>
                         <TableHead className="w-[100px]">申請書ID</TableHead>
@@ -29,7 +29,13 @@ const AppListTable = (props: AppListTableProps) => {
                             <TableCell>{appForm.userName}</TableCell>
                             <TableCell>{appForm.totalAmount}</TableCell>
                             <TableCell className='flex flex-row justify-center'>
-                                <span className='label-fill-light w-32'>{appForm.applicationStatusName}</span>
+                                {appForm.applicationStatus === 2 || appForm.applicationStatus === 3 ? (
+                                    <span className="label-fill-action w-32">{appForm.applicationStatusName}</span>
+                                ) : appForm.applicationStatus === 4 ? (
+                                    <span className="label-fill-success w-32">{appForm.applicationStatusName}</span>
+                                ) : (
+                                    <span className="label-fill-light w-32">{appForm.applicationStatusName}</span>
+                                )}
                             </TableCell>
                         </TableRow>
                     ))}

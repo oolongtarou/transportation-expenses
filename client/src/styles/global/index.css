@@ -73,6 +73,10 @@
   @apply min-w-[1200px] table-auto text-pale-blue;
 }
 
+.table-mini {
+  @apply min-w-[800px] table-auto text-pale-blue;
+}
+
 
 body {
   background-color: #F7FAFC;

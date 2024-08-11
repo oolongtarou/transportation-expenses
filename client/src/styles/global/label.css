@@ -1,3 +1,46 @@
+.label-fill-primary {
+    display: block;
+    color: #fff;
+    background-color: #1A73D1;
+    border-color: #1A73D1;
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid none;
+    padding: 0.375rem;
+    /* padding: 0.375rem 0.75rem; */
+    font-size: 1rem;
+    border-radius: 1rem;
+}
+
+.label-fill-action {
+    display: block;
+    color: #fff;
+    background-color: #F77B11;
+    border-color: #F77B11;
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid none;
+    padding: 0.375rem;
+    /* padding: 0.375rem 0.75rem; */
+    font-size: 1rem;
+    border-radius: 1rem;
+}
+
+
+.label-fill-success {
+    display: block;
+    color: #fff;
+    background-color: #8FBD2E;
+    border-color: #8FBD2E;
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid none;
+    padding: 0.375rem;
+    /* padding: 0.375rem 0.75rem; */
+    font-size: 1rem;
+    border-radius: 1rem;
+}
+
 .label-fill-light {
     display: block;
     color: #212529;
