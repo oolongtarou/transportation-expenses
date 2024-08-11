@@ -72,7 +72,7 @@ const AppFormList = () => {
         <div className="container">
             <header>
                 <h2 className="font-bold text-3xl mb-5">申請一覧</h2>
-                <section className="grid grid-cols-2 gap-4 mb-5">
+                <section className="grid md:grid-cols-2 gap-4 mb-5">
                     <div>
                         <Label htmlFor="applicationId">申請書ID</Label>
                         <Input id="applicationId" placeholder="12345" className="mt-1" />
