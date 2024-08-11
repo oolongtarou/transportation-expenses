@@ -18,7 +18,7 @@ const WorkspaceSetting = () => {
                 </div>
 
                 <Button className="btn btn-primary min-w-60">
-                    <img src="./icons/add_person.svg" />
+                    <img src="./icons/add_person.svg" className="mr-2" />
                     ワークスペースに招待する
                 </Button>
             </div>
