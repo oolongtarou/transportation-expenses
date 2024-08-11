@@ -13,7 +13,7 @@ const WorkspaceSetting = () => {
                             <h3 className="font-bold text-xl mr-5">Acme, Inc.</h3>
                             <img src="./icons/edit.svg" className="btn-img btn-link" />
                         </div>
-                        <p>Acme, Inc.は、革新的なソリューションを提供するグローバル企業で、効率的なチームコラボレーションを促進するワークスペースです。最先端のツールとリソースを駆使して、プロジェクト管理やコミュニケーションを円滑にサポートします。</p>
+                        <p className="text-pale-blue">Acme, Inc.は、革新的なソリューションを提供するグローバル企業で、効率的なチームコラボレーションを促進するワークスペースです。最先端のツールとリソースを駆使して、プロジェクト管理やコミュニケーションを円滑にサポートします。</p>
                     </div>
                 </div>
 
