@@ -1,0 +1,13 @@
+.label-fill-light {
+    display: block;
+    color: #212529;
+    background-color: #E8EDF5;
+    border-color: #E8EDF5;
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid none;
+    padding: 0.375rem;
+    /* padding: 0.375rem 0.75rem; */
+    font-size: 1rem;
+    border-radius: 1rem;
+}

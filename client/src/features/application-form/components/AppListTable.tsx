@@ -11,14 +11,14 @@ const AppListTable = (props: AppListTableProps) => {
     const { appForms, className } = props;
     return (
         <div className={className}>
-            <Table className="table-basic">
+            <Table className="table-basic table-fixed">
                 <TableHeader>
                     <TableRow>
                         <TableHead className="w-[100px]">申請書ID</TableHead>
                         <TableHead>申請日</TableHead>
                         <TableHead>申請者名</TableHead>
                         <TableHead>金額</TableHead>
-                        <TableHead>申請書ステータス</TableHead>
+                        <TableHead className='text-center'>申請書ステータス</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -28,12 +28,14 @@ const AppListTable = (props: AppListTableProps) => {
                             <TableCell>{appForm.applicationDate.toLocaleDateString()}</TableCell>
                             <TableCell>{appForm.userName}</TableCell>
                             <TableCell>{appForm.totalAmount}</TableCell>
-                            <TableCell>{appForm.applicationStatus}</TableCell>
+                            <TableCell className='flex flex-row justify-center'>
+                                <span className='label-fill-light w-32'>{appForm.applicationStatusName}</span>
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
             </Table>
-        </div>
+        </div >
     )
 }
 
