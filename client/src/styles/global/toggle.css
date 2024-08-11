@@ -1,0 +1,26 @@
+.toggle-primary {
+    background-color: #E8EDF2;
+    color: #0F0F0F;
+    border-radius: 15px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.toggle-primary:hover {
+    background-color: #D1D9E0;
+    /* 少し濃い背景色 */
+}
+
+.toggle-primary[data-state="on"] {
+    background-color: #0F0F0F;
+    color: #fff;
+}
+
+.toggle-primary[data-state="off"] {
+    background-color: #E8EDF2;
+    color: #0F0F0F;
+}
+
+.toggle-primary[data-state="off"]:hover {
+    background-color: #D1D9E0;
+    /* hover時の少し濃い背景色 */
+}
