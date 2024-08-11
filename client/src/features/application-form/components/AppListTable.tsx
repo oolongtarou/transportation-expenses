@@ -30,11 +30,11 @@ const AppListTable = (props: AppListTableProps) => {
                             <TableCell>{appForm.totalAmount}</TableCell>
                             <TableCell className='flex flex-row justify-center'>
                                 {appForm.applicationStatus === 2 || appForm.applicationStatus === 3 ? (
-                                    <span className="label-fill-action w-32">{appForm.applicationStatusName}</span>
+                                    <span className="label-fill label-fill-action w-32">{appForm.applicationStatusName}</span>
                                 ) : appForm.applicationStatus === 4 ? (
-                                    <span className="label-fill-success w-32">{appForm.applicationStatusName}</span>
+                                    <span className="label-fill label-fill-success w-32">{appForm.applicationStatusName}</span>
                                 ) : (
-                                    <span className="label-fill-light w-32">{appForm.applicationStatusName}</span>
+                                    <span className="label-fill label-fill-light w-32">{appForm.applicationStatusName}</span>
                                 )}
                             </TableCell>
                         </TableRow>
