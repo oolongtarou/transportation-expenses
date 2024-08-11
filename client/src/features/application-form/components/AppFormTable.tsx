@@ -9,9 +9,14 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { AppFormTableProps } from "./app-form-table"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { AppFormDetail } from "../app-form"
+
+
+interface AppFormTableProps {
+    tableRows: AppFormDetail[]
+}
 
 const AppFormTable = (props: AppFormTableProps) => {
     const { tableRows } = props;
@@ -54,12 +59,12 @@ const AppFormTable = (props: AppFormTableProps) => {
                                 </Select>
                             </TableCell>
                             <TableCell className="min-w-100">
-                                {row.route.length === 0 ? (
+                                {row.routes.length === 0 ? (
                                     <Button className="btn btn-sub font-normal w-full">経路を入力する</Button>
                                 ) : (
-                                    row.route.map((r, index) => (
+                                    row.routes.map((route, index) => (
                                         <div key={index}>
-                                            {r.departureStation} - {r.arrivalStation} ({r.line})
+                                            {route.departureStation} - {route.arrivalStation} ({route.line})
                                         </div>
                                     ))
                                 )}

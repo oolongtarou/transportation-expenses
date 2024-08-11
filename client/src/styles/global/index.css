@@ -69,6 +69,10 @@
   }
 }
 
+.table-basic {
+  @apply min-w-[1200px] table-auto text-pale-blue;
+}
+
 
 body {
   background-color: #F7FAFC;
@@ -89,3 +93,5 @@ body {
 .text-pale-blue {
   color: #4A789C;
 }
+
+.table-basic {}

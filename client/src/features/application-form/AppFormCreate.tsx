@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import AppFormTable from "./components/AppFormTable"
-import { AppFormDetail } from "./components/app-form-table"
+import { AppFormDetail } from "./app-form";
 
 const appFormDetails: AppFormDetail[] = [
     {
@@ -8,7 +8,7 @@ const appFormDetails: AppFormDetail[] = [
         date: new Date('2024-08-11'),
         description: 'Business trip to Osaka',
         transportation: 'Train',
-        route: [
+        routes: [
             { departureStation: 'Tokyo', arrivalStation: 'Osaka', line: 'Shinkansen' },
             { departureStation: 'Osaka', arrivalStation: 'Kyoto', line: 'JR Kyoto Line' }
         ],
@@ -21,7 +21,7 @@ const appFormDetails: AppFormDetail[] = [
         date: new Date('2024-08-10'),
         description: 'Meeting in Nagoya',
         transportation: 'Train',
-        route: [
+        routes: [
             { departureStation: 'Tokyo', arrivalStation: 'Nagoya', line: 'Shinkansen' }
         ],
         oneWayAmount: 11000,
@@ -33,7 +33,7 @@ const appFormDetails: AppFormDetail[] = [
         date: new Date('2024-08-09'),
         description: 'Client visit in Yokohama',
         transportation: 'Car',
-        route: [
+        routes: [
             { departureStation: 'Tokyo', arrivalStation: 'Yokohama', line: 'Expressway' }
         ],
         oneWayAmount: 2000,
@@ -45,7 +45,7 @@ const appFormDetails: AppFormDetail[] = [
         date: new Date('2024-08-09'),
         description: 'Client visit in Yokohama',
         transportation: 'Car',
-        route: [],
+        routes: [],
         oneWayAmount: 2000,
         isRoundTrip: true,
         detailAmount: 4000,
