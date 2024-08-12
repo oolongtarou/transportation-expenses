@@ -41,7 +41,7 @@ const appFormDetails: AppFormDetail[] = [
         detailAmount: 4000,
     },
     {
-        id: 3,
+        id: 4,
         date: new Date('2024-08-09'),
         description: 'Client visit in Yokohama',
         transportation: 'Car',
