@@ -46,6 +46,19 @@ const AppFormTable = (props: AppFormTableProps) => {
         setIsAddingRow(false);
     };
 
+    const deleteRow = (id: number) => {
+        setRows((prevRows) => {
+            // 行を削除
+            const newRows = prevRows.filter(row => row.id !== id);
+
+            // IDを再採番
+            return newRows.map((row, index) => ({
+                ...row,
+                id: index + 1,  // 1から始まるIDを再割り当て
+            }));
+        });
+    };
+
     return (
         <div className="overflow-x-auto">
             <Table className="min-w-[1200px] table-auto">
@@ -113,7 +126,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                                 <Button className="btn btn-link" onClick={() => deleteRow(row.id)}>削除</Button>
                             </TableCell>
                             <TableCell>
-                                <Button className="btn btn-link" onClick={() => copyRow(row.id)}>コピー</Button>
+                                <Button className="btn btn-link">コピー</Button>
                             </TableCell>
                         </TableRow>
                     ))}
