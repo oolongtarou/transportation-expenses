@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -18,6 +18,22 @@ const AppFormTable = (props: AppFormTableProps) => {
     const { tableRows } = props;
     const [rows, setRows] = useState<AppFormDetail[]>(tableRows);
     const [isAddingRow, setIsAddingRow] = useState(false);
+    const [totalAmount, setTotalAmount] = useState(0);
+
+    const calculateTotalAmount = (rows: AppFormDetail[]) => {
+        const total = rows.reduce((sum, row) => {
+            if (Number.isNaN(row.oneWayAmount))
+                return sum;
+
+            const rowAmount = row.isRoundTrip ? row.oneWayAmount * 2 : row.oneWayAmount;
+            return sum + rowAmount;
+        }, 0);
+        setTotalAmount(total);
+    };
+
+    useEffect(() => {
+        calculateTotalAmount(rows);
+    }, [rows]);
 
     const handleInputChange = (id: number, field: keyof AppFormDetail, value: unknown) => {
         setRows(prevRows =>
@@ -86,9 +102,9 @@ const AppFormTable = (props: AppFormTableProps) => {
                         <TableHead>説明</TableHead>
                         <TableHead>移動手段</TableHead>
                         <TableHead>経路</TableHead>
-                        <TableHead className="text-right">片道金額</TableHead>
-                        <TableHead>往復</TableHead>
-                        <TableHead className="text-right">金額</TableHead>
+                        <TableHead className="text-right w-40">片道金額</TableHead>
+                        <TableHead className="text-center">往復</TableHead>
+                        <TableHead className="text-right max-w-32">金額</TableHead>
                         <TableHead></TableHead>
                         <TableHead></TableHead>
                     </TableRow>
@@ -145,7 +161,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                                     </DialogContent>
                                 </Dialog>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="w-40">
                                 <Input
                                     type="text"
                                     defaultValue={row.oneWayAmount.toString()}
@@ -153,13 +169,15 @@ const AppFormTable = (props: AppFormTableProps) => {
                                     onChange={(e) => handleInputChange(row.id, 'oneWayAmount', parseFloat(e.target.value))}
                                 />
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="text-center">
                                 <Checkbox
                                     defaultChecked={row.isRoundTrip}
                                     onCheckedChange={(checked) => handleInputChange(row.id, 'isRoundTrip', checked)}
                                 />
                             </TableCell>
-                            <TableCell className="text-right">{row.isRoundTrip ? formatWithCommas(row.oneWayAmount * 2) : formatWithCommas(row.oneWayAmount)}</TableCell>
+                            <TableCell className="text-right max-w-32">
+                                {row.isRoundTrip ? formatWithCommas(row.oneWayAmount * 2) : formatWithCommas(row.oneWayAmount)}
+                            </TableCell>
                             <TableCell>
                                 <Button className="btn btn-link" onClick={() => deleteRow(row.id)}>削除</Button>
                             </TableCell>
@@ -176,8 +194,8 @@ const AppFormTable = (props: AppFormTableProps) => {
                 </TableBody>
                 <TableFooter>
                     <TableRow>
-                        <TableCell colSpan={6} className="font-bold text-lg">合計</TableCell>
-                        <TableCell colSpan={1} className="text-right font-bold text-lg">¥53,000</TableCell>
+                        <TableCell colSpan={6} className="font-bold text-lg">合計金額</TableCell>
+                        <TableCell colSpan={1} className="text-right font-bold text-lg">¥{totalAmount.toLocaleString()}</TableCell>
                         <TableCell colSpan={2}></TableCell>
                     </TableRow>
                 </TableFooter>
