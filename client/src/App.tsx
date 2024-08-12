@@ -7,6 +7,7 @@ import Header from "./components/Header"
 import AppFormCreate from "./features/application-form/AppFormCreate"
 import LoginLayout from "./features/layout/LoginLayout"
 import MainLayout from "./features/layout/MainLayout"
+import { appFormInitialData } from "./features/application-form/app-form"
 
 function App() {
 
@@ -22,7 +23,7 @@ function App() {
           <Route path='/account/password/reset-link' element={<PasswordResetLink />} />
         </Route>
         <Route element={<MainLayout />}>
-          <Route path='/menu' element={<AppFormCreate />} />
+          <Route path='/menu' element={<AppFormCreate appForm={appFormInitialData} />} />
         </Route>
       </Routes>
     </>

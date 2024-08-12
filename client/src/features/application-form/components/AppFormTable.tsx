@@ -11,7 +11,10 @@ import {
 } from "@/components/ui/table"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { AppFormDetail } from "../app-form"
+import { AppFormDetail, appFormDetailInitialData } from "../app-form"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import RouteInput from "./RouteInput"
+import { useState } from "react"
 
 
 interface AppFormTableProps {
@@ -20,6 +23,29 @@ interface AppFormTableProps {
 
 const AppFormTable = (props: AppFormTableProps) => {
     const { tableRows } = props;
+    const [rows, setRows] = useState<AppFormDetail[]>(tableRows);
+    const [isAddingRow, setIsAddingRow] = useState(false);
+
+    const addRow = () => {
+        console.log('行を追加します。')
+
+        if (isAddingRow) {
+            return;
+        }
+
+        setIsAddingRow(true);
+
+        const newRow: AppFormDetail = {
+            ...appFormDetailInitialData,
+            id: rows.length + 1,  // 新しいIDを設定
+            date: new Date(),  // 必要に応じて初期化
+            // 他のフィールドも必要に応じて設定
+        };
+
+        setRows((prevRows) => [...prevRows, newRow]);
+        setIsAddingRow(false);
+    };
+
     return (
         <div className="overflow-x-auto">
             <Table className="min-w-[1200px] table-auto">
@@ -37,21 +63,21 @@ const AppFormTable = (props: AppFormTableProps) => {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {tableRows.map(row => (
+                    {rows.map(row => (
                         <TableRow key={row.id}>
                             <TableCell>
-                                <Input type="date" value={row.date.toISOString().substring(0, 10)} />
+                                <Input type="date" defaultValue={row.date.toISOString().substring(0, 10)} />
                             </TableCell>
                             <TableCell>
-                                <Input type="text" value={row.description} maxLength={20} />
+                                <Input type="text" defaultValue={row.description} maxLength={20} />
                             </TableCell>
                             <TableCell>
-                                <Select>
+                                <Select defaultValue="1">
                                     <SelectTrigger className="min-w-[80px]">
                                         <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
+                                    <SelectContent >
+                                        <SelectGroup >
                                             <SelectItem value="1">電車</SelectItem>
                                             <SelectItem value="2">バス</SelectItem>
                                         </SelectGroup>
@@ -59,34 +85,41 @@ const AppFormTable = (props: AppFormTableProps) => {
                                 </Select>
                             </TableCell>
                             <TableCell className="min-w-100">
-                                {row.routes.length === 0 ? (
-                                    <Button className="btn btn-sub font-normal w-full">経路を入力する</Button>
-                                ) : (
-                                    row.routes.map((route, index) => (
-                                        <div key={index}>
-                                            {route.departureStation} - {route.arrivalStation} ({route.line})
-                                        </div>
-                                    ))
-                                )}
+                                <Dialog>
+                                    <DialogTrigger className="w-full text-left">
+                                        {row.routes.length === 0 ? (
+                                            <Button className="btn btn-sub font-normal w-full">経路を入力する</Button>
+                                        ) : (
+                                            row.routes.map((route, index) => (
+                                                <div key={index} >
+                                                    {route.departureStation} - {route.arrivalStation} ({route.line})
+                                                </div>
+                                            ))
+                                        )}
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-4xl">
+                                        <RouteInput />
+                                    </DialogContent>
+                                </Dialog>
                             </TableCell>
                             <TableCell>
-                                <Input type="text" id="one_way_amount" placeholder="524" className="text-right" value={row.oneWayAmount} />
+                                <Input type="text" id="one_way_amount" placeholder="524" className="text-right" defaultValue={row.oneWayAmount} />
                             </TableCell>
                             <TableCell>
-                                <Checkbox checked={row.isRoundTrip} />
+                                <Checkbox defaultChecked={row.isRoundTrip} />
                             </TableCell>
                             <TableCell className="text-right">{row.isRoundTrip ? row.oneWayAmount * 2 : row.oneWayAmount}</TableCell>
                             <TableCell>
-                                <Button className="btn btn-link">削除</Button>
+                                <Button className="btn btn-link" onClick={() => deleteRow(row.id)}>削除</Button>
                             </TableCell>
                             <TableCell>
-                                <Button className="btn btn-link">コピー</Button>
+                                <Button className="btn btn-link" onClick={() => copyRow(row.id)}>コピー</Button>
                             </TableCell>
                         </TableRow>
                     ))}
                     <TableRow>
-                        <TableCell colSpan={9} className="btn btn-link">
-                            <img src="./icons/add.svg" className="w-14 h-14 mx-auto" onClick={() => { }} />
+                        <TableCell colSpan={9} className="text-center btn btn-link" onClick={addRow}>
+                            <img src="./icons/add.svg" className="w-14 h-14 mx-auto" />
                         </TableCell>
                     </TableRow>
                 </TableBody>
