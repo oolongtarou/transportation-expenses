@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 
 import RouteInput from "./RouteInput"
 import { formatWithCommas } from "@/lib/math"
-import { AppFormDetail, appFormDetailInitialData } from "../app-form"
+import { AppFormDetail, appFormDetailInitialData, Route } from "../app-form"
 
 interface AppFormTableProps {
     tableRows: AppFormDetail[]
@@ -19,6 +19,14 @@ const AppFormTable = (props: AppFormTableProps) => {
     const [rows, setRows] = useState<AppFormDetail[]>(tableRows);
     const [isAddingRow, setIsAddingRow] = useState(false);
     const [totalAmount, setTotalAmount] = useState(0);
+    const [editingRowId, setEditingRowId] = useState<number | null>(null);
+    const handleDialogOpenChange = (id: number, isOpen: boolean) => {
+        setRows(prevRows =>
+            prevRows.map(row =>
+                row.id === id ? { ...row, isDialogOpen: isOpen } : row
+            )
+        );
+    };
 
     const calculateTotalAmount = (rows: AppFormDetail[]) => {
         const total = rows.reduce((sum, row) => {
@@ -41,6 +49,16 @@ const AppFormTable = (props: AppFormTableProps) => {
                 row.id === id ? { ...row, [field]: value } : row
             )
         );
+    };
+
+    const handleRoutesUpdate = (id: number, updatedRoutes: Route[]) => {
+        setRows(prevRows =>
+            prevRows.map(row =>
+                row.id === id ? { ...row, routes: updatedRoutes } : row
+            )
+        );
+        setEditingRowId(null); // 編集モードを解除
+        handleDialogOpenChange(id, false);
     };
 
     const addRow = () => {
@@ -144,8 +162,12 @@ const AppFormTable = (props: AppFormTableProps) => {
                                 </Select>
                             </TableCell>
                             <TableCell className="min-w-100">
-                                <Dialog>
-                                    <DialogTrigger className="w-full text-left">
+                                {/* <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}> */}
+                                <Dialog
+                                    open={row.isDialogOpen || false}
+                                    onOpenChange={(isOpen) => handleDialogOpenChange(row.id, isOpen)}
+                                >
+                                    <DialogTrigger className="w-full text-left" onClick={() => setEditingRowId(row.id)}>
                                         {row.routes.length === 0 ? (
                                             <Button className="btn btn-sub font-normal w-full">経路を入力する</Button>
                                         ) : (
@@ -157,7 +179,9 @@ const AppFormTable = (props: AppFormTableProps) => {
                                         )}
                                     </DialogTrigger>
                                     <DialogContent className="max-w-4xl">
-                                        <RouteInput inputRoutes={row.routes} />
+                                        {editingRowId === row.id && (
+                                            <RouteInput inputRoutes={row.routes} onComplete={(updatedRoutes) => handleRoutesUpdate(row.id, updatedRoutes)} />
+                                        )}
                                     </DialogContent>
                                 </Dialog>
                             </TableCell>

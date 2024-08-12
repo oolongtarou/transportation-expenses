@@ -15,11 +15,12 @@ import { Route } from "../app-form"
 import { Input } from "@/components/ui/input"
 
 interface RouteInputProps {
-    inputRoutes: Route[]
+    inputRoutes: Route[];
+    onComplete: (updatedRoutes: Route[]) => void;
 }
 
 const RouteInput = (props: RouteInputProps) => {
-    const { inputRoutes } = props;
+    const { inputRoutes, onComplete } = props;
 
     const [routes, setRoutes] = useState<Route[]>(inputRoutes);
 
@@ -28,9 +29,7 @@ const RouteInput = (props: RouteInputProps) => {
     const [lineSelectedOption, setLineSelectedOption] = useState<SelectOption>({ label: '', value: '' });
 
     const complete = () => {
-        console.log(departureSelectedOption);
-        console.log(arrivalSelectedOption);
-        console.log(lineSelectedOption);
+        onComplete(routes);
     }
 
     const addRow = () => {
@@ -123,7 +122,7 @@ const RouteInput = (props: RouteInputProps) => {
             </Table>
             <div className="flex justify-end gap-5">
                 <Button className="btn btn-outline-primary">料金を調べる</Button>
-                <Button onClick={() => complete()} className="btn btn-primary">入力を完了する</Button>
+                <Button onClick={complete} className="btn btn-primary">入力を完了する</Button>
             </div>
         </div>
     )

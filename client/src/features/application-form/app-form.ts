@@ -18,6 +18,7 @@ export interface AppFormDetail {
     oneWayAmount: number
     isRoundTrip: boolean
     detailAmount: number
+    isDialogOpen?: boolean;  // 各行ごとのDialog開閉状態 TODO:ここにこのデータを持たせるのはすごく嫌だ。別案を探す。
 }
 
 export interface Route {
