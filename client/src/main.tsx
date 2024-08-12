@@ -1,17 +1,30 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { createBrowserRouter, RouterProvider, } from "react-router-dom";
+
 import './styles/global/index.css'
 import './styles/global/reset.css'
 import './styles/global/button.css'
+import './styles/global/toggle.css'
+import './styles/global/pagination.css'
+import './styles/global/label.css'
+import App from './App'
+import AppFormCreate from './features/application-form/AppFormCreate';
 
-import PasswordReset from './features/account/PasswordReset'
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />
+  },
+  {
+    path: "/menu",
+    element: <AppFormCreate />
+  }
+]);
+
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <div className='container flex items-center justify-center min-h-screen'>
-      <div className='max-w-md w-full'>
-        <PasswordReset />
-      </div>
-    </div>
+    <RouterProvider router={router} />
   </StrictMode>,
 )

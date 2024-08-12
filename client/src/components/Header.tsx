@@ -1,9 +1,9 @@
 import { Button } from './ui/button'
 
 const Header = () => {
-    const isLogin: boolean = true;
+    const isLogin: boolean = false;
     return (
-        <div className='flex justify-between shadow fixed top-0 w-full bg-main h-14'>
+        <div className='flex justify-between shadow sticky top-0 w-full bg-main h-14'>
             <h1 className='font-bold text-lg mx-5 leading-14'>交通費精算ツール</h1>
             <nav className='leading-14'>
                 {isLogin ? HeaderNavWhenLogin() : HeaderNavWhenLogout()}

@@ -1,8 +1,16 @@
+import Header from "./components/Header"
+import Login from "./features/account/Login"
+
 function App() {
 
   return (
     <>
-      <h1>交通費精算ツール</h1>
+      <Header />
+      <div className="flex items-center justify-center main-content">
+        <div className="container max-w-xl">
+          <Login />
+        </div >
+      </div >
     </>
   )
 }
