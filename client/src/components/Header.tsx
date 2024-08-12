@@ -46,8 +46,8 @@ const HeaderNavWhenLogout = () => {
     return (
         <>
             <ul className='flex gap-3 mr-5'>
-                <li><Button className='btn btn-link'>ログイン</Button></li>
-                <li><Button className='btn btn-sub'>サインアップ</Button></li>
+                <li><a href='/account/login' className='btn btn-link'>ログイン</a></li>
+                <li><a href='/account/signup' className='btn btn-sub'>サインアップ</a></li>
             </ul>
         </>
     )

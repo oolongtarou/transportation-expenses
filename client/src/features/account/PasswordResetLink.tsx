@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import '../../styles/button.css'
 
 const PasswordResetLink = () => {
     return (

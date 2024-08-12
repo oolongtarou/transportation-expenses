@@ -67,13 +67,15 @@ const Login = () => {
                     {errors.password && <p className='text-red-500'>{errors.password.message}</p>}
                 </div>
                 <div className='text-center mb-5'>
-                    <a href='#' className='text-pale-blue text-sm'>パスワードを忘れた場合</a>
+                    <a onClick={() => navigate("/account/password/reset-link")} className='text-pale-blue text-sm' style={{ cursor: "pointer" }}>
+                        パスワードを忘れた場合
+                    </a>
                 </div>
                 <Button type='submit' className='btn btn-primary w-full mb-10'>ログイン</Button>
                 <div className='text-center mb-1'>
                     <p className='text-pale-blue text-sm'>アカウントを持っていない場合</p>
                 </div>
-                <Button className='btn btn-light w-full'>アカウントを作成する</Button>
+                <Button onClick={() => navigate("/account/signup")} className='btn btn-light w-full'>アカウントを作成する</Button>
             </form>
         </>
     )

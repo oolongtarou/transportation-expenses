@@ -1,8 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import '../../styles/button.css'
-import '../../styles/index.css'
 import PasswordRulesDescription from './PasswordRulesDescription'
 
 const SignUp = () => {
@@ -28,7 +26,7 @@ const SignUp = () => {
             </div>
 
             <div className='flex justify-evenly'>
-                <Button className='btn btn-light'>キャンセル</Button>
+                <a href='/account/login' className='btn btn-light'>キャンセル</a>
                 <Button className='btn btn-primary'>アカウントを作成する</Button>
             </div>
         </>

@@ -1,11 +1,10 @@
-import Header from "./components/Header"
+// import Header from "./components/Header"
 import Login from "./features/account/Login"
 
 function App() {
 
   return (
     <>
-      <Header />
       <div className="flex items-center justify-center main-content">
         <div className="container max-w-xl">
           <Login />
