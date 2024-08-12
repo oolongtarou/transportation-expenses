@@ -26,6 +26,14 @@ const AppFormTable = (props: AppFormTableProps) => {
     const [rows, setRows] = useState<AppFormDetail[]>(tableRows);
     const [isAddingRow, setIsAddingRow] = useState(false);
 
+    const handleInputChange = (id: number, field: keyof AppFormDetail, value: unknown) => {
+        setRows(prevRows =>
+            prevRows.map(row =>
+                row.id === id ? { ...row, [field]: value } : row
+            )
+        );
+    };
+
     const addRow = () => {
         console.log('行を追加します。')
 
@@ -59,6 +67,23 @@ const AppFormTable = (props: AppFormTableProps) => {
         });
     };
 
+    const copyRow = (id: number) => {
+        setRows((prevRows) => {
+            const rowToCopy = prevRows.find(row => row.id === id);
+            if (rowToCopy) {
+                const newRow: AppFormDetail = {
+                    ...rowToCopy,
+                    id: prevRows.length + 1,  // 新しいIDを設定
+                    date: new Date(rowToCopy.date.getTime()),  // Dateオブジェクトを新しくコピー
+                    routes: [...rowToCopy.routes],  // routesの配列をコピー
+                    // 必要に応じて他のネストされたオブジェクトや配列もコピー
+                };
+                return [...prevRows, newRow];
+            }
+            return prevRows;
+        });
+    };
+
     return (
         <div className="overflow-x-auto">
             <Table className="min-w-[1200px] table-auto">
@@ -79,13 +104,25 @@ const AppFormTable = (props: AppFormTableProps) => {
                     {rows.map(row => (
                         <TableRow key={row.id}>
                             <TableCell>
-                                <Input type="date" defaultValue={row.date.toISOString().substring(0, 10)} />
+                                <Input
+                                    type="date"
+                                    defaultValue={row.date.toISOString().substring(0, 10)}
+                                    onChange={(e) => handleInputChange(row.id, 'date', new Date(e.target.value))}
+                                />
                             </TableCell>
                             <TableCell>
-                                <Input type="text" defaultValue={row.description} maxLength={20} />
+                                <Input
+                                    type="text"
+                                    value={row.description}
+                                    maxLength={20}
+                                    onChange={(e) => handleInputChange(row.id, 'description', e.target.value)}
+                                />
                             </TableCell>
                             <TableCell>
-                                <Select defaultValue="1">
+                                <Select
+                                    defaultValue={row.transportation.toString()}
+                                    onValueChange={(value) => handleInputChange(row.id, 'transportation', parseInt(value))}
+                                >
                                     <SelectTrigger className="min-w-[80px]">
                                         <SelectValue />
                                     </SelectTrigger>
@@ -116,17 +153,25 @@ const AppFormTable = (props: AppFormTableProps) => {
                                 </Dialog>
                             </TableCell>
                             <TableCell>
-                                <Input type="text" id="one_way_amount" placeholder="524" className="text-right" defaultValue={row.oneWayAmount} />
+                                <Input
+                                    type="text"
+                                    defaultValue={row.oneWayAmount.toString()}
+                                    className="text-right"
+                                    onChange={(e) => handleInputChange(row.id, 'oneWayAmount', parseFloat(e.target.value))}
+                                />
                             </TableCell>
                             <TableCell>
-                                <Checkbox defaultChecked={row.isRoundTrip} />
+                                <Checkbox
+                                    defaultChecked={row.isRoundTrip}
+                                    onCheckedChange={(checked) => handleInputChange(row.id, 'isRoundTrip', checked)}
+                                />
                             </TableCell>
                             <TableCell className="text-right">{row.isRoundTrip ? row.oneWayAmount * 2 : row.oneWayAmount}</TableCell>
                             <TableCell>
                                 <Button className="btn btn-link" onClick={() => deleteRow(row.id)}>削除</Button>
                             </TableCell>
                             <TableCell>
-                                <Button className="btn btn-link">コピー</Button>
+                                <Button className="btn btn-link" onClick={() => copyRow(row.id)}>コピー</Button>
                             </TableCell>
                         </TableRow>
                     ))}
