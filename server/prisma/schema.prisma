@@ -1,0 +1,177 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId    Int      @id @default(autoincrement()) @map("user_id")
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  userWorkspaces  UserWorkspace[]
+  userAuthorities UserAuthority[]
+  applications    Application[]
+
+  @@map("users")
+}
+
+model Workspace {
+  workspaceId   Int      @id @default(autoincrement()) @map("workspace_id")
+  workspaceName String   @map("workspace_name")
+  description   String?  @map("description")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  userWorkspaces  UserWorkspace[]
+  userAuthorities UserAuthority[]
+  applications    Application[]
+
+  @@map("workspaces")
+}
+
+model Authority {
+  authorityId   Int      @id @default(autoincrement()) @map("authority_id")
+  authorityName String   @map("authority_name")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  userAuthorities UserAuthority[]
+
+  @@map("authorities")
+}
+
+model Transportation {
+  transportationId   Int      @id @default(autoincrement()) @map("transportation_id")
+  transportationName String?  @map("transportation_name")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at")
+
+  applicationDetails ApplicationDetail[]
+
+  @@map("transportations")
+}
+
+model UserWorkspace {
+  userWorkspaceId Int      @id @default(autoincrement()) @map("user_workspace_id")
+  userId          Int      @map("user_id")
+  workspaceId     Int      @map("workspace_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user      User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [workspaceId], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@map("user_workspaces")
+}
+
+model ApplicationStatus {
+  statusId   Int      @id @default(autoincrement()) @map("status_id")
+  statusName String   @map("status_name")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+
+  applications Application[]
+
+  @@map("application_statuses")
+}
+
+model Station {
+  stationId   Int      @id @default(autoincrement()) @map("station_id")
+  stationName String   @map("station_name")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("stations")
+}
+
+model RailwayLine {
+  lineId    Int      @id @default(autoincrement()) @map("line_id")
+  lineName  String   @map("line_name")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("railway_lines")
+}
+
+model UserAuthority {
+  userId      Int      @map("user_id")
+  workspaceId Int      @map("workspace_id")
+  authorityId Int      @map("authority_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user      User      @relation(fields: [userId], references: [userId])
+  workspace Workspace @relation(fields: [workspaceId], references: [workspaceId])
+  authority Authority @relation(fields: [authorityId], references: [authorityId])
+
+  @@id([userId, authorityId, workspaceId])
+  @@map("user_authorities")
+}
+
+model Application {
+  applicationId   Int       @id @default(autoincrement()) @map("application_id")
+  workspaceId     Int       @map("workspace_id")
+  userId          Int       @map("user_id")
+  applicationDate DateTime? @map("application_date")
+  statusId        Int       @map("status_id")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  user      User                @relation(fields: [userId], references: [userId])
+  workspace Workspace           @relation(fields: [workspaceId], references: [workspaceId])
+  status    ApplicationStatus   @relation(fields: [statusId], references: [statusId])
+  details   ApplicationDetail[]
+
+  @@map("applications")
+}
+
+model ApplicationDetail {
+  applicationId       Int      @map("application_id")
+  applicationDetailId Int      @map("application_detail_id")
+  detailDate          DateTime @map("detail_date")
+  description         String?  @map("description")
+  transportationId    Int      @map("transportation_id")
+  oneWayAmount        Int      @map("one_way_amount")
+  isRoundtrip         Boolean  @map("is_roundtrip")
+  detailAmount        Int      @map("detail_amount")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at")
+
+  application    Application              @relation(fields: [applicationId], references: [applicationId])
+  transportation Transportation           @relation(fields: [transportationId], references: [transportationId])
+  routes         ApplicationDetailRoute[]
+
+  @@id([applicationId, applicationDetailId])
+  @@map("application_details")
+}
+
+model ApplicationDetailRoute {
+  applicationId       Int      @map("application_id")
+  applicationDetailId Int      @map("application_detail_id")
+  routeId             Int      @default(autoincrement()) @map("route_id")
+  departure           String   @map("departure")
+  arrival             String   @map("arrival")
+  line                String   @map("line")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at")
+
+  applicationDetail ApplicationDetail @relation(fields: [applicationId, applicationDetailId], references: [applicationId, applicationDetailId])
+
+  @@id([applicationId, applicationDetailId, routeId])
+  @@map("application_detail_routes")
+}
