@@ -1,21 +1,14 @@
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableFooter,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { AppFormDetail, appFormDetailInitialData } from "../app-form"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import RouteInput from "./RouteInput"
-import { useState } from "react"
 
+import RouteInput from "./RouteInput"
+import { formatWithCommas } from "@/lib/math"
+import { AppFormDetail, appFormDetailInitialData } from "../app-form"
 
 interface AppFormTableProps {
     tableRows: AppFormDetail[]
@@ -166,7 +159,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                                     onCheckedChange={(checked) => handleInputChange(row.id, 'isRoundTrip', checked)}
                                 />
                             </TableCell>
-                            <TableCell className="text-right">{row.isRoundTrip ? row.oneWayAmount * 2 : row.oneWayAmount}</TableCell>
+                            <TableCell className="text-right">{row.isRoundTrip ? formatWithCommas(row.oneWayAmount * 2) : formatWithCommas(row.oneWayAmount)}</TableCell>
                             <TableCell>
                                 <Button className="btn btn-link" onClick={() => deleteRow(row.id)}>削除</Button>
                             </TableCell>
