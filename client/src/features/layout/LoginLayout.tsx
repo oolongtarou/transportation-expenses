@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 
-const AccountRouter = () => {
+const LoginLayout = () => {
     return (
         <div className="flex items-center justify-center main-content">
             <div className="container max-w-xl">
@@ -10,4 +10,4 @@ const AccountRouter = () => {
     )
 }
 
-export default AccountRouter
+export default LoginLayout

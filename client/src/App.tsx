@@ -4,9 +4,9 @@ import SignUp from "./features/account/SignUp"
 import PasswordChange from "./features/account/PasswordChange"
 import PasswordResetLink from "./features/account/PasswordResetLink"
 import Header from "./components/Header"
-import AccountRouter from "./features/account/AccountRouter"
-import MainRouter from "./features/account/MainRouter"
 import AppFormCreate from "./features/application-form/AppFormCreate"
+import LoginLayout from "./features/layout/LoginLayout"
+import MainLayout from "./features/layout/MainLayout"
 
 function App() {
 
@@ -14,14 +14,14 @@ function App() {
     <>
       <Header />
       <Routes>
-        <Route element={<AccountRouter />}>
+        <Route element={<LoginLayout />}>
           <Route path='/' element={<Login />} />
           <Route path='/account/login' element={<Login />} />
           <Route path='/account/signup' element={<SignUp />} />
           <Route path='/account/password/change' element={<PasswordChange />} />
           <Route path='/account/password/reset-link' element={<PasswordResetLink />} />
         </Route>
-        <Route element={<MainRouter />}>
+        <Route element={<MainLayout />}>
           <Route path='/menu' element={<AppFormCreate />} />
         </Route>
       </Routes>
