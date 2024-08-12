@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import PasswordRulesDescription from './PasswordRulesDescription'
+import { Link } from 'react-router-dom'
 
 const SignUp = () => {
     return (
@@ -26,7 +27,7 @@ const SignUp = () => {
             </div>
 
             <div className='flex justify-evenly'>
-                <a href='/account/login' className='btn btn-light'>キャンセル</a>
+                <Link to='/account/login' className='btn btn-light'>キャンセル</Link>
                 <Button className='btn btn-primary'>アカウントを作成する</Button>
             </div>
         </>
