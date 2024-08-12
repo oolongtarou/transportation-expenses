@@ -151,13 +151,13 @@ const AppFormTable = (props: AppFormTableProps) => {
                                         ) : (
                                             row.routes.map((route, index) => (
                                                 <div key={index} >
-                                                    {route.departureStation} - {route.arrivalStation} ({route.line})
+                                                    {route.departureName} - {route.arrivalName} ({route.lineName})
                                                 </div>
                                             ))
                                         )}
                                     </DialogTrigger>
                                     <DialogContent className="max-w-4xl">
-                                        <RouteInput />
+                                        <RouteInput inputRoutes={row.routes} />
                                     </DialogContent>
                                 </Dialog>
                             </TableCell>
