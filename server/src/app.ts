@@ -132,14 +132,13 @@ app.post("/account/login", async (req: Request, res: Response) => {
 app.get("/account/logout", async (req: Request, res: Response) => {
     // ログアウト処理。
     req.session.destroy(() => { });
-    res.redirect('/');
+    res.redirect('/auth/status');
 });
 
 
 // ログイン状態を確認するエンドポイント
 app.get('/auth/status', (req: Request, res: Response) => {
     if (req.session.userId) {
-        // トークンが有効でユーザーが存在する場合
         res.status(200).json(
             {
                 loggedIn: true,

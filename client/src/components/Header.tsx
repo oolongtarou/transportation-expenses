@@ -1,5 +1,7 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button'
+import axios from 'axios';
+import { useAuth } from '@/lib/auth';
 
 interface HeaderProps {
     isLoggedin: boolean;
@@ -19,13 +21,30 @@ const Header = (props: HeaderProps) => {
 
 export default Header
 
-
 const HeaderNavWhenLogin = () => {
+    const { setIsLoggedIn } = useAuth();
+    const navigate = useNavigate();
+
+    async function logout() {
+        try {
+            const res = await axios.get(`${import.meta.env.VITE_SERVER_DOMAIN}/account/logout`, { withCredentials: true });
+            if (!res.data.loggedIn) {
+                setIsLoggedIn(false);
+                navigate('/');
+            } else {
+                console.error('ログアウトできませんでした。');
+            }
+        } catch (err) {
+            console.error(err)
+        }
+
+    }
+
     return (
         <>
             <ul className='flex gap-3 mr-5 items-center'>
                 <li>
-                    <Button className='btn btn-link'>ログアウト</Button>
+                    <Button onClick={logout} className='btn btn-link'>ログアウト</Button>
                 </li>
                 <li>
                     <img src='/icons/notification.svg' className='btn-img btn-light' />
