@@ -10,7 +10,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
     const { appForm } = props;
     return (
         <div className="container">
-            <h2 className="font-bold text-xl mx-5 my-3">申請書を作成する</h2>
+            <h2 className="font-bold text-3xl mx-3 my-7">申請書を作成する</h2>
             <AppFormTable tableRows={appForm.details} />
             <div className="flex justify-end gap-5 mt-5 mb-5">
                 <Button className="btn btn-outline-primary" >下書き保存する</Button>

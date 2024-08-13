@@ -7,8 +7,7 @@ const WorkspaceNav = (props: WorkspaceNavProps) => {
     const { workspaceName } = props;
     return (
         <>
-            <ul className="min-h-screen py-5 pl-5 min-w-72">
-                {/* <ul className="max-w-72 min-h-screen py-5 pl-5"> */}
+            <ul className="min-h-screen-custom py-5 pl-5 min-w-72">
                 <li className="flex justify-between">
                     <h2 className="font-bold text-lg ">{workspaceName}</h2>
                     <button onClick={() => { }} className="flex justify-center items-center">
