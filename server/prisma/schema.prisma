@@ -92,7 +92,7 @@ model ApplicationStatus {
 }
 
 model Station {
-  stationId   Int      @id @default(autoincrement()) @map("station_id")
+  stationId   Int      @id @map("station_id")
   stationName String   @map("station_name") @db.VarChar(50)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
@@ -101,7 +101,7 @@ model Station {
 }
 
 model RailwayLine {
-  lineId    Int      @id @default(autoincrement()) @map("line_id")
+  lineId    Int      @id @map("line_id")
   lineName  String   @map("line_name") @db.VarChar(50)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
