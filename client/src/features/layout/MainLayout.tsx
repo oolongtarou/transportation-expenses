@@ -9,7 +9,8 @@ import WorkspaceNav from '../workspace/WorkspaceNav'
 const MainLayout = () => {
     return (
         <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel className='min-w-60 max-w-96'>
+            <ResizablePanel minSize={10} maxSize={30}>
+                {/* <ResizablePanel className='min-w-60 max-w-96'> */}
                 <WorkspaceNav workspaceId={1} workspaceName='ワールドアメニティ' />
             </ResizablePanel>
             <ResizableHandle />
