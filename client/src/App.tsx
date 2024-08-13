@@ -8,6 +8,9 @@ import AppFormCreate from "./features/application-form/AppFormCreate"
 import LoginLayout from "./features/layout/LoginLayout"
 import MainLayout from "./features/layout/MainLayout"
 import { appFormInitialData } from "./features/application-form/app-form"
+import AppFormList from "./features/application-form/AppFormList"
+import WorkspaceSetting from "./features/workspace/WorkspaceSetting"
+import MemberList from "./features/workspace/MemberList"
 
 function App() {
 
@@ -24,6 +27,11 @@ function App() {
         </Route>
         <Route element={<MainLayout />}>
           <Route path='/app-form/create' element={<AppFormCreate appForm={appFormInitialData} />} />
+          <Route path='/app-form/list/me' element={<AppFormList />} />
+          <Route path='/app-form/list/approval' element={<AppFormList />} />
+
+          <Route path='/workspace/:id/members' element={<MemberList />} />
+          <Route path='/workspace/:id/setting' element={<WorkspaceSetting />} />
         </Route>
       </Routes>
     </>

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import MemberTable from "../MemberTable"
+import MemberTable from "./MemberTable"
 import { User } from "@/lib/user";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
