@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
 import RouteInput from "./RouteInput"
 import { formatWithCommas } from "@/lib/math"
@@ -175,7 +175,12 @@ const AppFormTable = (props: AppFormTableProps) => {
                                                 ))
                                             )}
                                         </DialogTrigger>
-                                        <DialogContent className="max-w-4xl">
+                                        <DialogContent className="max-w-4xl" aria-describedby="申請書明細行の経路を入力する画面です">
+                                            <DialogHeader>
+                                                <DialogTitle>
+                                                    <h2 className="font-bold text-3xl mb-5">経路を入力する</h2>
+                                                </DialogTitle>
+                                            </DialogHeader>
                                             {editingRowId === row.id && (
                                                 <RouteInput inputRoutes={row.routes} onComplete={(updatedRoutes) => handleRoutesUpdate(row.id, updatedRoutes)} />
                                             )}

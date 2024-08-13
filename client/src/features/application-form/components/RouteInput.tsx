@@ -69,7 +69,6 @@ const RouteInput = (props: RouteInputProps) => {
 
     return (
         <div className="">
-            <h2 className="font-bold text-3xl mb-5">経路を入力する</h2>
             <section className="grid grid-cols-2 gap-4 mb-5">
                 <div>
                     <Label>出発駅</Label>
