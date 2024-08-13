@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface WorkspaceNavProps {
     workspaceId: number
@@ -15,41 +16,43 @@ const navItems: NavItem[] = [
     {
         label: '申請書を作成する',
         imgPath: '/icons/create_app_form.svg',
-        link: '#',
+        link: '/app-form/create',
     },
     {
         label: 'メンバー一覧',
         imgPath: '/icons/member_list.svg',
-        link: '#',
+        link: '/workspace/1/members',
     },
     {
         label: '申請一覧',
         imgPath: '/icons/hamburger.svg',
-        link: '#',
+        link: '/app-form/list/me',
     },
     {
         label: '承認一覧',
         imgPath: '/icons/approval_list.svg',
-        link: '#',
+        link: '/app-form/list/approval',
     },
     {
         label: '承認ルート',
         imgPath: '/icons/approval_route.svg',
-        link: '#',
+        link: '/workspace/1/approval-route',
     },
     {
         label: 'ワークスペース設定',
         imgPath: '/icons/settings.svg',
-        link: '#',
+        link: '/workspace/:id/setting',
     },
 ];
 
 const WorkspaceNav = (props: WorkspaceNavProps) => {
     const { workspaceName } = props;
     const [focusedIndex, setFocusedIndex] = useState<number>(0);
+    const navigate = useNavigate();
 
     const handleClick = (index: number) => {
         setFocusedIndex(index);
+        navigate(navItems[index].link);
     }
 
     return (
@@ -70,7 +73,7 @@ const WorkspaceNav = (props: WorkspaceNavProps) => {
                                 onClick={() => handleClick(index)}
                             >
                                 <img src={navItem.imgPath} />
-                                <a className="ml-2" href="#">{navItem.label}</a>
+                                <span className="ml-2">{navItem.label}</span>
                             </li>
                         ))}
                     </ul>

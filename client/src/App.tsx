@@ -11,6 +11,7 @@ import { appFormInitialData } from "./features/application-form/app-form"
 import AppFormList from "./features/application-form/AppFormList"
 import WorkspaceSetting from "./features/workspace/WorkspaceSetting"
 import MemberList from "./features/workspace/MemberList"
+import ApprovalRoute from "./features/workspace/ApprovalRoute"
 
 function App() {
 
@@ -31,6 +32,7 @@ function App() {
           <Route path='/app-form/list/approval' element={<AppFormList />} />
 
           <Route path='/workspace/:id/members' element={<MemberList />} />
+          <Route path='/workspace/:id/approval-route' element={<ApprovalRoute maxStep={5} approvers={[]} />} />
           <Route path='/workspace/:id/setting' element={<WorkspaceSetting />} />
         </Route>
       </Routes>
