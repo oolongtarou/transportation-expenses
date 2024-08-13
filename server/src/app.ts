@@ -11,12 +11,27 @@ import prisma from "./infra/db";
 import { toHashed } from "./lib/cipher";
 import { UserRepository } from "./repositories/user-repository";
 import rateLimit from "express-rate-limit";
+import { WorkspaceRepository } from "./repositories/workspace-repository";
+import { User } from "@prisma/client";
+import { AuthorityRepository } from "./repositories/authority-repository";
 
 
 declare module 'express-session' {
     interface SessionData {
         userId: number;
         userName: string;
+        workspaces: Workspace[];
+        authorities: Authrity[];
+    }
+
+    interface Workspace {
+        workspaceId: number;
+        workspaceName: string;
+    }
+
+    interface Authrity {
+        workspaceId: number;
+        authorityId: number;
     }
 }
 
@@ -73,38 +88,45 @@ app.get("/", (req: Request, res: Response) => {
     res.status(200).send("Hello World");
 });
 
-app.post("/account/login", (req: Request, res: Response) => {
+app.post("/account/login", async (req: Request, res: Response) => {
     console.log(req)
     console.log(req.body)
     const email: string = req.body.email;
     const password: string = toHashed(req.body.password);
-    UserRepository.findByEmailAndPassword(email, password)
-        .then(user => {
-            if (user == null) {
-                res.status(200).json({
-                    'userId': '',
-                    'userName': '',
-                    'message': 'メールアドレスかパスワードが間違っています。'
-                });
-            } else {
-                // ログイン成功。
-                req.session.userId = user.userId;
-                req.session.userName = user.userName;
 
-                res.status(200).json({
-                    'userId': req.session.userId,
-                    'userName': req.session.userName,
-                });
-            }
-        })
-        .catch(err => {
-            console.error(`メールアドレスとパスワードをキーにしてユーザー情報を取得する処理でエラーが発生しました：${err}`);
-            res.status(500).json({
+    try {
+        const user: User | null = await UserRepository.findByEmailAndPassword(email, password);
+        if (!user) {
+            res.status(200).json({
                 'userId': '',
                 'userName': '',
-                'message': 'サーバーでエラーが発生しています。',
-            })
+                'message': 'メールアドレスかパスワードが間違っています。'
+            });
+            return;
+        }
+
+        const userWorkspaces = await WorkspaceRepository.findByUserId(user.userId);
+        const userAuthorities = await AuthorityRepository.findByUserId(user.userId);
+
+        // ログイン成功。
+        req.session.userId = user.userId;
+        req.session.userName = user.userName;
+        req.session.workspaces = userWorkspaces ?? []
+        req.session.authorities = userAuthorities ?? [];
+        res.status(200).json({
+            'userId': req.session.userId,
+            'userName': req.session.userName,
+            'workspaces': req.session.workspaces,
+            'authorities': req.session.authorities,
+        });
+    } catch (err) {
+        console.error(`メールアドレスとパスワードをキーにしてユーザー情報を取得する処理でエラーが発生しました：${err}`);
+        res.status(500).json({
+            'userId': '',
+            'userName': '',
+            'message': 'サーバーでエラーが発生しています。',
         })
+    }
 });
 
 app.get("/account/logout", async (req: Request, res: Response) => {
@@ -113,14 +135,22 @@ app.get("/account/logout", async (req: Request, res: Response) => {
     res.redirect('/');
 });
 
-app.get("/users", async (req: Request, res: Response) => {
-    try {
-        const allUsers = await prisma.user.findMany();
-        console.log(allUsers);
-        res.send(allUsers)
-    } catch (err) {
-        console.log(err)
-        res.send(err)
+
+// ログイン状態を確認するエンドポイント
+app.get('/auth/status', (req: Request, res: Response) => {
+    if (req.session.userId) {
+        // トークンが有効でユーザーが存在する場合
+        res.status(200).json(
+            {
+                loggedIn: true,
+                userId: req.session.userId,
+                userName: req.session.userName,
+                workspaces: req.session.workspaces,
+                authorities: req.session.authorities,
+            });
+    } else {
+        // トークンが無効またはユーザーが存在しない場合
+        res.status(200).json({ loggedIn: false });
     }
 });
 
