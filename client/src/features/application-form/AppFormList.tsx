@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
     Pagination,
     PaginationContent,
@@ -12,62 +11,25 @@ import {
 } from "@/components/ui/pagination"
 
 import AppListTable from "./components/AppListTable"
-import { ApplicationForm } from "./app-form"
+import { ApplicationForm, statusSelectOptions } from "./app-form"
+import { MultiSelectBox } from "@/components/SelectBox"
+import axios from "axios"
+import { useState } from "react"
 
-const dummyApplicationForms: ApplicationForm[] = [
-    {
-        applicationId: 1,
-        applicationDate: new Date('2024-08-01'),
-        userId: 1001,
-        userName: '山田 太郎',
-        totalAmount: 15000,
-        applicationStatus: 1,
-        applicationStatusName: '下書き',
-        details: [],
-    },
-    {
-        applicationId: 2,
-        applicationDate: new Date('2024-08-02'),
-        userId: 1002,
-        userName: '鈴木 次郎',
-        totalAmount: 23000,
-        applicationStatus: 2,
-        applicationStatusName: '承認中',
-        details: [],
-    },
-    {
-        applicationId: 3,
-        applicationDate: new Date('2024-08-03'),
-        userId: 1003,
-        userName: '佐藤 花子',
-        totalAmount: 17500,
-        applicationStatus: 3,
-        applicationStatusName: '受領待ち',
-        details: [],
-    },
-    {
-        applicationId: 4,
-        applicationDate: new Date('2024-08-04'),
-        userId: 1004,
-        userName: '田中 一郎',
-        totalAmount: 12000,
-        applicationStatus: 4,
-        applicationStatusName: '受領済み',
-        details: [],
-    },
-    {
-        applicationId: 5,
-        applicationDate: new Date('2024-08-05'),
-        userId: 1005,
-        userName: '高橋 三郎',
-        totalAmount: 20000,
-        applicationStatus: 5,
-        applicationStatusName: '却下',
-        details: [],
-    },
-];
+
 
 const AppFormList = () => {
+    const [appForms, setAppForms] = useState<ApplicationForm[]>([]);
+
+    const fetchAppForms = async () => {
+        const res = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-forms/me`, { workspaceId: 1 }, { withCredentials: true })
+        console.log(res.data);
+
+        const fetchedAppForms: ApplicationForm[] = res.data.appForms;
+        console.log(fetchedAppForms)
+        setAppForms(fetchedAppForms);
+    };
+
     return (
         <div className="container">
             <header>
@@ -78,8 +40,12 @@ const AppFormList = () => {
                         <Input id="applicationId" placeholder="12345" className="mt-1" />
                     </div>
                     <div>
-                        <Label htmlFor="applicationDate">申請日</Label>
-                        <Input id="applicationDate" placeholder="12345" className="mt-1" />
+                        <Label htmlFor="startDate">申請日</Label>
+                        <div className="flex flex-row items-center gap-3 mt-1">
+                            <Input type="date" id="startDate" placeholder="12345" />
+                            <span>～</span>
+                            <Input type="date" id="endDate" placeholder="12345" />
+                        </div>
                     </div>
                     <div>
                         <Label htmlFor="userName">申請者名</Label>
@@ -95,29 +61,16 @@ const AppFormList = () => {
                     </div>
                     <div>
                         <Label htmlFor="applicationStatus">申請書ステータス</Label>
-                        <Select>
-                            <SelectTrigger id="applicationStatus" className="min-w-[80px] mt-1">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectItem value="0">下書き</SelectItem>
-                                    <SelectItem value="1">承認中</SelectItem>
-                                    <SelectItem value="2">受領待ち</SelectItem>
-                                    <SelectItem value="3">受領済み</SelectItem>
-                                    <SelectItem value="4">却下</SelectItem>
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
+                        <MultiSelectBox options={statusSelectOptions} onChange={() => { }} />
                     </div>
                 </section>
                 <div className="flex flex-row justify-end gap-5 mb-5">
                     <Button className="btn btn-light w-24">クリア</Button>
-                    <Button className="btn btn-primary w-24">検索</Button>
+                    <Button onClick={fetchAppForms} className="btn btn-primary w-24">検索</Button>
                 </div>
             </header>
             <main>
-                <AppListTable appForms={dummyApplicationForms} className="mb-3" />
+                <AppListTable appForms={appForms} className="mb-3" />
                 <Pagination>
                     <PaginationContent >
                         <PaginationItem>

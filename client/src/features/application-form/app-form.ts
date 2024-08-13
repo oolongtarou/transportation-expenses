@@ -1,12 +1,23 @@
+import { SelectOption } from "@/components/SelectBox"
+
 export interface ApplicationForm {
     applicationId: number
-    applicationDate: Date
+    workspaceId: number;
+    applicationDate: string
     userId: number
-    userName: string
     totalAmount: number
-    applicationStatus: number
-    applicationStatusName: string
+    statusId: number
+    user: User;
+    status: Status;
     details: AppFormDetail[]
+}
+
+interface User {
+    userName: string;
+}
+
+interface Status {
+    statusName: string;
 }
 
 export interface AppFormDetail {
@@ -48,14 +59,19 @@ export const appFormDetailInitialData: AppFormDetail =
 
 export const appFormInitialData: ApplicationForm = {
     applicationId: 1,
-    applicationDate: new Date(),
-    applicationStatus: 0,
-    applicationStatusName: "",
+    workspaceId: 1,
+    applicationDate: new Date().toISOString(), // 現在の日付と時刻をISO 8601形式の文字列に変換
+    userId: 1,
     totalAmount: 0,
-    userId: 0,
-    userName: "",
+    statusId: 0,
+    user: {
+        userName: "",
+    },
+    status: {
+        statusName: "",
+    },
     details: [appFormDetailInitialData]
-}
+};
 
 export interface AppFormTableProps {
     tableRows: AppFormDetail[]
@@ -73,18 +89,28 @@ export const calculateTotalAmount = (rows: AppFormDetail[]): number => {
     return total;
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
+export const statusSelectOptions: SelectOption[] = [
+    {
+        label: '下書き',
+        value: '0',
+    },
+    {
+        label: '承認中',
+        value: '1',
+    },
+    {
+        label: '受領待ち',
+        value: '2',
+    },
+    {
+        label: '受領済み',
+        value: '3',
+    },
+    {
+        label: '却下',
+        value: '4',
+    },
+]
 
 export const dummyAppFormDetails: AppFormDetail[] = [
     {
@@ -212,13 +238,13 @@ export const dummyAppFormDetails: AppFormDetail[] = [
     },
 ];
 
-export const appFormDummyData: ApplicationForm = {
-    applicationId: 1,
-    applicationDate: new Date(),
-    applicationStatus: 0,
-    applicationStatusName: "",
-    totalAmount: 0,
-    userId: 0,
-    userName: "",
-    details: dummyAppFormDetails,
-}
+// export const appFormDummyData: ApplicationForm = {
+//     applicationId: 1,
+//     applicationDate: new Date(),
+//     applicationStatus: 0,
+//     applicationStatusName: "",
+//     totalAmount: 0,
+//     userId: 0,
+//     userName: "",
+//     details: dummyAppFormDetails,
+// }

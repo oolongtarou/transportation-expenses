@@ -14,6 +14,7 @@ import rateLimit from "express-rate-limit";
 import { WorkspaceRepository } from "./repositories/workspace-repository";
 import { User } from "@prisma/client";
 import { AuthorityRepository } from "./repositories/authority-repository";
+import { AppFormRepository } from "./repositories/app-form-repository";
 
 
 declare module 'express-session' {
@@ -135,7 +136,6 @@ app.get("/account/logout", async (req: Request, res: Response) => {
     res.redirect('/auth/status');
 });
 
-
 // ログイン状態を確認するエンドポイント
 app.get('/auth/status', (req: Request, res: Response) => {
     if (req.session.userId) {
@@ -150,6 +150,30 @@ app.get('/auth/status', (req: Request, res: Response) => {
     } else {
         // トークンが無効またはユーザーが存在しない場合
         res.status(200).json({ loggedIn: false });
+    }
+});
+
+
+app.post("/app-forms/me", async (req: Request, res: Response) => {
+    if (!req.session.userId) {
+        res.status(200).json({ loggedIn: false });
+        return;
+    }
+
+    try {
+        const workspaceId: number = parseInt(req.body.workspaceId);
+        console.log(`userId:${req.session.userId} workspaceId:${workspaceId}`);
+        const appForms = await AppFormRepository.findByUserIdAndWorkspaceId(req.session.userId, workspaceId);
+        res.status(200).json(
+            {
+                loggedIn: true,
+                appForms: appForms,
+            });
+    } catch (err) {
+        res.status(500).json({
+            loggedIn: true,
+            'message': 'サーバーでエラーが発生しています。',
+        })
     }
 });
 
