@@ -8,14 +8,10 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 
 import RouteInput from "./RouteInput"
 import { formatWithCommas } from "@/lib/math"
-import { AppFormDetail, appFormDetailInitialData, Route } from "../app-form"
-
-interface AppFormTableProps {
-    tableRows: AppFormDetail[]
-}
+import { AppFormDetail, appFormDetailInitialData, AppFormTableProps, calculateTotalAmount, Route } from "../app-form"
 
 const AppFormTable = (props: AppFormTableProps) => {
-    const { tableRows } = props;
+    const { tableRows, editing } = props;
     const [rows, setRows] = useState<AppFormDetail[]>(tableRows);
     const [isAddingRow, setIsAddingRow] = useState(false);
     const [totalAmount, setTotalAmount] = useState(0);
@@ -28,19 +24,13 @@ const AppFormTable = (props: AppFormTableProps) => {
         );
     };
 
-    const calculateTotalAmount = (rows: AppFormDetail[]) => {
-        const total = rows.reduce((sum, row) => {
-            if (Number.isNaN(row.oneWayAmount))
-                return sum;
-
-            const rowAmount = row.isRoundTrip ? row.oneWayAmount * 2 : row.oneWayAmount;
-            return sum + rowAmount;
-        }, 0);
+    const refreshTotalAmount = (rows: AppFormDetail[]) => {
+        const total = calculateTotalAmount(rows);
         setTotalAmount(total);
     };
 
     useEffect(() => {
-        calculateTotalAmount(rows);
+        refreshTotalAmount(rows);
     }, [rows]);
 
     const handleInputChange = (id: number, field: keyof AppFormDetail, value: unknown) => {
@@ -123,8 +113,13 @@ const AppFormTable = (props: AppFormTableProps) => {
                         <TableHead className="text-right w-40">片道金額</TableHead>
                         <TableHead className="text-center">往復</TableHead>
                         <TableHead className="text-right max-w-32">金額</TableHead>
-                        <TableHead></TableHead>
-                        <TableHead></TableHead>
+                        {editing ?
+                            <>
+                                <TableHead></TableHead>
+                                <TableHead></TableHead>
+                            </>
+                            : <></>
+                        }
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -133,6 +128,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                             <TableCell>
                                 <Input
                                     type="date"
+                                    readOnly={editing ? false : true}
                                     defaultValue={row.date.toISOString().substring(0, 10)}
                                     onChange={(e) => handleInputChange(row.id, 'date', new Date(e.target.value))}
                                 />
@@ -140,7 +136,8 @@ const AppFormTable = (props: AppFormTableProps) => {
                             <TableCell>
                                 <Input
                                     type="text"
-                                    value={row.description}
+                                    readOnly={editing ? false : true}
+                                    defaultValue={row.description}
                                     maxLength={20}
                                     onChange={(e) => handleInputChange(row.id, 'description', e.target.value)}
                                 />
@@ -162,32 +159,40 @@ const AppFormTable = (props: AppFormTableProps) => {
                                 </Select>
                             </TableCell>
                             <TableCell className="min-w-100">
-                                {/* <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}> */}
-                                <Dialog
-                                    open={row.isDialogOpen || false}
-                                    onOpenChange={(isOpen) => handleDialogOpenChange(row.id, isOpen)}
-                                >
-                                    <DialogTrigger className="w-full text-left" onClick={() => setEditingRowId(row.id)}>
-                                        {row.routes.length === 0 ? (
-                                            <Button className="btn btn-sub font-normal w-full">経路を入力する</Button>
-                                        ) : (
-                                            row.routes.map((route, index) => (
-                                                <div key={index} >
-                                                    {route.departureName} - {route.arrivalName} ({route.lineName})
-                                                </div>
-                                            ))
-                                        )}
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-4xl">
-                                        {editingRowId === row.id && (
-                                            <RouteInput inputRoutes={row.routes} onComplete={(updatedRoutes) => handleRoutesUpdate(row.id, updatedRoutes)} />
-                                        )}
-                                    </DialogContent>
-                                </Dialog>
+                                {editing ?
+                                    <Dialog
+                                        open={row.isDialogOpen || false}
+                                        onOpenChange={(isOpen) => handleDialogOpenChange(row.id, isOpen)}
+                                    >
+                                        <DialogTrigger className="w-full text-left" onClick={() => setEditingRowId(row.id)}>
+                                            {row.routes.length === 0 ? (
+                                                <Button className="btn btn-sub font-normal w-full">経路を入力する</Button>
+                                            ) : (
+                                                row.routes.map((route, index) => (
+                                                    <div key={index} >
+                                                        {route.departureName} - {route.arrivalName} ({route.lineName})
+                                                    </div>
+                                                ))
+                                            )}
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-4xl">
+                                            {editingRowId === row.id && (
+                                                <RouteInput inputRoutes={row.routes} onComplete={(updatedRoutes) => handleRoutesUpdate(row.id, updatedRoutes)} />
+                                            )}
+                                        </DialogContent>
+                                    </Dialog>
+                                    :
+                                    row.routes.map((route, index) => (
+                                        <div key={index} >
+                                            {route.departureName} - {route.arrivalName} ({route.lineName})
+                                        </div>
+                                    ))
+                                }
                             </TableCell>
                             <TableCell className="w-40">
                                 <Input
                                     type="text"
+                                    readOnly={editing ? false : true}
                                     defaultValue={row.oneWayAmount.toString()}
                                     className="text-right"
                                     onChange={(e) => handleInputChange(row.id, 'oneWayAmount', parseFloat(e.target.value))}
@@ -195,26 +200,36 @@ const AppFormTable = (props: AppFormTableProps) => {
                             </TableCell>
                             <TableCell className="text-center">
                                 <Checkbox
+                                    checked={editing ? row.isRoundTrip : undefined}
                                     defaultChecked={row.isRoundTrip}
+                                    disabled={editing ? false : true}
                                     onCheckedChange={(checked) => handleInputChange(row.id, 'isRoundTrip', checked)}
                                 />
                             </TableCell>
                             <TableCell className="text-right max-w-32">
                                 {row.isRoundTrip ? formatWithCommas(row.oneWayAmount * 2) : formatWithCommas(row.oneWayAmount)}
                             </TableCell>
-                            <TableCell>
-                                <Button className="btn btn-link" onClick={() => deleteRow(row.id)}>削除</Button>
-                            </TableCell>
-                            <TableCell>
-                                <Button className="btn btn-link" onClick={() => copyRow(row.id)}>コピー</Button>
-                            </TableCell>
+                            {editing ?
+                                <>
+                                    <TableCell>
+                                        <Button className="btn btn-link" onClick={() => deleteRow(row.id)}>削除</Button>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Button className="btn btn-link" onClick={() => copyRow(row.id)}>コピー</Button>
+                                    </TableCell>
+                                </>
+                                : <></>
+                            }
                         </TableRow>
                     ))}
-                    <TableRow>
-                        <TableCell colSpan={9} className="text-center btn btn-link" onClick={addRow}>
-                            <img src="./icons/add.svg" className="w-14 h-14 mx-auto" />
-                        </TableCell>
-                    </TableRow>
+                    {editing ?
+                        <TableRow>
+                            <TableCell colSpan={9} className="text-center btn btn-link" onClick={addRow}>
+                                <img src="/icons/add.svg" className="w-14 h-14 mx-auto" />
+                            </TableCell>
+                        </TableRow>
+                        : <></>
+                    }
                 </TableBody>
                 <TableFooter>
                     <TableRow>
