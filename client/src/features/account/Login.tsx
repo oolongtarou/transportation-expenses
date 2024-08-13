@@ -31,7 +31,7 @@ const Login = () => {
         axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/account/login`, data, { withCredentials: true })
             .then((response) => {
                 if (response.data.userId) {
-                    navigate("/menu")
+                    navigate("/app-form/create")
                 } else {
                     setError(response.data.message);
                 }

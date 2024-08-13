@@ -23,7 +23,7 @@ function App() {
           <Route path='/account/password/reset-link' element={<PasswordResetLink />} />
         </Route>
         <Route element={<MainLayout />}>
-          <Route path='/menu' element={<AppFormCreate appForm={appFormInitialData} />} />
+          <Route path='/app-form/create' element={<AppFormCreate appForm={appFormInitialData} />} />
         </Route>
       </Routes>
     </>
