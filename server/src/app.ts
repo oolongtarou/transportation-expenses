@@ -10,6 +10,7 @@ import RedisStore from 'connect-redis'
 import prisma from "./infra/db";
 import { toHashed } from "./lib/cipher";
 import { UserRepository } from "./repositories/user-repository";
+import rateLimit from "express-rate-limit";
 
 
 declare module 'express-session' {
@@ -27,6 +28,16 @@ const redisUrl: string = process.env.REDIS_URL || 'redis://localhost:6379';
 const redisClient = new Redis(redisUrl, {
     password: process.env.REDIS_PASSWORD,
 });
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+app.use(limiter);
+
 
 app.use(session({
     secret: process.env.SESSION_SECRET as string,
