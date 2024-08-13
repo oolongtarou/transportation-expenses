@@ -9,6 +9,7 @@ import axios, { AxiosError } from 'axios';
 import { useState } from 'react';
 import AlertDestructive from '@/components/Alert';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/lib/auth';
 
 type LoginFormData = {
     email: string;
@@ -16,6 +17,7 @@ type LoginFormData = {
 };
 
 const Login = () => {
+    const { setIsLoggedIn } = useAuth();
     const [error, setError] = useState('');
     const navigate = useNavigate();
     const {
@@ -31,6 +33,7 @@ const Login = () => {
         axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/account/login`, data, { withCredentials: true })
             .then((response) => {
                 if (response.data.userId) {
+                    setIsLoggedIn(true);
                     navigate("/app-form/create")
                 } else {
                     setError(response.data.message);

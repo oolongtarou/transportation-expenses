@@ -1,14 +1,17 @@
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button'
-import { useAuth } from '@/lib/auth';
 
-const Header = () => {
-    const { isLoggedIn } = useAuth();
+interface HeaderProps {
+    isLoggedin: boolean;
+}
+
+const Header = (props: HeaderProps) => {
+    const { isLoggedin } = props;
     return (
         <div className='flex justify-between shadow sticky top-0 w-full bg-main h-14'>
             <h1 className='font-bold text-lg mx-5 leading-14'>交通費精算ツール</h1>
             <nav className='leading-14'>
-                {isLoggedIn ? HeaderNavWhenLogin() : HeaderNavWhenLogout()}
+                {isLoggedin ? HeaderNavWhenLogin() : HeaderNavWhenLogout()}
             </nav>
         </div>
     )
