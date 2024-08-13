@@ -31,7 +31,7 @@ const HeaderNavWhenLogin = () => {
                     <img src='/icons/help.svg' className='btn-img btn-light' />
                 </li>
                 <li>
-                    <Link to='/'>
+                    <Link to='/account/my-page'>
                         <img src='/icons/default_user_icon.svg' className='btn-img btn-link' />
                     </Link>
                 </li>

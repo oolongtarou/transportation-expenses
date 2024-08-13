@@ -14,6 +14,8 @@ import MemberList from "./features/workspace/MemberList"
 import ApprovalRoute from "./features/workspace/ApprovalRoute"
 import { createContext, useEffect, useState } from "react"
 import axios from "axios"
+import MyPage from "./features/account/MyPage"
+import { Workspace } from "./lib/user-workspace"
 
 // 型定義
 interface AuthContextType {
@@ -23,6 +25,8 @@ interface AuthContextType {
 
 // ログイン状態を管理するContextを作成
 export const AuthContext = createContext<AuthContextType | null>(null);
+
+let workspaces: Workspace[] = [];
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -37,6 +41,7 @@ function App() {
     const res = await axios.get(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true })
     const loggedIn = res.data.loggedIn;;
     if (loggedIn !== isLoggedIn) {
+      workspaces = res.data.workspaces;
       setIsLoggedIn(loggedIn);
     }
   };
@@ -51,6 +56,7 @@ function App() {
           <Route path='/account/signup' element={<SignUp />} />
           <Route path='/account/password/change' element={<PasswordChange />} />
           <Route path='/account/password/reset-link' element={<PasswordResetLink />} />
+          <Route path='/account/my-page' element={<MyPage workspaces={workspaces} />} />
         </Route>
         <Route element={<MainLayout />}>
           <Route path='/app-form/create' element={<AppFormCreate appForm={appFormInitialData} />} />
