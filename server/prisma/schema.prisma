@@ -15,10 +15,10 @@ datasource db {
 
 model User {
   userId    Int      @id @default(autoincrement()) @map("user_id")
-  firstName String   @map("first_name")
-  lastName  String   @map("last_name")
-  userName  String   @unique @map("user_name")
-  email     String   @unique
+  firstName String   @map("first_name") @db.VarChar(50)
+  lastName  String   @map("last_name") @db.VarChar(50)
+  userName  String   @unique @map("user_name") @db.VarChar(50)
+  email     String   @unique @db.VarChar(255)
   password  String
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -32,8 +32,8 @@ model User {
 
 model Workspace {
   workspaceId   Int      @id @default(autoincrement()) @map("workspace_id")
-  workspaceName String   @map("workspace_name")
-  description   String?  @map("description")
+  workspaceName String   @map("workspace_name") @db.VarChar(50)
+  description   String?  @map("description") @db.VarChar(50)
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -45,8 +45,8 @@ model Workspace {
 }
 
 model Authority {
-  authorityId   Int      @id @default(autoincrement()) @map("authority_id")
-  authorityName String   @map("authority_name")
+  authorityId   Int      @id @map("authority_id")
+  authorityName String   @map("authority_name") @db.VarChar(50)
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -57,7 +57,7 @@ model Authority {
 
 model Transportation {
   transportationId   Int      @id @default(autoincrement()) @map("transportation_id")
-  transportationName String?  @map("transportation_name")
+  transportationName String?  @map("transportation_name") @db.VarChar(50)
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -81,8 +81,8 @@ model UserWorkspace {
 }
 
 model ApplicationStatus {
-  statusId   Int      @id @default(autoincrement()) @map("status_id")
-  statusName String   @map("status_name")
+  statusId   Int      @id @map("status_id")
+  statusName String   @map("status_name") @db.VarChar(50)
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -93,7 +93,7 @@ model ApplicationStatus {
 
 model Station {
   stationId   Int      @id @default(autoincrement()) @map("station_id")
-  stationName String   @map("station_name")
+  stationName String   @map("station_name") @db.VarChar(50)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -102,7 +102,7 @@ model Station {
 
 model RailwayLine {
   lineId    Int      @id @default(autoincrement()) @map("line_id")
-  lineName  String   @map("line_name")
+  lineName  String   @map("line_name") @db.VarChar(50)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -165,9 +165,9 @@ model ApplicationDetailRoute {
   applicationId       Int      @map("application_id")
   applicationDetailId Int      @map("application_detail_id")
   routeId             Int      @default(autoincrement()) @map("route_id")
-  departure           String   @map("departure")
-  arrival             String   @map("arrival")
-  line                String   @map("line")
+  departure           String   @map("departure") @db.VarChar(50)
+  arrival             String   @map("arrival") @db.VarChar(50)
+  line                String   @map("line") @db.VarChar(50)
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @default(now()) @updatedAt @map("updated_at")
 
