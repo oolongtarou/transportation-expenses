@@ -1,5 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ApplicationForm } from '../app-form'
+import { formatWithCommas } from '@/lib/math';
 
 
 interface AppListTableProps {
@@ -17,7 +18,7 @@ const AppListTable = (props: AppListTableProps) => {
                         <TableHead className="w-[100px]">申請書ID</TableHead>
                         <TableHead>申請日</TableHead>
                         <TableHead>申請者名</TableHead>
-                        <TableHead>金額</TableHead>
+                        <TableHead className='text-right'>金額</TableHead>
                         <TableHead className='text-center'>申請書ステータス</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -25,16 +26,16 @@ const AppListTable = (props: AppListTableProps) => {
                     {appForms.map(appForm => (
                         <TableRow key={appForm.applicationId}>
                             <TableCell className='font-bold text-lg'>{appForm.applicationId}</TableCell>
-                            <TableCell>{appForm.applicationDate.toLocaleDateString()}</TableCell>
-                            <TableCell>{appForm.userName}</TableCell>
-                            <TableCell>{appForm.totalAmount}</TableCell>
+                            <TableCell>{new Date(appForm.applicationDate).toLocaleDateString()}</TableCell>
+                            <TableCell>{appForm.user.userName}</TableCell>
+                            <TableCell className='font-bold text-right'>{formatWithCommas(appForm.totalAmount)}</TableCell>
                             <TableCell className='flex flex-row justify-center'>
-                                {appForm.applicationStatus === 2 || appForm.applicationStatus === 3 ? (
-                                    <span className="label-fill label-fill-action w-32">{appForm.applicationStatusName}</span>
-                                ) : appForm.applicationStatus === 4 ? (
-                                    <span className="label-fill label-fill-success w-32">{appForm.applicationStatusName}</span>
+                                {appForm.statusId === 1 || appForm.statusId === 2 ? (
+                                    <span className="label-fill label-fill-action w-32">{appForm.status.statusName}</span>
+                                ) : appForm.statusId === 3 ? (
+                                    <span className="label-fill label-fill-success w-32">{appForm.status.statusName}</span>
                                 ) : (
-                                    <span className="label-fill label-fill-light w-32">{appForm.applicationStatusName}</span>
+                                    <span className="label-fill label-fill-light w-32">{appForm.status.statusName}</span>
                                 )}
                             </TableCell>
                         </TableRow>
