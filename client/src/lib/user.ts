@@ -1,9 +1,14 @@
+import { Authority } from "./auth"
+import { Workspace } from "./user-workspace"
+
 export interface User {
     userId: number
     userName: string
     mailAddress: string
     password: string
     roles: number[]
+    workspaces: Workspace[]
+    authorities: Authority[]
 }
 
 const Role = {

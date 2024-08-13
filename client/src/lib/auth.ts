@@ -8,3 +8,9 @@ export const useAuth = () => {
     }
     return context;
 };
+
+
+export interface Authority {
+    workspaceId: number;
+    authorityId: number;
+}
