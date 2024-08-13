@@ -12,7 +12,7 @@ import AppFormList from "./features/application-form/AppFormList"
 import WorkspaceSetting from "./features/workspace/WorkspaceSetting"
 import MemberList from "./features/workspace/MemberList"
 import ApprovalRoute from "./features/workspace/ApprovalRoute"
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useEffect, useState } from "react"
 import axios from "axios"
 
 // 型定義
@@ -22,7 +22,7 @@ interface AuthContextType {
 }
 
 // ログイン状態を管理するContextを作成
-const AuthContext = createContext<AuthContextType | null>(null);
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -65,13 +65,5 @@ function App() {
     </AuthContext.Provider>
   )
 }
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-};
 
 export default App

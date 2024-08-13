@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button'
-import { useAuth } from '@/App';
+import { useAuth } from '@/lib/auth';
 
 const Header = () => {
     const { isLoggedIn } = useAuth();
@@ -25,14 +25,10 @@ const HeaderNavWhenLogin = () => {
                     <Button className='btn btn-link'>ログアウト</Button>
                 </li>
                 <li>
-                    {/* <Link to='/'> */}
                     <img src='/icons/notification.svg' className='btn-img btn-light' />
-                    {/* </Link> */}
                 </li>
                 <li>
-                    {/* <Link to='/'> */}
                     <img src='/icons/help.svg' className='btn-img btn-light' />
-                    {/* </Link> */}
                 </li>
                 <li>
                     <Link to='/'>
