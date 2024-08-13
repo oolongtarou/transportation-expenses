@@ -10,35 +10,45 @@ const users: User[] = [
         userName: "Alice",
         mailAddress: "alice@example.com",
         password: "password1",
-        roles: [1, 2] // Member, Approver
+        roles: [1, 2], // Member, Approver
+        authorities: [],
+        workspaces: [],
     },
     {
         userId: 2,
         userName: "Bob",
         mailAddress: "bob@example.com",
         password: "password2",
-        roles: [100] // Admin
+        roles: [100], // Admin
+        authorities: [],
+        workspaces: [],
     },
     {
         userId: 3,
         userName: "Charlie",
         mailAddress: "charlie@example.com",
         password: "password3",
-        roles: [1] // Member
+        roles: [1], // Member
+        authorities: [],
+        workspaces: [],
     },
     {
         userId: 4,
         userName: "David",
         mailAddress: "david@example.com",
         password: "password4",
-        roles: [2] // Approver
+        roles: [2], // Approver
+        authorities: [],
+        workspaces: [],
     },
     {
         userId: 5,
         userName: "Eve",
         mailAddress: "eve@example.com",
         password: "password5",
-        roles: [1, 100] // Member, Admin
+        roles: [1, 100], // Member, Admin
+        authorities: [],
+        workspaces: [],
     }
 ];
 
@@ -48,7 +58,7 @@ const MemberList = () => {
             <header className="flex justify-between items-center">
                 <h2 className="heading-2">メンバー一覧</h2>
                 <Button className="btn btn-primary">
-                    <img src="./icons/add_person.svg" />
+                    <img src="/icons/add_person.svg" />
                     <span className="ml-2">ワークスペースに招待する</span>
                 </Button>
             </header>
