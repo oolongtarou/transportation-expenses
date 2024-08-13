@@ -45,8 +45,8 @@ const users: User[] = [
 const MemberList = () => {
     return (
         <div className="container">
-            <header className="flex justify-between items-center mb-5">
-                <h2 className="font-bold text-3xl my-5">メンバー一覧</h2>
+            <header className="flex justify-between items-center">
+                <h2 className="heading-2">メンバー一覧</h2>
                 <Button className="btn btn-primary">
                     <img src="./icons/add_person.svg" />
                     <span className="ml-2">ワークスペースに招待する</span>

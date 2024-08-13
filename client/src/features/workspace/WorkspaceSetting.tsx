@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 const WorkspaceSetting = () => {
     return (
         <div className="container max-w-6xl">
-            <h2 className="font-bold text-3xl my-5">ワークスペース設定</h2>
+            <h2 className="heading-2">ワークスペース設定</h2>
             <div className="flex flex-row justify-between">
                 <div className="flex ">
                     <img src="./icons/default_workspace_icon.svg" className="w-32 h-32 btn-img btn-link" />

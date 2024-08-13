@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 const WorkspaceCreate = () => {
     return (
         <div className="container max-w-md">
-            <h2 className="font-bold text-2xl text-center mb-7">ワークスペースを作成する</h2>
+            <h2 className="heading-2">ワークスペースを作成する</h2>
 
             <div>
                 <div>

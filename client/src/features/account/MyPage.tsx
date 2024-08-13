@@ -10,7 +10,7 @@ const MyPage = (props: MyPageProps) => {
     const { workspaces } = props;
     return (
         <div className="container max-w-6xl">
-            <h2 className="font-bold text-3xl my-5">マイページ</h2>
+            <h2 className="heading-2">マイページ</h2>
             <div className="flex mb-5">
                 <img src="./icons/default_user_icon.svg" className="w-32 h-32 btn-img btn-link" />
                 <div className="ml-3 pr-5 max-w-2xl">

@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom'
 const SignUp = () => {
     return (
         <>
-            <h2 className='font-bold text-2xl text-center mb-2'>アカウントを作成する</h2>
+            <h2 className='heading-2'>アカウントを作成する</h2>
             <PasswordRulesDescription />
 
             <div className="grid w-full items-center gap-1.5 mb-5">

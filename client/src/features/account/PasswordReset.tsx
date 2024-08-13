@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 const PasswordReset = () => {
     return (
         <>
-            <h2 className="font-bold text-2xl text-center mb-5">パスワードを再設定する</h2>
+            <h2 className="heading-2">パスワードを再設定する</h2>
             <PasswordRulesDescription />
 
             <div className="grid w-full items-center gap-1.5 mb-5">

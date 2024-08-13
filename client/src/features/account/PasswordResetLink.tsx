@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input"
 const PasswordResetLink = () => {
     return (
         <>
-            <h2 className="font-bold text-2xl text-center mb-10">パスワードを再設定する</h2>
+            <h2 className="heading-2">パスワードを再設定する</h2>
 
             <p className="text-sm text-pale-blue mb-1">登録しているメールアドレスを入力してください。</p>
             <div className="grid w-full items-center gap-1.5 mb-5">

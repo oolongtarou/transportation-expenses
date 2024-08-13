@@ -20,7 +20,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
 
     return (
         <div className="container">
-            <h2 className="font-bold text-3xl mx-3 my-7">
+            <h2 className="heading-2">
                 {editing ? '申請書を作成する' : 'この内容で申請する'}
             </h2>
             <AppFormTable tableRows={appForm.details} editing={editing} />

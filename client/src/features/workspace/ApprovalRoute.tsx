@@ -19,7 +19,7 @@ const ApprovalRoute = (props: ApproverRouteProps) => {
     return (
         <div className="container">
             <header className="mb-10">
-                <h2 className="font-bold text-3xl mb-5">承認ルート</h2>
+                <h2 className="heading-2">承認ルート</h2>
                 <div className="max-w-52">
                     <Label>必要な承認回数</Label>
                     <Select >

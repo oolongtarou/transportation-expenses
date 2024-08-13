@@ -71,7 +71,7 @@ const AppFormList = () => {
     return (
         <div className="container">
             <header>
-                <h2 className="font-bold text-3xl mb-5">申請一覧</h2>
+                <h2 className="heading-2">申請一覧</h2>
                 <section className="grid md:grid-cols-2 gap-4 mb-5">
                     <div>
                         <Label htmlFor="applicationId">申請書ID</Label>
@@ -115,6 +115,8 @@ const AppFormList = () => {
                     <Button className="btn btn-light w-24">クリア</Button>
                     <Button className="btn btn-primary w-24">検索</Button>
                 </div>
+            </header>
+            <main>
                 <AppListTable appForms={dummyApplicationForms} className="mb-3" />
                 <Pagination>
                     <PaginationContent >
@@ -141,9 +143,6 @@ const AppFormList = () => {
                         </PaginationItem>
                     </PaginationContent>
                 </Pagination>
-            </header>
-            <main>
-
             </main>
         </div>
     )

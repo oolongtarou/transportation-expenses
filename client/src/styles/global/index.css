@@ -79,6 +79,10 @@
   }
 }
 
+.heading-2 {
+  @apply font-bold text-3xl mx-3 my-7;
+}
+
 .table-basic {
   @apply min-w-[1200px] table-auto text-pale-blue;
 }
