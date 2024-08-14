@@ -1,9 +1,8 @@
 import { Authorities, Authority, getAuthoritiesByWorkspaceId, useAuth } from "@/lib/auth";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface NavItem {
-    index: number;
     label: string;
     imgPath: string;
     link: string;
@@ -12,42 +11,36 @@ interface NavItem {
 
 const navItems: NavItem[] = [
     {
-        index: 0,
         label: '申請書を作成する',
         imgPath: '/icons/create_app_form.svg',
         link: '/app-form/create',
         requiredAuthorities: [Authorities.APPLICATION],
     },
     {
-        index: 1,
         label: 'メンバー一覧',
         imgPath: '/icons/member_list.svg',
         link: '/workspace/1/members',
         requiredAuthorities: [Authorities.APPLICATION],
     },
     {
-        index: 2,
         label: '申請一覧',
         imgPath: '/icons/hamburger.svg',
         link: '/app-form/list/me?page=1',
         requiredAuthorities: [Authorities.APPLICATION],
     },
     {
-        index: 3,
         label: '承認一覧',
         imgPath: '/icons/approval_list.svg',
         link: '/app-form/list/approval',
         requiredAuthorities: [Authorities.APPROVAL],
     },
     {
-        index: 4,
         label: '承認ルート',
         imgPath: '/icons/approval_route.svg',
         link: '/workspace/1/approval-route',
         requiredAuthorities: [Authorities.APPLICATION, Authorities.APPROVAL, Authorities.ADMIN],
     },
     {
-        index: 5,
         label: 'ワークスペース設定',
         imgPath: '/icons/settings.svg',
         link: '/workspace/:id/setting',
@@ -58,7 +51,7 @@ const navItems: NavItem[] = [
 const WorkspaceNav = () => {
     const { currentWorkspace, myAuthorities } = useAuth();
     const navigate = useNavigate();
-    const [focusedIndex, setFocusedIndex] = useState<number>(1);
+    const location = useLocation();  // 現在のURLを取得
     const [filteredNavItems, setFilteredNavItems] = useState<NavItem[]>([]);
 
     useEffect(() => {
@@ -68,12 +61,11 @@ const WorkspaceNav = () => {
         setFilteredNavItems(navItems.filter(navItem =>
             navItem.requiredAuthorities.some(id => currentAuthorityIds.includes(id))
         ));
-    }, [currentWorkspace, myAuthorities, filteredNavItems]);
+    }, [currentWorkspace, myAuthorities]);
 
 
-    const handleClick = (index: number) => {
-        setFocusedIndex(index);
-        navigate(navItems[index].link);
+    const handleClick = (link: string) => {
+        navigate(link);
     }
 
     return (
@@ -87,11 +79,11 @@ const WorkspaceNav = () => {
                 </li>
                 <li>
                     <ul className="mt-4 mx-2 flex flex-col gap-2">
-                        {filteredNavItems?.map(navItem => (
+                        {filteredNavItems?.map((navItem, index) => (
                             <li
-                                key={navItem.index}
-                                className={`flex flex-row btn btn-link ${focusedIndex === navItem.index ? 'focus' : ''}`}
-                                onClick={() => handleClick(navItem.index)}
+                                key={index}
+                                className={`flex flex-row btn btn-link ${navItem.link.includes(location.pathname) ? 'focus' : ''}`}
+                                onClick={() => handleClick(navItem.link)}
                             >
                                 <img src={navItem.imgPath} />
                                 <span className="ml-2">{navItem.label}</span>
