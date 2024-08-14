@@ -56,14 +56,8 @@ const AppFormList = () => {
     });
 
     const onSubmit = async (data: SearchFormInputs) => {
-        // console.log(selectedOptions);
-        // console.log(toNumberArray(selectedOptions));
         data.status = toNumberArray(selectedOptions);
-        // console.log('フォームデータ:', data);
         const res = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-forms/me`, { workspaceId: 1, searchOptions: data }, { withCredentials: true })
-        window.alert('レスポンスが返ってきました。');
-        console.log(res);
-        // ここでAPIコールやデータの送信などの処理を行います
 
         const fetchedAppForms: ApplicationForm[] = res.data.appForms;
         if (res.data.loggedIn) {

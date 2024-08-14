@@ -15,6 +15,7 @@ import { WorkspaceRepository } from "./repositories/workspace-repository";
 import { User } from "@prisma/client";
 import { AuthorityRepository } from "./repositories/authority-repository";
 import { AppFormRepository } from "./repositories/app-form-repository";
+import { SearchOption } from "./schema/post";
 
 
 declare module 'express-session' {
@@ -161,9 +162,12 @@ app.post("/app-forms/me", async (req: Request, res: Response) => {
     }
 
     try {
+        const searchOption: SearchOption = req.body.searchOptions;
+        console.log(searchOption)
         const workspaceId: number = parseInt(req.body.workspaceId);
         console.log(`userId:${req.session.userId} workspaceId:${workspaceId}`);
-        const appForms = await AppFormRepository.findByUserIdAndWorkspaceId(req.session.userId, workspaceId);
+        const appForms = await AppFormRepository.findBySearchOption(req.session.userId, workspaceId, searchOption);
+        // const appForms = await AppFormRepository.findByUserIdAndWorkspaceId(req.session.userId, workspaceId);
         res.status(200).json(
             {
                 loggedIn: true,

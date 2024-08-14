@@ -1,12 +1,12 @@
 import { SelectOption } from "@/components/SelectBox"
 
 export interface ApplicationForm {
-    applicationId: number
+    applicationId: number;
     workspaceId: number;
-    applicationDate: string
-    userId: number
-    totalAmount: number
-    statusId: number
+    applicationDate: string;
+    userId: number;
+    totalAmount: number;
+    statusId: number;
     user: User;
     status: Status;
     details: AppFormDetail[]
@@ -108,7 +108,7 @@ export const statusSelectOptions: SelectOption[] = [
     },
     {
         label: '却下',
-        value: '4',
+        value: '10',
     },
 ]
 
