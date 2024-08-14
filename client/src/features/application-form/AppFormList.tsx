@@ -68,9 +68,15 @@ const AppFormList = () => {
         }
     };
 
+    const getCurrentSearchOptions = (): SearchFormInputs => {
+        const currentSearchOptions = watch();
+        currentSearchOptions.status = toNumberArray(selectedOptions);
+        return currentSearchOptions;
+    }
+
     // 初回レンダリング時にデータを取得
     useEffect(() => {
-        fetchData(currentPage, watch());
+        fetchData(currentPage, getCurrentSearchOptions());
     }, [currentPage, navigate, setIsLoggedIn]);
 
     const onSubmit = async (data: SearchFormInputs) => {
@@ -80,7 +86,7 @@ const AppFormList = () => {
 
     const handlePageChange = (page: number) => {
         setSearchParams({ page: page.toString() });  // URLのクエリを更新
-        fetchData(page, watch());  // ページ変更時にデータを再取得
+        fetchData(page, getCurrentSearchOptions());  // ページ変更時にデータを再取得
     };
 
     return (
