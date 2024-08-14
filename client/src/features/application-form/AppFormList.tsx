@@ -39,6 +39,7 @@ const AppFormList = () => {
         register,
         handleSubmit,
         formState: { errors },
+        watch,
     } = useForm<SearchFormInputs>({
         mode: 'onChange',
         resolver: zodResolver(searchSchema),
@@ -69,7 +70,7 @@ const AppFormList = () => {
 
     // 初回レンダリング時にデータを取得
     useEffect(() => {
-        fetchData(currentPage, {});
+        fetchData(currentPage, watch());
     }, [currentPage, navigate, setIsLoggedIn]);
 
     const onSubmit = async (data: SearchFormInputs) => {
@@ -79,7 +80,7 @@ const AppFormList = () => {
 
     const handlePageChange = (page: number) => {
         setSearchParams({ page: page.toString() });  // URLのクエリを更新
-        fetchData(page, {});  // ページ変更時にデータを再取得
+        fetchData(page, watch());  // ページ変更時にデータを再取得
     };
 
     return (

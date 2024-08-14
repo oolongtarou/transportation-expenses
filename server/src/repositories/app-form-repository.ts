@@ -34,12 +34,12 @@ export class AppFormRepository {
                     userId: userId,
                     workspaceId: workspaceId,
                     applicationId: {
-                        gte: options.applicationIdMin ?? undefined, // applicationIdMinがNOT NULLのときのみ適用
-                        lte: options.applicationIdMax ?? undefined, // applicationIdMaxがNOT NULLのときのみ適用
+                        gte: options.applicationIdMin ? Number(options.applicationIdMin) : undefined, // applicationIdMinがNOT NULLのときのみ適用
+                        lte: options.applicationIdMax ? Number(options.applicationIdMax) : undefined, // applicationIdMaxがNOT NULLのときのみ適用
                     },
                     totalAmount: {
-                        gte: options.totalAmountMin ?? undefined, // totalAmountMinがNOT NULLのときのみ適用
-                        lte: options.totalAmountMax ?? undefined, // totalAmountMaxがNOT NULLのときのみ適用
+                        gte: options.totalAmountMin ? Number(options.totalAmountMin) : undefined, // totalAmountMinがNOT NULLのときのみ適用
+                        lte: options.totalAmountMax ? Number(options.totalAmountMax) : undefined, // totalAmountMaxがNOT NULLのときのみ適用
                     },
                     statusId: options.status && options.status.length > 0 ? { in: options.status } : undefined, // statusがNOT NULLかつ要素数1以上のときのみ適用
                     applicationDate: {
@@ -76,12 +76,12 @@ export class AppFormRepository {
                     userId: userId,
                     workspaceId: workspaceId,
                     applicationId: {
-                        gte: options.applicationIdMin ?? undefined, // applicationIdMinがNOT NULLのときのみ適用
-                        lte: options.applicationIdMax ?? undefined, // applicationIdMaxがNOT NULLのときのみ適用
+                        gte: options.applicationIdMin ? Number(options.applicationIdMin) : undefined, // applicationIdMinがNOT NULLのときのみ適用
+                        lte: options.applicationIdMax ? Number(options.applicationIdMax) : undefined, // applicationIdMaxがNOT NULLのときのみ適用
                     },
                     totalAmount: {
-                        gte: options.totalAmountMin ?? undefined, // totalAmountMinがNOT NULLのときのみ適用
-                        lte: options.totalAmountMax ?? undefined, // totalAmountMaxがNOT NULLのときのみ適用
+                        gte: options.totalAmountMin ? Number(options.totalAmountMin) : undefined, // totalAmountMinがNOT NULLのときのみ適用
+                        lte: options.totalAmountMax ? Number(options.totalAmountMax) : undefined, // totalAmountMaxがNOT NULLのときのみ適用
                     },
                     statusId: options.status && options.status.length > 0 ? { in: options.status } : undefined, // statusがNOT NULLかつ要素数1以上のときのみ適用
                     applicationDate: {

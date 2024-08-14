@@ -26,7 +26,7 @@ const navItems: NavItem[] = [
     {
         label: '申請一覧',
         imgPath: '/icons/hamburger.svg',
-        link: '/app-form/list/me',
+        link: '/app-form/list/me?page=1',
     },
     {
         label: '承認一覧',
