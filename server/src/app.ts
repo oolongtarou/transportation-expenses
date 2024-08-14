@@ -163,15 +163,17 @@ app.post("/app-forms/me", async (req: Request, res: Response) => {
 
     try {
         const searchOption: SearchOption = req.body.searchOptions;
+        searchOption.page = req.body.page;
         console.log(searchOption)
         const workspaceId: number = parseInt(req.body.workspaceId);
         console.log(`userId:${req.session.userId} workspaceId:${workspaceId}`);
         const appForms = await AppFormRepository.findBySearchOption(req.session.userId, workspaceId, searchOption);
-        // const appForms = await AppFormRepository.findByUserIdAndWorkspaceId(req.session.userId, workspaceId);
+        const count = await AppFormRepository.fetchCountBySearchOption(req.session.userId, workspaceId, searchOption);
         res.status(200).json(
             {
                 loggedIn: true,
                 appForms: appForms,
+                count: count,
             });
     } catch (err) {
         res.status(500).json({

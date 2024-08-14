@@ -8,4 +8,5 @@ export interface SearchOption {
     startDate?: string;
     endDate?: string;
     userName?: string;
+    page: number;
 }

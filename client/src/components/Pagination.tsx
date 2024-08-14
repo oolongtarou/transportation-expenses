@@ -5,10 +5,11 @@ type CustomPaginationProps = {
     total: number;
     currentPage: number;
     itemsPerPage: number;
+    onPageChange: (page: number) => void;  // ページ変更時のコールバック関数
 };
 
 export const CustomPagination = (props: CustomPaginationProps) => {
-    const { total, currentPage, itemsPerPage } = props;
+    const { total, currentPage, itemsPerPage, onPageChange } = props;
     const totalPage = calculateTotalPages(itemsPerPage, total);
 
     // ページ番号の配列を生成
@@ -18,7 +19,7 @@ export const CustomPagination = (props: CustomPaginationProps) => {
         <Pagination className="my-5">
             <PaginationContent>
                 <PaginationItem hidden={!existsPrevPage(currentPage)}>
-                    <PaginationPrevious />
+                    <PaginationPrevious onClick={() => onPageChange(currentPage - 1)} />
                 </PaginationItem>
 
                 {/* 前後2ページずつを表示 */}
@@ -32,6 +33,7 @@ export const CustomPagination = (props: CustomPaginationProps) => {
                             <PaginationItem key={pageNumber}>
                                 <PaginationLink
                                     className={currentPage === pageNumber ? "active" : ""}
+                                    onClick={() => onPageChange(pageNumber)}  // クリック時にページ番号を親に通知
                                 >
                                     {pageNumber}
                                 </PaginationLink>
@@ -43,7 +45,7 @@ export const CustomPagination = (props: CustomPaginationProps) => {
                 })}
 
                 <PaginationItem hidden={!existsNextPage(currentPage, totalPage)}>
-                    <PaginationNext />
+                    <PaginationNext onClick={() => onPageChange(currentPage + 1)} />
                 </PaginationItem>
             </PaginationContent>
         </Pagination>

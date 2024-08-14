@@ -59,11 +59,41 @@ export class AppFormRepository {
                         },
                     },
                 },
+                skip: (options.page - 1) * Number(process.env.ITEMS_PER_PAGE), // 最初の20件をスキップ
+                take: Number(process.env.ITEMS_PER_PAGE), // 次の20件を取得
             });
             return applications;
         } catch (err) {
             console.error(err);
             return null;
+        }
+    }
+
+    static async fetchCountBySearchOption(userId: number, workspaceId: number, options: SearchOption): Promise<number> {
+        try {
+            const count = await prisma.application.count({
+                where: {
+                    userId: userId,
+                    workspaceId: workspaceId,
+                    applicationId: {
+                        gte: options.applicationIdMin ?? undefined, // applicationIdMinがNOT NULLのときのみ適用
+                        lte: options.applicationIdMax ?? undefined, // applicationIdMaxがNOT NULLのときのみ適用
+                    },
+                    totalAmount: {
+                        gte: options.totalAmountMin ?? undefined, // totalAmountMinがNOT NULLのときのみ適用
+                        lte: options.totalAmountMax ?? undefined, // totalAmountMaxがNOT NULLのときのみ適用
+                    },
+                    statusId: options.status && options.status.length > 0 ? { in: options.status } : undefined, // statusがNOT NULLかつ要素数1以上のときのみ適用
+                    applicationDate: {
+                        gte: options.startDate ? new Date(options.startDate) : undefined,
+                        lte: options.endDate ? new Date(options.endDate) : undefined,
+                    },
+                },
+            });
+            return count;
+        } catch (err) {
+            console.error(err);
+            return 0;
         }
     }
 }

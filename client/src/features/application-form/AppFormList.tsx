@@ -1,51 +1,40 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from "@/components/ui/pagination"
 import Select, { MultiValue, Options } from 'react-select';
 
 import AppListTable from "./components/AppListTable"
 import { ApplicationForm, statusSelectOptions } from "./app-form"
 import axios from "axios"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { SearchFormInputs, searchSchema } from "../schema/search-option-schema"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuth } from "@/lib/auth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { SelectOption } from "@/components/SelectBox";
 import { toNumberArray } from "@/lib/select";
+import { CustomPagination } from "@/components/Pagination";
 
 
 const options: Options<SelectOption> = statusSelectOptions;
 
 const AppFormList = () => {
     const [appForms, setAppForms] = useState<ApplicationForm[]>([]);
+    const [total, setTotal] = useState<number>(0);  // total stateを追加
 
     const { setIsLoggedIn } = useAuth();
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [selectedOptions, setSelectedOptions] = useState<MultiValue<SelectOption>>([]);
+
+    const currentPage = Number(searchParams.get('page') ?? '1');
+
+
     const handleChange = (selected: MultiValue<SelectOption>) => {
         setSelectedOptions(selected);
     };
 
-    // const fetchAppForms = async () => {
-    //     const res = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-forms/me`, { workspaceId: 1 }, { withCredentials: true })
-    //     const fetchedAppForms: ApplicationForm[] = res.data.appForms;
-    //     if (res.data.loggedIn) {
-    //         setAppForms(fetchedAppForms);
-    //     } else {
-    //         setIsLoggedIn(false);
-    //         navigate('/');
-    //     }
-    // };
     const {
         register,
         handleSubmit,
@@ -55,17 +44,42 @@ const AppFormList = () => {
         resolver: zodResolver(searchSchema),
     });
 
+    // データを取得する関数
+    const fetchData = async (page: number, searchOptions: SearchFormInputs) => {
+        try {
+            const res = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-forms/me`, {
+                workspaceId: 1,
+                page: page,
+                searchOptions: searchOptions
+            }, { withCredentials: true });
+
+            const fetchedAppForms: ApplicationForm[] = res.data.appForms;
+            setTotal(res.data.count);  // totalをセット
+
+            if (res.data.loggedIn) {
+                setAppForms(fetchedAppForms);
+            } else {
+                setIsLoggedIn(false);
+                navigate('/');
+            }
+        } catch (error) {
+            console.error("データの取得に失敗しました", error);
+        }
+    };
+
+    // 初回レンダリング時にデータを取得
+    useEffect(() => {
+        fetchData(currentPage, {});
+    }, [currentPage, navigate, setIsLoggedIn]);
+
     const onSubmit = async (data: SearchFormInputs) => {
         data.status = toNumberArray(selectedOptions);
-        const res = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-forms/me`, { workspaceId: 1, searchOptions: data }, { withCredentials: true })
+        fetchData(1, data);  // 検索フォーム送信時は1ページ目を取得
+    };
 
-        const fetchedAppForms: ApplicationForm[] = res.data.appForms;
-        if (res.data.loggedIn) {
-            setAppForms(fetchedAppForms);
-        } else {
-            setIsLoggedIn(false);
-            navigate('/');
-        }
+    const handlePageChange = (page: number) => {
+        setSearchParams({ page: page.toString() });  // URLのクエリを更新
+        fetchData(page, {});  // ページ変更時にデータを再取得
     };
 
     return (
@@ -217,31 +231,7 @@ const AppFormList = () => {
             </header>
             <main>
                 <AppListTable appForms={appForms} className="mb-3" />
-                <Pagination>
-                    <PaginationContent >
-                        <PaginationItem>
-                            <PaginationPrevious href="#" />
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationLink href="#">1</PaginationLink>
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationLink href="#">2</PaginationLink>
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationLink href="#">3</PaginationLink>
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationLink href="#">4</PaginationLink>
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationLink href="#">5</PaginationLink>
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationNext href="#" />
-                        </PaginationItem>
-                    </PaginationContent>
-                </Pagination>
+                <CustomPagination currentPage={currentPage} total={total} itemsPerPage={5} onPageChange={handlePageChange} />
             </main>
         </div>
     )
