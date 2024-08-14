@@ -4,18 +4,20 @@ import axios from 'axios';
 import { useAuth } from '@/lib/auth';
 import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
+import { getWorkspaceById, getWorkspacesExcludingId } from '@/lib/user-workspace';
 
 interface HeaderProps {
     isLoggedin: boolean;
 }
 
 const Header = (props: HeaderProps) => {
+    const { currentWorkspace, myWorkspaces, setCurrentWorkspace } = useAuth();
     const { isLoggedin } = props;
     return (
         <div className='flex justify-between shadow sticky top-0 w-full bg-main h-14 z-50'>
             <div className='flex'>
                 <h1 className='font-bold text-lg mx-5 leading-14'>交通費精算ツール</h1>
-                {isLoggedin
+                {isLoggedin && myWorkspaces.length > 0
                     ?
                     <Popover>
                         <PopoverTrigger>
@@ -27,13 +29,21 @@ const Header = (props: HeaderProps) => {
                         <PopoverContent align='start'>
                             <h3 className='mx-1'>現在のワークスペース</h3>
                             <ul className='text-left flex flex-col gap-3'>
-                                <li className='btn my-3 h-14 leading-10' style={{ textAlign: 'left', cursor: 'auto' }}>開発チーム</li>
+                                <li className='btn my-3 h-14 leading-10' style={{ textAlign: 'left', cursor: 'auto' }}>
+                                    {getWorkspaceById(myWorkspaces, currentWorkspace ?? 0)?.workspaceName}
+                                </li>
                             </ul>
                             <Separator />
                             <h3 className='mx-1 my-3'>ワークスペース</h3>
                             <ul>
-                                <li className='btn btn-link my-3 h-14 leading-10' style={{ textAlign: 'left' }}>デザインチーム</li>
-                                <li className='btn btn-link my-3 h-14 leading-10' style={{ textAlign: 'left' }}>マーケティングチーム</li>
+                                {getWorkspacesExcludingId(myWorkspaces, currentWorkspace ?? 0).map(workspace => (
+                                    <li onClick={() => setCurrentWorkspace(workspace.workspaceId)}
+                                        className='btn btn-link my-3 h-14 leading-10'
+                                        style={{ textAlign: 'left' }}
+                                    >
+                                        {workspace.workspaceName}
+                                    </li>
+                                ))}
                             </ul>
                         </PopoverContent>
                     </Popover>

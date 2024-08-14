@@ -10,6 +10,7 @@ import { useState } from 'react';
 import AlertDestructive from '@/components/Alert';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
+import { getFirstWorkspaceId } from '@/lib/user-workspace';
 
 type LoginFormData = {
     email: string;
@@ -17,7 +18,7 @@ type LoginFormData = {
 };
 
 const Login = () => {
-    const { setIsLoggedIn } = useAuth();
+    const { setIsLoggedIn, setCurrentWorkspace, setMyWorkspaces } = useAuth();
     const [error, setError] = useState('');
     const navigate = useNavigate();
     const {
@@ -34,6 +35,8 @@ const Login = () => {
             .then((response) => {
                 if (response.data.userId) {
                     setIsLoggedIn(true);
+                    setMyWorkspaces(response.data.workspaces)
+                    setCurrentWorkspace(getFirstWorkspaceId(response.data.workspaces))
                     navigate("/app-form/create")
                 } else {
                     setError(response.data.message);
