@@ -2,6 +2,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button'
 import axios from 'axios';
 import { useAuth } from '@/lib/auth';
+import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover"
+import { Separator } from "@/components/ui/separator"
 
 interface HeaderProps {
     isLoggedin: boolean;
@@ -11,11 +13,37 @@ const Header = (props: HeaderProps) => {
     const { isLoggedin } = props;
     return (
         <div className='flex justify-between shadow sticky top-0 w-full bg-main h-14 z-50'>
-            <h1 className='font-bold text-lg mx-5 leading-14'>交通費精算ツール</h1>
+            <div className='flex'>
+                <h1 className='font-bold text-lg mx-5 leading-14'>交通費精算ツール</h1>
+                {isLoggedin
+                    ?
+                    <Popover>
+                        <PopoverTrigger>
+                            <ul className='flex items-center btn btn-link'>
+                                <li>ワークスペース</li>
+                                <li><img src='/icons/stat_minus.svg' /></li>
+                            </ul>
+                        </PopoverTrigger>
+                        <PopoverContent align='start'>
+                            <h3 className='mx-1'>現在のワークスペース</h3>
+                            <ul className='text-left flex flex-col gap-3'>
+                                <li className='btn my-3 h-14 leading-10' style={{ textAlign: 'left', cursor: 'auto' }}>開発チーム</li>
+                            </ul>
+                            <Separator />
+                            <h3 className='mx-1 my-3'>ワークスペース</h3>
+                            <ul>
+                                <li className='btn btn-link my-3 h-14 leading-10' style={{ textAlign: 'left' }}>デザインチーム</li>
+                                <li className='btn btn-link my-3 h-14 leading-10' style={{ textAlign: 'left' }}>マーケティングチーム</li>
+                            </ul>
+                        </PopoverContent>
+                    </Popover>
+                    : <></>}
+
+            </div>
             <nav className='leading-14'>
                 {isLoggedin ? HeaderNavWhenLogin() : HeaderNavWhenLogout()}
             </nav>
-        </div>
+        </div >
     )
 }
 
