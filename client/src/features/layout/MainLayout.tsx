@@ -10,7 +10,7 @@ const MainLayout = () => {
     return (
         <ResizablePanelGroup direction="horizontal">
             <ResizablePanel minSize={10} maxSize={30}>
-                <WorkspaceNav workspaceId={1} workspaceName='ワールドアメニティ' />
+                <WorkspaceNav />
             </ResizablePanel>
             <ResizableHandle />
             <ResizablePanel>

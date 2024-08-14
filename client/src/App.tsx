@@ -15,15 +15,21 @@ import ApprovalRoute from "./features/workspace/ApprovalRoute"
 import { createContext, useState } from "react"
 import MyPage from "./features/account/MyPage"
 import { Workspace } from "./lib/user-workspace"
+import { Authority } from "./lib/auth"
 
 // 型定義
 interface AuthContextType {
   isLoggedin: boolean;
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
-  currentWorkspace: number | null;
-  setCurrentWorkspace: React.Dispatch<React.SetStateAction<number | null>>;
+
+  currentWorkspace: Workspace | null;
+  setCurrentWorkspace: React.Dispatch<React.SetStateAction<Workspace | null>>;
+
   myWorkspaces: Workspace[];
   setMyWorkspaces: React.Dispatch<React.SetStateAction<Workspace[]>>;
+
+  myAuthorities: Authority[];
+  setMyAuthorities: React.Dispatch<React.SetStateAction<Authority[]>>;
 }
 
 // ログイン状態を管理するContextを作成
@@ -31,11 +37,17 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 function App() {
   const [isLoggedin, setIsLoggedIn] = useState<boolean>(false);
-  const [currentWorkspace, setCurrentWorkspace] = useState<number | null>(null);
+  const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | null>(null);
   const [myWorkspaces, setMyWorkspaces] = useState<Workspace[]>([]);
+  const [myAuthorities, setMyAuthorities] = useState<Authority[]>([]);
 
   return (
-    <AuthContext.Provider value={{ isLoggedin, setIsLoggedIn, currentWorkspace, setCurrentWorkspace, myWorkspaces, setMyWorkspaces }}>
+    <AuthContext.Provider value={{
+      isLoggedin, setIsLoggedIn,
+      currentWorkspace, setCurrentWorkspace,
+      myWorkspaces, setMyWorkspaces,
+      myAuthorities, setMyAuthorities
+    }}>
       <Header isLoggedin={isLoggedin} />
       <Routes>
         <Route element={<LoginLayout />}>

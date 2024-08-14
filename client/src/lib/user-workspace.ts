@@ -4,14 +4,16 @@ export interface Workspace {
     workspaceIcon?: File
 }
 
-export function getFirstWorkspaceId(workspaces: Workspace[] | null): number | null {
+export function getWorkspaceWithSmallestId(workspaces: Workspace[] | null): Workspace | null {
     if (!workspaces || workspaces.length === 0) {
         return null;
     }
 
-    return workspaces.reduce((minId, workspace) => {
-        return workspace.workspaceId < minId ? workspace.workspaceId : minId;
-    }, workspaces[0].workspaceId);
+    const workspaceWithSmallestId = workspaces.reduce((minWorkspace, currentWorkspace) => {
+        return currentWorkspace.workspaceId < minWorkspace.workspaceId ? currentWorkspace : minWorkspace;
+    }, workspaces[0]);
+
+    return workspaceWithSmallestId;
 }
 
 export function getWorkspaceById(workspaces: Workspace[] | null, targetId: number): Workspace | null {

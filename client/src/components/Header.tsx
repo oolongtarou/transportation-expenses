@@ -30,14 +30,14 @@ const Header = (props: HeaderProps) => {
                             <h3 className='mx-1'>現在のワークスペース</h3>
                             <ul className='text-left flex flex-col gap-3'>
                                 <li className='btn my-3 h-14 leading-10' style={{ textAlign: 'left', cursor: 'auto' }}>
-                                    {getWorkspaceById(myWorkspaces, currentWorkspace ?? 0)?.workspaceName}
+                                    {getWorkspaceById(myWorkspaces, currentWorkspace?.workspaceId ?? 0)?.workspaceName}
                                 </li>
                             </ul>
                             <Separator />
                             <h3 className='mx-1 my-3'>ワークスペース</h3>
                             <ul>
-                                {getWorkspacesExcludingId(myWorkspaces, currentWorkspace ?? 0).map(workspace => (
-                                    <li onClick={() => setCurrentWorkspace(workspace.workspaceId)}
+                                {getWorkspacesExcludingId(myWorkspaces, currentWorkspace?.workspaceId ?? 0).map(workspace => (
+                                    <li onClick={() => setCurrentWorkspace(workspace)}
                                         className='btn btn-link my-3 h-14 leading-10'
                                         style={{ textAlign: 'left' }}
                                     >

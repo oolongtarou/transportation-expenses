@@ -10,7 +10,7 @@ import { useState } from 'react';
 import AlertDestructive from '@/components/Alert';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
-import { getFirstWorkspaceId } from '@/lib/user-workspace';
+import { getWorkspaceWithSmallestId } from '@/lib/user-workspace';
 
 type LoginFormData = {
     email: string;
@@ -18,7 +18,7 @@ type LoginFormData = {
 };
 
 const Login = () => {
-    const { setIsLoggedIn, setCurrentWorkspace, setMyWorkspaces } = useAuth();
+    const { setIsLoggedIn, setCurrentWorkspace, setMyWorkspaces, setMyAuthorities } = useAuth();
     const [error, setError] = useState('');
     const navigate = useNavigate();
     const {
@@ -35,15 +35,16 @@ const Login = () => {
             .then((response) => {
                 if (response.data.userId) {
                     setIsLoggedIn(true);
-                    setMyWorkspaces(response.data.workspaces)
-                    setCurrentWorkspace(getFirstWorkspaceId(response.data.workspaces))
+                    setMyWorkspaces(response.data.workspaces);
+                    setCurrentWorkspace(getWorkspaceWithSmallestId(response.data.workspaces));
+                    setMyAuthorities(response.data.authorities);
                     navigate("/app-form/create")
                 } else {
                     setError(response.data.message);
                 }
             })
             .catch((err: AxiosError) => {
-                setError(`サーバーエラーが発生しました。ステータスコード:${err.code}`);
+                setError(`サーバーエラーが発生しました：${err.code}`);
             })
     });
 
