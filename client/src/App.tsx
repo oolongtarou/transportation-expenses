@@ -19,16 +19,19 @@ import MyPage from "./features/account/MyPage"
 interface AuthContextType {
   isLoggedin: boolean;
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+  currentWorkspace: number | null;
+  setCurrentWorkspace: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 // ログイン状態を管理するContextを作成
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 function App() {
-  const [isLoggedin, setIsLoggedIn] = useState(false);
+  const [isLoggedin, setIsLoggedIn] = useState<boolean>(false);
+  const [currentWorkspace, setCurrentWorkspace] = useState<number | null>(null);
 
   return (
-    <AuthContext.Provider value={{ isLoggedin, setIsLoggedIn }}>
+    <AuthContext.Provider value={{ isLoggedin, setIsLoggedIn, currentWorkspace, setCurrentWorkspace }}>
       <Header isLoggedin={isLoggedin} />
       <Routes>
         <Route element={<LoginLayout />}>
