@@ -65,7 +65,7 @@ const MemberEdit = (props: MemberEditProps) => {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
-                <Button className="btn btn-primary">設定を保存する</Button>
+                <span className="btn btn-primary">設定を保存する</span>
             </section>
         </div>
     )

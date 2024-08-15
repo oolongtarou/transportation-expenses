@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button"
 import WorkspaceInviteDialog from "./WorkspaceInviteDialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
 
@@ -24,7 +23,7 @@ const WorkspaceSetting = () => {
             <div className="mt-5">
                 <AlertDialog>
                     <AlertDialogTrigger>
-                        <Button className="btn btn-danger">ワークスペースを削除する</Button>
+                        <span className="btn btn-danger">ワークスペースを削除する</span>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                         <AlertDialogHeader>

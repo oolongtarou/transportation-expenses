@@ -28,7 +28,7 @@ const MemberList = () => {
             .catch(error => {
                 console.error(error);
             });
-    }, [currentWorkspace?.workspaceId]);
+    }, [currentWorkspace?.workspaceId, location.pathname]);
 
     useEffect(() => {
         const filteredMembers = originalMembers.filter(member =>

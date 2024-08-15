@@ -1,5 +1,4 @@
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -7,8 +6,6 @@ import { Textarea } from "@/components/ui/textarea"
 const WorkspaceInvite = () => {
     return (
         <div className="container max-w-md">
-            <h2 className="heading-2">ワークスペースに招待する</h2>
-
             <div>
                 <div>
                     <Label htmlFor="mailAddress">メールアドレス</Label>
@@ -23,8 +20,8 @@ const WorkspaceInvite = () => {
             </div>
 
             <div className="flex justify-evenly">
-                <Button className="btn btn-light">キャンセル</Button>
-                <Button className="btn btn-primary">招待する</Button>
+                <span className="btn btn-light">キャンセル</span>
+                <span className="btn btn-primary">招待する</span>
             </div>
         </div>
     )

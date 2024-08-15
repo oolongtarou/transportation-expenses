@@ -19,14 +19,13 @@ const ApprovalRoute = () => {
     useEffect(() => {
         axios.get<WorkspaceApprovers>(`${import.meta.env.VITE_SERVER_DOMAIN}/workspace/approvers`, { params: { workspaceId: getWorkspaceIdFrom(location.pathname) ?? 0 }, withCredentials: true })
             .then(response => {
-                console.log(response.data)
                 setWorkspaceApprovers(response.data);
                 setApprovalStep(response.data.approvalStep)
             })
             .catch((err: AxiosError) => {
                 console.error(err.code);
             })
-    }, [currentWorkspace]);
+    }, [currentWorkspace, location.pathname]);
 
     const renderRows = () => {
         const rows = [];
