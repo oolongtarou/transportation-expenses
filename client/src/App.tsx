@@ -48,8 +48,6 @@ function App() {
     // サーバーからユーザーのログイン状態やワークスペース、権限情報を取得
     axios.get(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true })
       .then((response) => {
-        console.log('サーバーからデータを取得しました。');
-        console.log(response.data)
         if (response.data.userId) {
           setIsLoggedIn(true);
           setMyWorkspaces(response.data.workspaces);
@@ -77,7 +75,6 @@ function App() {
       <Routes>
         <Route element={<LoginLayout />}>
           <Route path='/' element={<Login />} />
-          {/* <Route path='/' element={<MemberEdit user={dummyUser} />} /> */}
           <Route path='/account/login' element={<Login />} />
           <Route path='/account/signup' element={<SignUp />} />
           <Route path='/account/password/change' element={<PasswordChange />} />
