@@ -18,7 +18,7 @@ const MemberTable = (props: MemberTableProps) => {
                     <TableHead>メールアドレス</TableHead>
                     {AuthorityArray.map(authority => (
                         <TableHead key={authority.authorityId} className='text-center'>{authority.label}</TableHead>
-                    ))};
+                    ))}
                     <TableHead></TableHead>
                 </TableRow>
             </TableHeader>
@@ -31,7 +31,7 @@ const MemberTable = (props: MemberTableProps) => {
                             <TableCell key={authority.authorityId} className='text-center px-0'>
                                 <Checkbox checked={hasAuthority(member.authorities, authority.authorityId)} />
                             </TableCell>
-                        ))};
+                        ))}
                         <TableCell>
                             <Button className='btn btn-link'>削除</Button>
                         </TableCell>
