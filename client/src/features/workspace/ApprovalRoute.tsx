@@ -39,7 +39,7 @@ const ApprovalRoute = () => {
                     <TableCell className="w-20">
                         <img src="/icons/person.svg" style={{ backgroundColor: '#F0F2F5', borderRadius: '0.75rem' }} />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="min-w-48">
                         <p className="font-bold text-black">{step}段階目</p>
                         <p>{userNames.join(', ')}</p>
                     </TableCell>
@@ -83,7 +83,7 @@ const ApprovalRoute = () => {
             </header>
             <main>
                 <h3 className="font-bold text-lg mb-2">承認者</h3>
-                <Table className="table-mini bg-white">
+                <Table className="bg-white">
                     <TableBody>
                         {renderRows()}
                     </TableBody>
