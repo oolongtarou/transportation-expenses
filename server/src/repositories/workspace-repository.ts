@@ -1,4 +1,3 @@
-import { UserWorkspace } from "@prisma/client";
 import prisma from "../infra/db";
 import { Workspace, WorkspaceMember } from "../lib/workspace";
 
@@ -46,5 +45,40 @@ export class WorkspaceRepository {
             console.error(err);
             return [];
         }
+    }
+
+    static async findApproversBy(workspaceId: number) {
+        const workspaces = await prisma.workspace.findMany({
+            where: {
+                workspaceId: workspaceId,
+            },
+            select: {
+                workspaceId: true,
+                approvalStep: true,
+                WorkspaceApprovers: {
+                    select: {
+                        user: {
+                            select: {
+                                userId: true,
+                                userName: true,
+                            },
+                        },
+                        approvalStep: true,
+                    },
+                },
+            },
+        });
+
+        const formattedResult = workspaces.map((workspace) => ({
+            workspaceId: workspace.workspaceId,
+            approvalStep: workspace.approvalStep,
+            approvers: workspace.WorkspaceApprovers.map((approver) => ({
+                userId: approver.user.userId,
+                userName: approver.user.userName,
+                approvalStep: approver.approvalStep,
+            })),
+        }));
+
+        return formattedResult[0];
     }
 }

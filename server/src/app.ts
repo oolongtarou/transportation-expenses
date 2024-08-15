@@ -199,6 +199,29 @@ app.get('/workspace/member-list', async (req: Request, res: Response) => {
 
 });
 
+app.get('/workspace/approvers', async (req: Request, res: Response) => {
+    const workspaceIdQuery = req.query.workspaceId;
+    const workspaceId = toNumber(workspaceIdQuery);
+    if (workspaceId) {
+        try {
+            const approvers = await WorkspaceRepository.findApproversBy(workspaceId);
+            res.status(200).json(approvers);
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({
+                'message': 'サーバーでエラーが発生しています。',
+            })
+        }
+    } else {
+        res.status(200).json({
+            loggedIn: true,
+            'message': 'ワークスペースIDが不明です',
+        })
+    }
+
+});
+
+
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
     console.log("Server running at PORT: ", PORT);

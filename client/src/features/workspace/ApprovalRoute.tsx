@@ -2,27 +2,68 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
+import { WorkspaceApprovers } from "@/lib/approver"
+import { useAuth } from "@/lib/auth"
+import axios, { AxiosError } from "axios"
+import { useEffect, useState } from "react"
 
-export interface Approver {
-    step: number
-    userName: string
-}
+const ApprovalRoute = () => {
+    const { currentWorkspace } = useAuth();
 
-interface ApproverRouteProps {
-    maxStep: number
-    approvers: Approver[]
-}
+    const [approvalStep, setApprovalStep] = useState<number>(1);
+    const [workspaceApprovers, setWorkspaceApprovers] = useState<WorkspaceApprovers | null>(null);
 
-const ApprovalRoute = (props: ApproverRouteProps) => {
-    const groupedByStep = groupUserNamesByStep(props);
-    const sortedResult = sortGroupedUserNamesByStep(groupedByStep);
+    useEffect(() => {
+        axios.get<WorkspaceApprovers>(`${import.meta.env.VITE_SERVER_DOMAIN}/workspace/approvers`, { params: { workspaceId: currentWorkspace?.workspaceId ?? 1 }, withCredentials: true })
+            .then(response => {
+                console.log(response.data)
+                setWorkspaceApprovers(response.data);
+                setApprovalStep(response.data.approvalStep)
+            })
+            .catch((err: AxiosError) => {
+                console.error(err.code);
+            })
+    }, [currentWorkspace]);
+
+
+    const renderRows = () => {
+        const rows = [];
+        for (let step = 1; step <= 5; step++) {
+            const userNames = workspaceApprovers?.approvers
+                .filter(approver => approver.approvalStep === step)
+                .map(approver => approver.userName) || [];
+
+            rows.push(
+                <TableRow key={step} className={`${step > approvalStep ? 'bg-gray-200' : ''}`}>
+                    <TableCell className="w-20">
+                        <img src="/icons/person.svg" style={{ backgroundColor: '#F0F2F5', borderRadius: '0.75rem' }} />
+                    </TableCell>
+                    <TableCell>
+                        <p className="font-bold text-black">{step}段階目</p>
+                        <p>{userNames.join(', ')}</p>
+                    </TableCell>
+                    <TableCell className="text-right">
+                        {step > approvalStep
+                            ? <></>
+                            : userNames.length === 0
+                                ? <Button className="btn btn-action">承認者を設定する</Button>
+                                : <Button className="btn btn-light">承認者を変更する</Button>
+                        }
+                    </TableCell>
+                </TableRow>
+            );
+        }
+        return rows;
+    }
+
     return (
         <div className="container">
             <header className="mb-10">
                 <h2 className="heading-2">承認ルート</h2>
                 <div className="max-w-52">
                     <Label>必要な承認回数</Label>
-                    <Select >
+                    {/* <Select > */}
+                    <Select defaultValue={approvalStep?.toString()}>
                         <SelectTrigger id="applicationStatus" className="min-w-[80px] mt-1">
                             <SelectValue />
                         </SelectTrigger>
@@ -42,22 +83,7 @@ const ApprovalRoute = (props: ApproverRouteProps) => {
                 <h3 className="font-bold text-lg mb-2">承認者</h3>
                 <Table className="table-mini bg-white">
                     <TableBody>
-                        {Object.entries(sortedResult).map(([step, userNames]) => (
-                            < TableRow key={step} >
-                                <TableCell className="w-20">
-                                    <img src="/icons/person.svg" style={{ backgroundColor: '#F0F2F5', borderRadius: '0.75rem' }} />
-                                </TableCell>
-                                <TableCell>
-                                    <p className="font-bold text-black">{step}段階目</p>
-                                    <p>{userNames.join(', ')}</p>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    {userNames.length === 0
-                                        ? <Button className="btn btn-action">承認者を設定する</Button>
-                                        : <Button className="btn btn-light">承認者を変更する</Button>}
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                        {renderRows()}
                     </TableBody>
                 </Table>
                 <div className="mt-3 flex justify-end mr-4">
@@ -69,32 +95,3 @@ const ApprovalRoute = (props: ApproverRouteProps) => {
 }
 
 export default ApprovalRoute
-
-
-function groupUserNamesByStep(props: ApproverRouteProps): Record<number, string[]> {
-    const grouped: Record<number, string[]> = {};
-
-    // 1からmaxStepまでの初期化
-    for (let i = 1; i <= 5; i++) {
-        grouped[i] = [];
-    }
-
-    props.approvers.forEach(approver => {
-        if (grouped[approver.step]) {
-            grouped[approver.step].push(approver.userName);
-        }
-    });
-
-    return grouped;
-}
-
-function sortGroupedUserNamesByStep(grouped: Record<number, string[]>): Record<number, string[]> {
-    const sortedKeys = Object.keys(grouped).map(Number).sort((a, b) => a - b);
-
-    const sortedGrouped: Record<number, string[]> = {};
-    sortedKeys.forEach(key => {
-        sortedGrouped[key] = grouped[key];
-    });
-
-    return sortedGrouped;
-}
