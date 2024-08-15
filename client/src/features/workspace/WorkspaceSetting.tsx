@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import WorkspaceInviteDialog from "./WorkspaceInviteDialog"
-
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
 
 const WorkspaceSetting = () => {
     return (
@@ -22,7 +22,24 @@ const WorkspaceSetting = () => {
                 </div>
             </div>
             <div className="mt-5">
-                <Button className="btn btn-danger">ワークスペースを削除する</Button>
+                <AlertDialog>
+                    <AlertDialogTrigger>
+                        <Button className="btn btn-danger">ワークスペースを削除する</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>本当に削除しますか？</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                この操作は元に戻せません。
+                                ワークスペースは永久に削除され、データはサーバーから削除されます。
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                            <AlertDialogAction className="btn btn-danger">削除</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </ div>
     )
