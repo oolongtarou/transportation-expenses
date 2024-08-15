@@ -4,6 +4,7 @@ import { Authorities, AuthorityArray } from "@/lib/auth";
 import { hasAuthority, User } from "@/lib/user"
 import { Label } from "@radix-ui/react-label"
 import { Separator } from "@radix-ui/react-separator"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
 
 interface MemberEditProps {
     user: User;
@@ -46,7 +47,24 @@ const MemberEdit = (props: MemberEditProps) => {
                 ))}
             </section>
             <section className="flex justify-evenly my-5">
-                <Button className="btn btn-danger">ワークスペースから削除する</Button>
+                <AlertDialog>
+                    <AlertDialogTrigger>
+                        <Button className="btn btn-danger">ワークスペースから削除する</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>本当に削除しますか？</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                この操作は元に戻せません。
+                                このユーザーの所属情報は永久に削除され、データはサーバーから削除されます。
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                            <AlertDialogAction className="btn btn-danger">削除</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
                 <Button className="btn btn-primary">設定を保存する</Button>
             </section>
         </div>
