@@ -13,19 +13,35 @@ const MemberList = () => {
     const { currentWorkspace, myAuthorities } = useAuth();
 
     const [members, setMembers] = useState<User[]>([]);
+    const [originalMembers, setOriginalMembers] = useState<User[]>([]);
+    const [filterText, setFilterText] = useState<string>("");
 
     useEffect(() => {
         axios.get<RawUserData[]>(`${import.meta.env.VITE_SERVER_DOMAIN}/workspace/member-list`, { params: { workspaceId: currentWorkspace?.workspaceId } })
             .then(response => {
                 const workspaceMembers = ToWorkspaceMembers(response.data);
-                console.log(workspaceMembers);
                 setMembers(workspaceMembers);
+                setOriginalMembers(workspaceMembers);  // オリジナルのリストを保存しておく
             })
             .catch(error => {
                 console.error(error);
             });
     }, [currentWorkspace?.workspaceId]);
-    // currentWorkspaceのメンバー一覧を取得する。
+
+    useEffect(() => {
+        if (filterText) {
+            const filteredMembers = originalMembers.filter(member =>
+                member.userName.includes(filterText)
+            );
+            setMembers(filteredMembers);
+        } else {
+            setMembers(originalMembers);
+        }
+    }, [filterText, originalMembers]);
+
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setFilterText(event.target.value);
+    };
 
     return (
         <div className="container">
@@ -38,7 +54,7 @@ const MemberList = () => {
                             <span className="ml-2">ワークスペースに招待する</span>
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-4xl" aria-describedby="申請書明細行の経路を入力する画面です">
+                    <DialogContent className="max-w-4xl" aria-describedby="ワークスペースに招待するためのダイアログです">
                         <DialogHeader>
                             <DialogTitle>
                             </DialogTitle>
@@ -50,7 +66,7 @@ const MemberList = () => {
             </header>
             <main>
                 <section className="w-5/12 flex flex-col gap-4 mb-5">
-                    <Input type="text" placeholder="ユーザー名で検索する" />
+                    <Input type="text" placeholder="ユーザー名で絞り込む" onChange={handleInputChange} />
                     <ToggleGroup type="multiple" className="flex flex-row justify-start gap-4">
                         {AuthorityArray.map(authority => (
                             <ToggleGroupItem
@@ -63,7 +79,7 @@ const MemberList = () => {
                             </ToggleGroupItem>
                         ))}
                     </ToggleGroup>
-                    <Button className="btn btn-primary w-full">検索</Button>
+                    {/* <Button className="btn btn-primary w-full">検索</Button> */}
                 </section>
                 <MemberTable members={members} myAuthorities={myAuthorities} />
                 <section className="flex justify-end my-5">
