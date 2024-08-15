@@ -7,17 +7,19 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Separator } from "@/components/ui/separator";
 import WorkspaceInviteDialog from "./WorkspaceInviteDialog";
+import { useLocation } from "react-router-dom";
+import { getWorkspaceIdFrom } from "@/lib/user-workspace";
 
 const MemberList = () => {
     const { currentWorkspace, myAuthorities } = useAuth();
-
+    const location = useLocation();
     const [members, setMembers] = useState<User[]>([]);
     const [originalMembers, setOriginalMembers] = useState<User[]>([]);
     const [filterText, setFilterText] = useState<string>("");
     const [selectedAuthorities, setSelectedAuthorities] = useState<number[]>([]); // 選択された権限IDを管理する状態
 
     useEffect(() => {
-        axios.get<RawUserData[]>(`${import.meta.env.VITE_SERVER_DOMAIN}/workspace/member-list`, { params: { workspaceId: currentWorkspace?.workspaceId } })
+        axios.get<RawUserData[]>(`${import.meta.env.VITE_SERVER_DOMAIN}/workspace/member-list`, { params: { workspaceId: getWorkspaceIdFrom(location.pathname) } })
             .then(response => {
                 const workspaceMembers = ToWorkspaceMembers(response.data);
                 setMembers(workspaceMembers);
