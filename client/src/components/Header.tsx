@@ -14,7 +14,9 @@ const Header = (props: HeaderProps) => {
     const { myWorkspaces, setIsLoggedIn } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    const workspaceId = getWorkspaceIdFrom(useLocation().pathname);
+    const currentWorkspaceId = getWorkspaceIdFrom(useLocation().pathname);
+    const currentWorkspaceName = getWorkspaceById(myWorkspaces, currentWorkspaceId ? Number(currentWorkspaceId) : 0)?.workspaceName;
+    const workspacesWithoutCurrent = getWorkspacesExcludingId(myWorkspaces, currentWorkspaceId ? Number(currentWorkspaceId) : 0);
     const { isLoggedin } = props;
 
 
@@ -41,7 +43,7 @@ const Header = (props: HeaderProps) => {
                     : <Popover>
                         <PopoverTrigger>
                             <ul className='flex items-center btn btn-link'>
-                                <li>ワークスペース</li>
+                                <li>{currentWorkspaceName}</li>
                                 <li><img src='/icons/stat_minus.svg' /></li>
                             </ul>
                         </PopoverTrigger>
@@ -49,13 +51,13 @@ const Header = (props: HeaderProps) => {
                             <h3 className='mx-1'>現在のワークスペース</h3>
                             <ul className='text-left flex flex-col gap-3'>
                                 <li className='btn my-3 h-14 leading-10' style={{ textAlign: 'left', cursor: 'auto' }}>
-                                    {getWorkspaceById(myWorkspaces, workspaceId ? Number(workspaceId) : 0)?.workspaceName}
+                                    {currentWorkspaceName}
                                 </li>
                             </ul>
                             <Separator />
                             <h3 className='mx-1 my-3'>ワークスペース</h3>
                             <ul>
-                                {getWorkspacesExcludingId(myWorkspaces, workspaceId ? Number(workspaceId) : 0).map(workspace => (
+                                {workspacesWithoutCurrent.map(workspace => (
                                     <li
                                         key={workspace.workspaceId}
                                         className='btn btn-link my-3 h-14 leading-10'
