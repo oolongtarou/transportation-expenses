@@ -23,6 +23,7 @@ declare module 'express-session' {
     interface SessionData {
         userId: number;
         userName: string;
+        mailAddress: string;
         workspaces: Workspace[];
         authorities: Authrity[];
     }
@@ -114,6 +115,7 @@ app.post("/account/login", async (req: Request, res: Response) => {
         // ログイン成功。
         req.session.userId = user.userId;
         req.session.userName = user.userName;
+        req.session.mailAddress = user.email;
         req.session.workspaces = userWorkspaces ?? []
         req.session.authorities = userAuthorities ?? [];
         res.status(200).json({
@@ -146,6 +148,7 @@ app.get('/auth/status', (req: Request, res: Response) => {
                 loggedIn: true,
                 userId: req.session.userId,
                 userName: req.session.userName,
+                mailAddress: req.session.mailAddress,
                 workspaces: req.session.workspaces,
                 authorities: req.session.authorities,
             });

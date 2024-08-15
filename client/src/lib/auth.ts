@@ -42,3 +42,17 @@ export function getAuthoritiesByWorkspaceId(authorities: Authority[] | null, tar
 
     return filteredAuthorities.length > 0 ? filteredAuthorities : [];
 }
+
+// 権限IDからラベルを取得するための関数
+export function getLabelByAuthorityId(authorityId: number): string | undefined {
+    // Authoritiesオブジェクトのキーと値を逆にしてマッピングする
+    const idToLabelMap = Object.entries(Authorities).reduce<{ [key: number]: string }>(
+        (map, [key, value]) => {
+            map[value] = AuthorityLabels[key as keyof typeof Authorities];
+            return map;
+        },
+        {}
+    );
+
+    return idToLabelMap[authorityId];
+}

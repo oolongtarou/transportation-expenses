@@ -1,10 +1,10 @@
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button'
 import axios from 'axios';
 import { useAuth } from '@/lib/auth';
 import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
-import { getWorkspaceById, getWorkspacesExcludingId } from '@/lib/user-workspace';
+import { getWorkspaceById, getWorkspaceIdFrom, getWorkspacesExcludingId } from '@/lib/user-workspace';
 
 interface HeaderProps {
     isLoggedin: boolean;
@@ -12,8 +12,7 @@ interface HeaderProps {
 
 const Header = (props: HeaderProps) => {
     const { myWorkspaces } = useAuth();
-    const pathname = useLocation().pathname;
-    const workspaceId = pathname.split('/')[2];
+    const workspaceId = getWorkspaceIdFrom(useLocation().pathname);
     const { isLoggedin } = props;
 
     return (
@@ -65,7 +64,7 @@ const Header = (props: HeaderProps) => {
 export default Header
 
 const HeaderNavWhenLogin = () => {
-    const { workspaceId } = useParams();
+    const location = useLocation();
     const { setIsLoggedIn } = useAuth();
     const navigate = useNavigate();
 
@@ -97,7 +96,7 @@ const HeaderNavWhenLogin = () => {
                     <img src='/icons/help.svg' className='btn-img btn-light' />
                 </li>
                 <li>
-                    <Link to={`w/${workspaceId}/my-page`}>
+                    <Link to={`w/${getWorkspaceIdFrom(location.pathname)}/my-page`}>
                         <img src='/icons/default_user_icon.svg' className='btn-img btn-link' />
                     </Link>
                 </li>
