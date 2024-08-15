@@ -6,6 +6,8 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Authorities, AuthorityArray, useAuth } from "@/lib/auth";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import WorkspaceInvite from "./WorkspaceInvite";
 
 const MemberList = () => {
     const { currentWorkspace, myAuthorities } = useAuth();
@@ -29,10 +31,22 @@ const MemberList = () => {
         <div className="container">
             <header className="flex justify-between items-center">
                 <h2 className="heading-2">メンバー一覧</h2>
-                <Button className="btn btn-primary">
-                    <img src="/icons/add_person.svg" />
-                    <span className="ml-2">ワークスペースに招待する</span>
-                </Button>
+                <Dialog>
+                    <DialogTrigger className="text-right">
+                        <Button className="btn btn-primary">
+                            <img src="/icons/add_person.svg" />
+                            <span className="ml-2">ワークスペースに招待する</span>
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl" aria-describedby="申請書明細行の経路を入力する画面です">
+                        <DialogHeader>
+                            <DialogTitle>
+                            </DialogTitle>
+                        </DialogHeader>
+                        <WorkspaceInvite />
+                    </DialogContent>
+                </Dialog>
+
             </header>
             <main>
                 <section className="w-5/12 flex flex-col gap-4 mb-5">

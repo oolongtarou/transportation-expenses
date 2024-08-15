@@ -19,7 +19,7 @@ const navItems: NavItem[] = [
     {
         label: 'メンバー一覧',
         imgPath: '/icons/member_list.svg',
-        link: '/workspace/1/members',
+        link: '/workspace/members',
         requiredAuthorities: [Authorities.APPLICATION],
     },
     {
@@ -37,13 +37,13 @@ const navItems: NavItem[] = [
     {
         label: '承認ルート',
         imgPath: '/icons/approval_route.svg',
-        link: '/workspace/1/approval-route',
+        link: '/workspace/approval-route',
         requiredAuthorities: [Authorities.APPLICATION, Authorities.APPROVAL, Authorities.ADMIN],
     },
     {
         label: 'ワークスペース設定',
         imgPath: '/icons/settings.svg',
-        link: '/workspace/:id/setting',
+        link: '/workspace/setting',
         requiredAuthorities: [Authorities.ADMIN],
     },
 ];

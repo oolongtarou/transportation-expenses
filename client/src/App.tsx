@@ -63,9 +63,9 @@ function App() {
           <Route path='/app-form/list/me' element={<AppFormList />} />
           <Route path='/app-form/list/approval' element={<AppFormList />} />
 
-          <Route path='/workspace/:id/members' element={<MemberList />} />
-          <Route path='/workspace/:id/approval-route' element={<ApprovalRoute maxStep={5} approvers={[]} />} />
-          <Route path='/workspace/:id/setting' element={<WorkspaceSetting />} />
+          <Route path='/workspace/members' element={<MemberList />} />
+          <Route path='/workspace/approval-route' element={<ApprovalRoute maxStep={5} approvers={[]} />} />
+          <Route path='/workspace/setting' element={<WorkspaceSetting />} />
         </Route>
       </Routes>
     </AuthContext.Provider>
