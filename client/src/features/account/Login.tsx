@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { loginSchema } from '../schema/user-schema';
 import axios, { AxiosError } from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AlertDestructive from '@/components/Alert';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
@@ -18,7 +18,7 @@ type LoginFormData = {
 };
 
 const Login = () => {
-    const { setIsLoggedIn, currentWorkspace, setCurrentWorkspace, setMyWorkspaces, setMyAuthorities } = useAuth();
+    const { setIsLoggedIn, setCurrentWorkspace, setMyWorkspaces, setMyAuthorities } = useAuth();
     const [error, setError] = useState('');
     const navigate = useNavigate();
     const {
@@ -30,6 +30,21 @@ const Login = () => {
         resolver: zodResolver(loginSchema)
     });
 
+    useEffect(() => {
+        axios.get(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true })
+            .then((response) => {
+                if (response.data.userId) {
+                    const defaultWorkspaceId = getWorkspaceWithSmallestId(response.data.workspaces)
+                    navigate(`/w/${defaultWorkspaceId?.workspaceId}/app-form/create`);
+                } else {
+                    navigate('/');
+                }
+            })
+            .catch((err: AxiosError) => {
+                window.alert(`サーバーエラーが発生しました：${err.code}`);
+            });
+    }, [navigate]);
+
     const onSubmit = handleSubmit((data: LoginFormData) => {
         axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/account/login`, data, { withCredentials: true })
             .then((response) => {
@@ -38,7 +53,7 @@ const Login = () => {
                     setMyWorkspaces(response.data.workspaces);
                     setCurrentWorkspace(getWorkspaceWithSmallestId(response.data.workspaces));
                     setMyAuthorities(response.data.authorities);
-                    navigate(`/w/${currentWorkspace?.workspaceId}/app-form/create`);
+                    navigate(`/w/${getWorkspaceWithSmallestId(response.data.workspaces)?.workspaceId}/app-form/create`);
                 } else {
                     setError(response.data.message);
                 }

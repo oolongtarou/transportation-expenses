@@ -19,7 +19,6 @@ const MyPage = () => {
                 if (response.data.userId) {
                     setUser(response.data);
                 } else {
-                    console.error(response.data.message);
                     navigate('/');
                 }
             })

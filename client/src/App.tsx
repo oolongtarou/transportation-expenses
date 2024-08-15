@@ -1,4 +1,4 @@
-import { Route, Routes, useNavigate } from "react-router-dom"
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom"
 import Login from "./features/account/Login"
 import SignUp from "./features/account/SignUp"
 import PasswordChange from "./features/account/PasswordChange"
@@ -43,6 +43,7 @@ function App() {
   const [myAuthorities, setMyAuthorities] = useState<Authority[]>([]);
 
   const navigate = useNavigate();
+  const pathname = useLocation().pathname;
 
   useEffect(() => {
     // サーバーからユーザーのログイン状態やワークスペース、権限情報を取得
@@ -54,15 +55,17 @@ function App() {
           setCurrentWorkspace(getWorkspaceWithSmallestId(response.data.workspaces));
           setMyAuthorities(response.data.authorities);
         } else {
-          console.error(response.data.message);
-          navigate("/");
+          if (pathname.startsWith('w/')) {
+            console.error(response.data.message);
+            navigate("/");
+          }
         }
       })
       .catch((err: AxiosError) => {
         console.error(`サーバーエラーが発生しました：${err.code}`);
         navigate("/");
       });
-  }, [navigate]);
+  }, [navigate, pathname]);
 
   return (
     <AuthContext.Provider value={{
