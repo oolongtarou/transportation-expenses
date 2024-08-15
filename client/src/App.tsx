@@ -87,7 +87,7 @@ function App() {
           <Route path='/app-form/list/approval' element={<AppFormList />} />
 
           <Route path='/workspace/members' element={<MemberList />} />
-          <Route path='/workspace/approval-route' element={<ApprovalRoute maxStep={5} approvers={[]} />} />
+          <Route path='/workspace/approval-route' element={<ApprovalRoute />} />
           <Route path='/workspace/setting' element={<WorkspaceSetting />} />
         </Route>
       </Routes>
