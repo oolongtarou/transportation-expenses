@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -9,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import RouteInput from "./RouteInput"
 import { formatWithCommas } from "@/lib/math"
 import { AppFormDetail, appFormDetailInitialData, AppFormTableProps, calculateTotalAmount, Route } from "../app-form"
+import { DialogDescription } from "@radix-ui/react-dialog"
 
 const AppFormTable = (props: AppFormTableProps) => {
     const { tableRows, editing } = props;
@@ -166,7 +166,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                                     >
                                         <DialogTrigger className="w-full text-left" onClick={() => setEditingRowId(row.id)}>
                                             {row.routes.length === 0 ? (
-                                                <Button className="btn btn-sub font-normal w-full">経路を入力する</Button>
+                                                <div className="btn btn-sub font-normal w-full">経路を入力する</div>
                                             ) : (
                                                 row.routes.map((route, index) => (
                                                     <div key={index} >
@@ -177,9 +177,12 @@ const AppFormTable = (props: AppFormTableProps) => {
                                         </DialogTrigger>
                                         <DialogContent className="max-w-4xl" aria-describedby="申請書明細行の経路を入力する画面です">
                                             <DialogHeader>
-                                                <DialogTitle>
-                                                    <h2 className="font-bold text-3xl mb-5">経路を入力する</h2>
+                                                <DialogTitle className="font-bold text-3xl mb-5">
+                                                    経路を入力する
                                                 </DialogTitle>
+                                                <DialogDescription hidden>
+                                                    申請書明細の経路を入力するための画面です。
+                                                </DialogDescription>
                                             </DialogHeader>
                                             {editingRowId === row.id && (
                                                 <RouteInput inputRoutes={row.routes} onComplete={(updatedRoutes) => handleRoutesUpdate(row.id, updatedRoutes)} />
@@ -217,10 +220,10 @@ const AppFormTable = (props: AppFormTableProps) => {
                             {editing ?
                                 <>
                                     <TableCell>
-                                        <Button className="btn btn-link" onClick={() => deleteRow(row.id)}>削除</Button>
+                                        <div className="btn btn-link" onClick={() => deleteRow(row.id)}>削除</div>
                                     </TableCell>
                                     <TableCell>
-                                        <Button className="btn btn-link" onClick={() => copyRow(row.id)}>コピー</Button>
+                                        <div className="btn btn-link" onClick={() => copyRow(row.id)}>コピー</div>
                                     </TableCell>
                                 </>
                                 : <></>
