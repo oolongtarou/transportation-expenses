@@ -10,7 +10,7 @@ import { useEffect, useState } from "react"
 const ApprovalRoute = () => {
     const { currentWorkspace } = useAuth();
 
-    const [approvalStep, setApprovalStep] = useState<number>(1);
+    const [approvalStep, setApprovalStep] = useState<number | null>(null);
     const [workspaceApprovers, setWorkspaceApprovers] = useState<WorkspaceApprovers | null>(null);
 
     useEffect(() => {
@@ -25,7 +25,6 @@ const ApprovalRoute = () => {
             })
     }, [currentWorkspace]);
 
-
     const renderRows = () => {
         const rows = [];
         for (let step = 1; step <= 5; step++) {
@@ -34,7 +33,7 @@ const ApprovalRoute = () => {
                 .map(approver => approver.userName) || [];
 
             rows.push(
-                <TableRow key={step} className={`${step > approvalStep ? 'bg-gray-200' : ''}`}>
+                <TableRow key={step} className={`${step > (approvalStep ?? 0) ? 'bg-gray-200' : ''}`}>
                     <TableCell className="w-20">
                         <img src="/icons/person.svg" style={{ backgroundColor: '#F0F2F5', borderRadius: '0.75rem' }} />
                     </TableCell>
@@ -43,7 +42,7 @@ const ApprovalRoute = () => {
                         <p>{userNames.join(', ')}</p>
                     </TableCell>
                     <TableCell className="text-right">
-                        {step > approvalStep
+                        {step > (approvalStep ?? 0)
                             ? <></>
                             : userNames.length === 0
                                 ? <Button className="btn btn-action">承認者を設定する</Button>
@@ -62,21 +61,22 @@ const ApprovalRoute = () => {
                 <h2 className="heading-2">承認ルート</h2>
                 <div className="max-w-52">
                     <Label>必要な承認回数</Label>
-                    {/* <Select > */}
-                    <Select defaultValue={approvalStep?.toString()}>
-                        <SelectTrigger id="applicationStatus" className="min-w-[80px] mt-1">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectItem value="1">1段階</SelectItem>
-                                <SelectItem value="2">2段階</SelectItem>
-                                <SelectItem value="3">3段階</SelectItem>
-                                <SelectItem value="4">4段階</SelectItem>
-                                <SelectItem value="5">5段階</SelectItem>
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
+                    {approvalStep !== null && (
+                        <Select defaultValue={approvalStep.toString()}>
+                            <SelectTrigger id="applicationStatus" className="min-w-[80px] mt-1">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectItem value="1">1段階</SelectItem>
+                                    <SelectItem value="2">2段階</SelectItem>
+                                    <SelectItem value="3">3段階</SelectItem>
+                                    <SelectItem value="4">4段階</SelectItem>
+                                    <SelectItem value="5">5段階</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    )}
                 </div>
             </header>
             <main>
@@ -94,4 +94,4 @@ const ApprovalRoute = () => {
     )
 }
 
-export default ApprovalRoute
+export default ApprovalRoute;
