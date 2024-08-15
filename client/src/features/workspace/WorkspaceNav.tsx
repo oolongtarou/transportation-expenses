@@ -1,4 +1,5 @@
 import { Authorities, Authority, getAuthoritiesByWorkspaceId, useAuth } from "@/lib/auth";
+import { getWorkspaceIdFrom } from "@/lib/user-workspace";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
@@ -56,7 +57,7 @@ const WorkspaceNav = () => {
     const [filteredNavItems, setFilteredNavItems] = useState<NavItem[]>([]);
 
     useEffect(() => {
-        const currentWorkspaceAuthorities: Authority[] = getAuthoritiesByWorkspaceId(myAuthorities, currentWorkspace?.workspaceId ?? 0);
+        const currentWorkspaceAuthorities: Authority[] = getAuthoritiesByWorkspaceId(myAuthorities, getWorkspaceIdFrom(location.pathname) ?? 0);
         const currentAuthorityIds = currentWorkspaceAuthorities.map(authority => authority.authorityId);
 
         setFilteredNavItems(navItems.filter(navItem =>

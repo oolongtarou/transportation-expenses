@@ -11,19 +11,20 @@ import { useForm } from "react-hook-form"
 import { SearchFormInputs, searchSchema } from "../schema/search-option-schema"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuth } from "@/lib/auth";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { SelectOption } from "@/components/SelectBox";
 import { toNumberArray } from "@/lib/select";
 import { CustomPagination } from "@/components/Pagination";
+import { getWorkspaceIdFrom } from "@/lib/user-workspace";
 
 
 const options: Options<SelectOption> = statusSelectOptions;
 
 const AppFormList = () => {
+    const workspaceId = getWorkspaceIdFrom(useLocation().pathname);
     const [appForms, setAppForms] = useState<ApplicationForm[]>([]);
     const [total, setTotal] = useState<number>(0);  // total stateを追加
-
-    const { setIsLoggedIn, currentWorkspace } = useAuth();
+    const { setIsLoggedIn } = useAuth();
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const [selectedOptions, setSelectedOptions] = useState<MultiValue<SelectOption>>([]);
@@ -49,7 +50,7 @@ const AppFormList = () => {
     const fetchData = async (page: number, searchOptions: SearchFormInputs) => {
         try {
             const res = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-forms/me`, {
-                workspaceId: currentWorkspace?.workspaceId ?? 0,
+                workspaceId: workspaceId ?? 0,
                 page: page,
                 searchOptions: searchOptions
             }, { withCredentials: true });

@@ -35,3 +35,13 @@ export function getWorkspacesExcludingId(workspaces: Workspace[] | null, targetI
 
     return filteredWorkspaces.length > 0 ? filteredWorkspaces : [];
 }
+
+export function getWorkspaceIdFrom(pathname: string): number | null {
+    const workspaceId = pathname.split('/')[2];
+    const parsed = Number(workspaceId);
+    if (Number.isNaN(parsed)) {
+        return null;
+    } else {
+        return parsed;
+    }
+}

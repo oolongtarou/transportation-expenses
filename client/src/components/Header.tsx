@@ -13,7 +13,6 @@ interface HeaderProps {
 const Header = (props: HeaderProps) => {
     const { myWorkspaces } = useAuth();
     const pathname = useLocation().pathname;
-    console.log(pathname);
     const workspaceId = pathname.split('/')[2];
     const { isLoggedin } = props;
 
