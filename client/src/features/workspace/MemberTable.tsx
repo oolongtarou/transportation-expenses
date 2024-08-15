@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { isAdmin, isApprover, isMember, User } from '@/lib/user'
+import { AuthorityArray } from '@/lib/auth';
+import { hasAuthority, User } from '@/lib/user'
 
 interface MemberTableProps {
     members: User[]
@@ -15,9 +16,9 @@ const MemberTable = (props: MemberTableProps) => {
                 <TableRow>
                     <TableHead className="w-[100px]">ユーザー名</TableHead>
                     <TableHead>メールアドレス</TableHead>
-                    <TableHead className='text-center'>申請権限</TableHead>
-                    <TableHead className='text-center'>承認権限</TableHead>
-                    <TableHead className='text-center'>管理者権限権限</TableHead>
+                    {AuthorityArray.map(authority => (
+                        <TableHead key={authority.authorityId} className='text-center'>{authority.label}</TableHead>
+                    ))};
                     <TableHead></TableHead>
                 </TableRow>
             </TableHeader>
@@ -26,15 +27,11 @@ const MemberTable = (props: MemberTableProps) => {
                     <TableRow key={member.userId}>
                         <TableCell className='font-bold text-lg'>{member.userName}</TableCell>
                         <TableCell>{member.mailAddress}</TableCell>
-                        <TableCell className='text-center px-0'>
-                            <Checkbox checked={isMember(member)} />
-                        </TableCell>
-                        <TableCell className='text-center px-0'>
-                            <Checkbox checked={isApprover(member)} />
-                        </TableCell>
-                        <TableCell className='text-center px-0'>
-                            <Checkbox checked={isAdmin(member)} />
-                        </TableCell>
+                        {AuthorityArray.map(authority => (
+                            <TableCell key={authority.authorityId} className='text-center px-0'>
+                                <Checkbox checked={hasAuthority(member.authorities, authority.authorityId)} />
+                            </TableCell>
+                        ))};
                         <TableCell>
                             <Button className='btn btn-link'>削除</Button>
                         </TableCell>

@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { User, UserAuthority } from "@prisma/client";
 import prisma from "../infra/db";
 
 
@@ -17,4 +17,41 @@ export class UserRepository {
             return null;
         }
     }
+
+    static async findByWorkspaceId(workspaceId: number): Promise<UserAuthority[]> {
+        try {
+            const usersWithAuthorities = await prisma.userAuthority.findMany({
+                where: {
+                    workspaceId: workspaceId,
+                },
+                include: {
+                    user: {
+                        select: {
+                            userId: true,
+                            firstName: true,
+                            lastName: true,
+                            userName: true,
+                        },
+                    },
+                },
+                orderBy: [
+                    {
+                        userId: 'asc',
+                    },
+                    {
+                        workspaceId: 'asc',
+                    },
+                    {
+                        authorityId: 'asc',
+                    },
+                ],
+            });
+
+            return usersWithAuthorities;
+        } catch (err) {
+            console.error(err);
+            return [];
+        }
+    }
 }
+

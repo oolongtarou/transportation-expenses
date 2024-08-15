@@ -16,6 +16,7 @@ import { User } from "@prisma/client";
 import { AuthorityRepository } from "./repositories/authority-repository";
 import { AppFormRepository } from "./repositories/app-form-repository";
 import { SearchOption } from "./schema/post";
+import { toNumber } from "./lib/converter";
 
 
 declare module 'express-session' {
@@ -181,6 +182,21 @@ app.post("/app-forms/me", async (req: Request, res: Response) => {
             'message': 'サーバーでエラーが発生しています。',
         })
     }
+});
+
+app.get('/workspace/member-list', async (req: Request, res: Response) => {
+    const workspaceIdQuery = req.query.workspaceId;
+    const workspaceId = toNumber(workspaceIdQuery);
+    if (workspaceId) {
+        const members = await WorkspaceRepository.findWorkspaceMembers(workspaceId);
+        res.status(200).json(members);
+    } else {
+        res.status(500).json({
+            loggedIn: true,
+            'message': 'サーバーでエラーが発生しています。',
+        })
+    }
+
 });
 
 const PORT = process.env.PORT;

@@ -16,6 +16,18 @@ export const Authorities = {
     ADMIN: 100,
 } as const;
 
+// 権限IDに対応するラベルを定義
+export const AuthorityLabels: { [key in keyof typeof Authorities]: string } = {
+    APPLICATION: "申請権限",
+    APPROVAL: "承認権限",
+    ADMIN: "管理者権限"
+};
+
+export const AuthorityArray = Object.keys(Authorities).map(key => ({
+    authorityId: Authorities[key as keyof typeof Authorities],
+    label: AuthorityLabels[key as keyof typeof Authorities]
+}));
+
 export interface Authority {
     workspaceId: number;
     authorityId: number;
