@@ -1,14 +1,14 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import MemberTable from "./MemberTable"
-import { RawUserData, ToWorkspaceMembers, User } from "@/lib/user";
+import { hasAuthority, RawUserData, ToWorkspaceMembers, User } from "@/lib/user";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { AuthorityArray, useAuth } from "@/lib/auth";
+import { Authorities, AuthorityArray, useAuth } from "@/lib/auth";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
 const MemberList = () => {
-    const { currentWorkspace } = useAuth();
+    const { currentWorkspace, myAuthorities } = useAuth();
 
     const [members, setMembers] = useState<User[]>([]);
 
@@ -51,9 +51,12 @@ const MemberList = () => {
                     </ToggleGroup>
                     <Button className="btn btn-primary w-full">検索</Button>
                 </section>
-                <MemberTable members={members} />
+                <MemberTable members={members} myAuthorities={myAuthorities} />
                 <section className="flex justify-end my-5">
-                    <Button className="btn btn-primary">変更を保存する</Button>
+                    {hasAuthority(myAuthorities, Authorities.ADMIN)
+                        ?
+                        <Button className="btn btn-primary">変更を保存する</Button>
+                        : <></>}
                 </section>
             </main>
         </div>

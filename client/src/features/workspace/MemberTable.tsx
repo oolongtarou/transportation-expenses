@@ -1,24 +1,30 @@
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { AuthorityArray } from '@/lib/auth';
+import { Authorities, Authority, AuthorityArray } from '@/lib/auth';
 import { hasAuthority, User } from '@/lib/user'
 
 interface MemberTableProps {
     members: User[]
+    myAuthorities: Authority[]
 }
 
 const MemberTable = (props: MemberTableProps) => {
-    const { members } = props;
+    const { members, myAuthorities } = props;
     return (
-        <Table className="min-w-[1200px] table-auto text-pale-blue">
+        <Table className="max-w-[1200px] table-auto text-pale-blue">
             <TableHeader>
                 <TableRow>
                     <TableHead className="w-[100px]">ユーザー名</TableHead>
-                    <TableHead>メールアドレス</TableHead>
+                    <TableHead className='min-w-[200px]'>メールアドレス</TableHead>
                     {AuthorityArray.map(authority => (
-                        <TableHead key={authority.authorityId} className='text-center'>{authority.label}</TableHead>
+                        <TableHead
+                            key={authority.authorityId}
+                            className='text-center w-[150px]'>
+                            {authority.label}
+                        </TableHead>
                     ))}
+                    {hasAuthority(myAuthorities, Authorities.ADMIN) ? <TableHead></TableHead> : <></>}
                     <TableHead></TableHead>
                 </TableRow>
             </TableHeader>
@@ -32,9 +38,12 @@ const MemberTable = (props: MemberTableProps) => {
                                 <Checkbox checked={hasAuthority(member.authorities, authority.authorityId)} />
                             </TableCell>
                         ))}
-                        <TableCell>
-                            <Button className='btn btn-link'>削除</Button>
-                        </TableCell>
+                        {hasAuthority(myAuthorities, Authorities.ADMIN)
+                            ?
+                            <TableCell>
+                                <Button className='btn btn-link'>削除</Button>
+                            </TableCell>
+                            : <></>}
                     </TableRow>
                 ))}
 
