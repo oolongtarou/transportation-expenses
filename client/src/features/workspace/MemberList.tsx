@@ -1,13 +1,14 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import MemberTable from "./MemberTable"
-import { hasAuthority, RawUserData, ToWorkspaceMembers, User } from "@/lib/user";
+import { RawUserData, ToWorkspaceMembers, User } from "@/lib/user";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Authorities, AuthorityArray, useAuth } from "@/lib/auth";
+import { AuthorityArray, useAuth } from "@/lib/auth";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import WorkspaceInvite from "./WorkspaceInvite";
+import { Separator } from "@/components/ui/separator";
 
 const MemberList = () => {
     const { currentWorkspace, myAuthorities } = useAuth();
@@ -44,7 +45,6 @@ const MemberList = () => {
     };
 
     const handleToggleChange = (authorityId: number) => {
-        // const authorityId = parseInt(value, 10);
         setSelectedAuthorities(prev =>
             prev.includes(authorityId)
                 ? prev.filter(id => id !== authorityId)
@@ -91,12 +91,7 @@ const MemberList = () => {
                     </ToggleGroup>
                 </section>
                 <MemberTable members={members} myAuthorities={myAuthorities} />
-                <section className="flex justify-end my-5">
-                    {hasAuthority(myAuthorities, Authorities.ADMIN)
-                        ?
-                        <Button className="btn btn-primary">変更を保存する</Button>
-                        : <></>}
-                </section>
+                <Separator className="mb-5" />
             </main>
         </div>
     )

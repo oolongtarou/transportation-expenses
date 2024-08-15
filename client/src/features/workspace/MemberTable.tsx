@@ -3,6 +3,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Authorities, Authority, AuthorityArray } from '@/lib/auth';
 import { hasAuthority, User } from '@/lib/user'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import MemberEdit from './MemberEdit';
 
 interface MemberTableProps {
     members: User[]
@@ -10,13 +12,14 @@ interface MemberTableProps {
 }
 
 const MemberTable = (props: MemberTableProps) => {
+
     const { members, myAuthorities } = props;
     return (
         <Table className="max-w-[1200px] table-auto text-pale-blue">
             <TableHeader>
                 <TableRow>
                     <TableHead className="w-[100px]">ユーザー名</TableHead>
-                    <TableHead className='min-w-[200px]'>メールアドレス</TableHead>
+                    <TableHead className='w-[200px]'>メールアドレス</TableHead>
                     {AuthorityArray.map(authority => (
                         <TableHead
                             key={authority.authorityId}
@@ -30,7 +33,11 @@ const MemberTable = (props: MemberTableProps) => {
             </TableHeader>
             <TableBody>
                 {members.map(member => (
-                    <TableRow key={member.userId}>
+                    <TableRow
+                        key={member.userId}
+                        style={{ textAlign: 'left' }}
+                    // onClick={handleClick}
+                    >
                         <TableCell className='font-bold text-lg'>{member.userName}</TableCell>
                         <TableCell>{member.mailAddress}</TableCell>
                         {AuthorityArray.map(authority => (
@@ -40,9 +47,20 @@ const MemberTable = (props: MemberTableProps) => {
                         ))}
                         {hasAuthority(myAuthorities, Authorities.ADMIN)
                             ?
-                            <TableCell>
-                                <Button className='btn btn-link'>削除</Button>
-                            </TableCell>
+                            <Dialog>
+                                <DialogTrigger className="text-right">
+                                    <TableCell>
+                                        <Button className='btn btn-link'>編集</Button>
+                                    </TableCell>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-xl" aria-describedby="ワークスペースに招待するためのダイアログです">
+                                    <DialogHeader>
+                                        <DialogTitle>
+                                        </DialogTitle>
+                                    </DialogHeader>
+                                    <MemberEdit user={member} />
+                                </DialogContent>
+                            </Dialog>
                             : <></>}
                     </TableRow>
                 ))}
