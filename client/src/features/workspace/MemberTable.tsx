@@ -1,10 +1,11 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Authorities, Authority, AuthorityArray } from '@/lib/auth';
 import { hasAuthority, User } from '@/lib/user'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import MemberEdit from './MemberEdit';
+import { useLocation } from 'react-router-dom';
+import { getWorkspaceIdFrom } from '@/lib/user-workspace';
 
 interface MemberTableProps {
     members: User[]
@@ -12,6 +13,7 @@ interface MemberTableProps {
 }
 
 const MemberTable = (props: MemberTableProps) => {
+    const location = useLocation();
 
     const { members, myAuthorities } = props;
     return (
@@ -36,7 +38,6 @@ const MemberTable = (props: MemberTableProps) => {
                     <TableRow
                         key={member.userId}
                         style={{ textAlign: 'left' }}
-                    // onClick={handleClick}
                     >
                         <TableCell className='font-bold text-lg'>{member.userName}</TableCell>
                         <TableCell>{member.mailAddress}</TableCell>
@@ -45,22 +46,22 @@ const MemberTable = (props: MemberTableProps) => {
                                 <Checkbox checked={hasAuthority(member.authorities, authority.authorityId)} />
                             </TableCell>
                         ))}
-                        {hasAuthority(myAuthorities, Authorities.ADMIN)
+                        {hasAuthority(myAuthorities.filter(authority => authority.workspaceId === getWorkspaceIdFrom(location.pathname)), Authorities.ADMIN)
                             ?
-                            <Dialog>
-                                <DialogTrigger className="text-right">
-                                    <TableCell>
-                                        <Button className='btn btn-link'>編集</Button>
-                                    </TableCell>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-xl" aria-describedby="ワークスペースに招待するためのダイアログです">
-                                    <DialogHeader>
-                                        <DialogTitle>
-                                        </DialogTitle>
-                                    </DialogHeader>
-                                    <MemberEdit user={member} />
-                                </DialogContent>
-                            </Dialog>
+                            <TableCell>
+                                <Dialog>
+                                    <DialogTrigger className="text-right">
+                                        <span className='btn btn-link'>編集</span>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-xl" aria-describedby="ワークスペースに招待するためのダイアログです">
+                                        <DialogHeader>
+                                            <DialogTitle>
+                                            </DialogTitle>
+                                        </DialogHeader>
+                                        <MemberEdit user={member} />
+                                    </DialogContent>
+                                </Dialog>
+                            </TableCell>
                             : <></>}
                     </TableRow>
                 ))}
