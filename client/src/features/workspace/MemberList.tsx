@@ -15,6 +15,7 @@ const MemberList = () => {
     const [members, setMembers] = useState<User[]>([]);
     const [originalMembers, setOriginalMembers] = useState<User[]>([]);
     const [filterText, setFilterText] = useState<string>("");
+    const [selectedAuthorities, setSelectedAuthorities] = useState<number[]>([]); // 選択された権限IDを管理する状態
 
     useEffect(() => {
         axios.get<RawUserData[]>(`${import.meta.env.VITE_SERVER_DOMAIN}/workspace/member-list`, { params: { workspaceId: currentWorkspace?.workspaceId } })
@@ -29,18 +30,26 @@ const MemberList = () => {
     }, [currentWorkspace?.workspaceId]);
 
     useEffect(() => {
-        if (filterText) {
-            const filteredMembers = originalMembers.filter(member =>
-                member.userName.includes(filterText)
-            );
-            setMembers(filteredMembers);
-        } else {
-            setMembers(originalMembers);
-        }
-    }, [filterText, originalMembers]);
+        const filteredMembers = originalMembers.filter(member =>
+            (!filterText || member.userName.includes(filterText)) &&
+            (selectedAuthorities.length === 0 || selectedAuthorities.some(authId =>
+                member.authorities.some(authority => authority.authorityId === authId)
+            ))
+        );
+        setMembers(filteredMembers);
+    }, [filterText, selectedAuthorities, originalMembers]);
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setFilterText(event.target.value);
+    };
+
+    const handleToggleChange = (authorityId: number) => {
+        // const authorityId = parseInt(value, 10);
+        setSelectedAuthorities(prev =>
+            prev.includes(authorityId)
+                ? prev.filter(id => id !== authorityId)
+                : [...prev, authorityId]
+        );
     };
 
     return (
@@ -74,12 +83,12 @@ const MemberList = () => {
                                 value={authority.authorityId.toString()}
                                 aria-label={`Toggle ${authority.label}`}
                                 className="toggle-primary w-32"
+                                onClick={() => handleToggleChange(authority.authorityId)}
                             >
                                 {authority.label}
                             </ToggleGroupItem>
                         ))}
                     </ToggleGroup>
-                    {/* <Button className="btn btn-primary w-full">検索</Button> */}
                 </section>
                 <MemberTable members={members} myAuthorities={myAuthorities} />
                 <section className="flex justify-end my-5">
