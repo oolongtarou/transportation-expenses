@@ -45,7 +45,7 @@ const ApprovalRoute = (props: ApproverRouteProps) => {
                         {Object.entries(sortedResult).map(([step, userNames]) => (
                             < TableRow key={step} >
                                 <TableCell className="w-20">
-                                    <img src="./icons/person.svg" style={{ backgroundColor: '#F0F2F5', borderRadius: '0.75rem' }} />
+                                    <img src="/icons/person.svg" style={{ backgroundColor: '#F0F2F5', borderRadius: '0.75rem' }} />
                                 </TableCell>
                                 <TableCell>
                                     <p className="font-bold text-black">{step}段階目</p>
