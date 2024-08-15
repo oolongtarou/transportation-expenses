@@ -193,7 +193,7 @@ app.get('/workspace/member-list', async (req: Request, res: Response) => {
     } else {
         res.status(500).json({
             loggedIn: true,
-            'message': 'サーバーでエラーが発生しています。',
+            'message': 'ワークスペースIDが不明です',
         })
     }
 

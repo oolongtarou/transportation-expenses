@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom"
+import { Route, Routes, useNavigate } from "react-router-dom"
 import Login from "./features/account/Login"
 import SignUp from "./features/account/SignUp"
 import PasswordChange from "./features/account/PasswordChange"
@@ -12,10 +12,11 @@ import AppFormList from "./features/application-form/AppFormList"
 import WorkspaceSetting from "./features/workspace/WorkspaceSetting"
 import MemberList from "./features/workspace/MemberList"
 import ApprovalRoute from "./features/workspace/ApprovalRoute"
-import { createContext, useState } from "react"
+import { createContext, useEffect, useState } from "react"
 import MyPage from "./features/account/MyPage"
-import { Workspace } from "./lib/user-workspace"
+import { getWorkspaceWithSmallestId, Workspace } from "./lib/user-workspace"
 import { Authority } from "./lib/auth"
+import axios, { AxiosError } from "axios"
 
 // 型定義
 interface AuthContextType {
@@ -41,6 +42,30 @@ function App() {
   const [myWorkspaces, setMyWorkspaces] = useState<Workspace[]>([]);
   const [myAuthorities, setMyAuthorities] = useState<Authority[]>([]);
 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // サーバーからユーザーのログイン状態やワークスペース、権限情報を取得
+    axios.get(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true })
+      .then((response) => {
+        console.log('サーバーからデータを取得しました。');
+        console.log(response.data)
+        if (response.data.userId) {
+          setIsLoggedIn(true);
+          setMyWorkspaces(response.data.workspaces);
+          setCurrentWorkspace(getWorkspaceWithSmallestId(response.data.workspaces));
+          setMyAuthorities(response.data.authorities);
+        } else {
+          console.error(response.data.message);
+          navigate("/");
+        }
+      })
+      .catch((err: AxiosError) => {
+        console.error(`サーバーエラーが発生しました：${err.code}`);
+        navigate("/");
+      });
+  }, [navigate]);
+
   return (
     <AuthContext.Provider value={{
       isLoggedin, setIsLoggedIn,
@@ -52,6 +77,7 @@ function App() {
       <Routes>
         <Route element={<LoginLayout />}>
           <Route path='/' element={<Login />} />
+          {/* <Route path='/' element={<MemberEdit user={dummyUser} />} /> */}
           <Route path='/account/login' element={<Login />} />
           <Route path='/account/signup' element={<SignUp />} />
           <Route path='/account/password/change' element={<PasswordChange />} />
