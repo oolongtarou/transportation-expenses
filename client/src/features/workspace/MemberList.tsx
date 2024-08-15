@@ -59,7 +59,7 @@ const MemberList = () => {
                 <WorkspaceInviteDialog />
             </header>
             <main>
-                <section className="w-5/12 flex flex-col gap-4 mb-5">
+                <section className="lg:w-5/12 flex flex-col gap-4 mb-5">
                     <Input type="text" placeholder="ユーザー名で絞り込む" onChange={handleInputChange} />
                     <ToggleGroup type="multiple" className="flex flex-row justify-start gap-4">
                         {AuthorityArray.map(authority => (
@@ -67,7 +67,7 @@ const MemberList = () => {
                                 key={authority.authorityId}
                                 value={authority.authorityId.toString()}
                                 aria-label={`Toggle ${authority.label}`}
-                                className="toggle-primary w-32"
+                                className="toggle-primary min-w-32"
                                 onClick={() => handleToggleChange(authority.authorityId)}
                             >
                                 {authority.label}
@@ -76,7 +76,7 @@ const MemberList = () => {
                     </ToggleGroup>
                 </section>
                 <MemberTable members={members} myAuthorities={myAuthorities} />
-                <Separator className="mb-5" />
+                <Separator className="mb-5 max-w-[1200px]" />
             </main>
         </div>
     )

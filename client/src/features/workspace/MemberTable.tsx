@@ -20,8 +20,8 @@ const MemberTable = (props: MemberTableProps) => {
         <Table className="max-w-[1200px] table-auto text-pale-blue">
             <TableHeader>
                 <TableRow>
-                    <TableHead className="w-[100px]">ユーザー名</TableHead>
-                    <TableHead className='w-[200px]'>メールアドレス</TableHead>
+                    <TableHead className="min-w-40">ユーザー名</TableHead>
+                    <TableHead className='min-w-[200px]'>メールアドレス</TableHead>
                     {AuthorityArray.map(authority => (
                         <TableHead
                             key={authority.authorityId}
@@ -29,8 +29,7 @@ const MemberTable = (props: MemberTableProps) => {
                             {authority.label}
                         </TableHead>
                     ))}
-                    {hasAuthority(myAuthorities, Authorities.ADMIN) ? <TableHead></TableHead> : <></>}
-                    <TableHead></TableHead>
+                    {hasAuthority(myAuthorities, Authorities.ADMIN) ? <TableHead className='min-w-28'></TableHead> : <></>}
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -65,7 +64,6 @@ const MemberTable = (props: MemberTableProps) => {
                             : <></>}
                     </TableRow>
                 ))}
-
             </TableBody>
         </Table>
     )
