@@ -79,16 +79,16 @@ function App() {
           <Route path='/account/signup' element={<SignUp />} />
           <Route path='/account/password/change' element={<PasswordChange />} />
           <Route path='/account/password/reset-link' element={<PasswordResetLink />} />
-          <Route path='/account/my-page' element={<MyPage />} />
         </Route>
         <Route element={<MainLayout />}>
-          <Route path='/app-form/create' element={<AppFormCreate appForm={appFormInitialData} />} />
-          <Route path='/app-form/list/me' element={<AppFormList />} />
-          <Route path='/app-form/list/approval' element={<AppFormList />} />
+          <Route path='/w/:workspaceId/app-form/create' element={<AppFormCreate appForm={appFormInitialData} />} />
+          <Route path='/w/:workspaceId/app-form/list/me' element={<AppFormList />} />
+          <Route path='/w/:workspaceId/app-form/list/approval' element={<AppFormList />} />
 
-          <Route path='/workspace/members' element={<MemberList />} />
-          <Route path='/workspace/approval-route' element={<ApprovalRoute />} />
-          <Route path='/workspace/setting' element={<WorkspaceSetting />} />
+          <Route path='/w/:workspaceId/workspace/members' element={<MemberList />} />
+          <Route path='/w/:workspaceId/workspace/approval-route' element={<ApprovalRoute />} />
+          <Route path='/w/:workspaceId/workspace/setting' element={<WorkspaceSetting />} />
+          <Route path='/w/:workspaceId/my-page' element={<MyPage />} />
         </Route>
       </Routes>
     </AuthContext.Provider>

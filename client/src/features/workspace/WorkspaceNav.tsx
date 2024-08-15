@@ -1,6 +1,6 @@
 import { Authorities, Authority, getAuthoritiesByWorkspaceId, useAuth } from "@/lib/auth";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 interface NavItem {
     label: string;
@@ -13,43 +13,44 @@ const navItems: NavItem[] = [
     {
         label: '申請書を作成する',
         imgPath: '/icons/create_app_form.svg',
-        link: '/app-form/create',
+        link: '/w/:workspaceId/app-form/create',
         requiredAuthorities: [Authorities.APPLICATION],
     },
     {
         label: 'メンバー一覧',
         imgPath: '/icons/member_list.svg',
-        link: '/workspace/members',
+        link: '/w/:workspaceId/workspace/members',
         requiredAuthorities: [Authorities.APPLICATION],
     },
     {
         label: '申請一覧',
         imgPath: '/icons/hamburger.svg',
-        link: '/app-form/list/me?page=1',
+        link: '/w/:workspaceId/app-form/list/me?page=1',
         requiredAuthorities: [Authorities.APPLICATION],
     },
     {
         label: '承認一覧',
         imgPath: '/icons/approval_list.svg',
-        link: '/app-form/list/approval',
+        link: '/w/:workspaceId/app-form/list/approval',
         requiredAuthorities: [Authorities.APPROVAL],
     },
     {
         label: '承認ルート',
         imgPath: '/icons/approval_route.svg',
-        link: '/workspace/approval-route',
+        link: '/w/:workspaceId/workspace/approval-route',
         requiredAuthorities: [Authorities.APPLICATION, Authorities.APPROVAL, Authorities.ADMIN],
     },
     {
         label: 'ワークスペース設定',
         imgPath: '/icons/settings.svg',
-        link: '/workspace/setting',
+        link: '/w/:workspaceId/workspace/setting',
         requiredAuthorities: [Authorities.ADMIN],
     },
 ];
 
 const WorkspaceNav = () => {
     const { currentWorkspace, myAuthorities } = useAuth();
+    const { workspaceId } = useParams();
     const navigate = useNavigate();
     const location = useLocation();  // 現在のURLを取得
     const [filteredNavItems, setFilteredNavItems] = useState<NavItem[]>([]);
@@ -65,7 +66,7 @@ const WorkspaceNav = () => {
 
 
     const handleClick = (link: string) => {
-        navigate(link);
+        navigate(link.replace(':workspaceId', workspaceId ?? '0'));
     }
 
     return (

@@ -18,7 +18,7 @@ type LoginFormData = {
 };
 
 const Login = () => {
-    const { setIsLoggedIn, setCurrentWorkspace, setMyWorkspaces, setMyAuthorities } = useAuth();
+    const { setIsLoggedIn, currentWorkspace, setCurrentWorkspace, setMyWorkspaces, setMyAuthorities } = useAuth();
     const [error, setError] = useState('');
     const navigate = useNavigate();
     const {
@@ -38,7 +38,7 @@ const Login = () => {
                     setMyWorkspaces(response.data.workspaces);
                     setCurrentWorkspace(getWorkspaceWithSmallestId(response.data.workspaces));
                     setMyAuthorities(response.data.authorities);
-                    navigate("/app-form/create")
+                    navigate(`/w/${currentWorkspace?.workspaceId}/app-form/create`);
                 } else {
                     setError(response.data.message);
                 }

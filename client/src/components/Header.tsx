@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button } from './ui/button'
 import axios from 'axios';
 import { useAuth } from '@/lib/auth';
@@ -11,8 +11,12 @@ interface HeaderProps {
 }
 
 const Header = (props: HeaderProps) => {
-    const { currentWorkspace, myWorkspaces, setCurrentWorkspace } = useAuth();
+    const { myWorkspaces } = useAuth();
+    const pathname = useLocation().pathname;
+    console.log(pathname);
+    const workspaceId = pathname.split('/')[2];
     const { isLoggedin } = props;
+
     return (
         <div className='flex justify-between shadow sticky top-0 w-full bg-main h-14 z-50'>
             <div className='flex'>
@@ -30,18 +34,20 @@ const Header = (props: HeaderProps) => {
                             <h3 className='mx-1'>現在のワークスペース</h3>
                             <ul className='text-left flex flex-col gap-3'>
                                 <li className='btn my-3 h-14 leading-10' style={{ textAlign: 'left', cursor: 'auto' }}>
-                                    {getWorkspaceById(myWorkspaces, currentWorkspace?.workspaceId ?? 0)?.workspaceName}
+                                    {getWorkspaceById(myWorkspaces, workspaceId ? Number(workspaceId) : 0)?.workspaceName}
                                 </li>
                             </ul>
                             <Separator />
                             <h3 className='mx-1 my-3'>ワークスペース</h3>
                             <ul>
-                                {getWorkspacesExcludingId(myWorkspaces, currentWorkspace?.workspaceId ?? 0).map(workspace => (
-                                    <li onClick={() => setCurrentWorkspace(workspace)}
+                                {getWorkspacesExcludingId(myWorkspaces, workspaceId ? Number(workspaceId) : 0).map(workspace => (
+                                    <li
                                         className='btn btn-link my-3 h-14 leading-10'
                                         style={{ textAlign: 'left' }}
                                     >
-                                        {workspace.workspaceName}
+                                        <a href={`/w/${workspace.workspaceId}/app-form/create`} className='block'>
+                                            {workspace.workspaceName}
+                                        </a>
                                     </li>
                                 ))}
                             </ul>
@@ -60,6 +66,7 @@ const Header = (props: HeaderProps) => {
 export default Header
 
 const HeaderNavWhenLogin = () => {
+    const { workspaceId } = useParams();
     const { setIsLoggedIn } = useAuth();
     const navigate = useNavigate();
 
@@ -91,7 +98,7 @@ const HeaderNavWhenLogin = () => {
                     <img src='/icons/help.svg' className='btn-img btn-light' />
                 </li>
                 <li>
-                    <Link to='/account/my-page'>
+                    <Link to={`w/${workspaceId}/my-page`}>
                         <img src='/icons/default_user_icon.svg' className='btn-img btn-link' />
                     </Link>
                 </li>
