@@ -54,16 +54,17 @@ const WorkspaceNav = () => {
     const { workspaceId } = useParams();
     const navigate = useNavigate();
     const location = useLocation();  // 現在のURLを取得
+    const currentWorkspaceId = getWorkspaceIdFrom(location.pathname);
     const [filteredNavItems, setFilteredNavItems] = useState<NavItem[]>([]);
 
     useEffect(() => {
-        const currentWorkspaceAuthorities: Authority[] = getAuthoritiesByWorkspaceId(myAuthorities, getWorkspaceIdFrom(location.pathname) ?? 0);
+        const currentWorkspaceAuthorities: Authority[] = getAuthoritiesByWorkspaceId(myAuthorities, currentWorkspaceId ?? 0);
         const currentAuthorityIds = currentWorkspaceAuthorities.map(authority => authority.authorityId);
 
         setFilteredNavItems(navItems.filter(navItem =>
             navItem.requiredAuthorities.some(id => currentAuthorityIds.includes(id))
         ));
-    }, [currentWorkspace, myAuthorities]);
+    }, [currentWorkspace, myAuthorities, currentWorkspaceId]);
 
 
     const handleClick = (link: string) => {
@@ -84,7 +85,7 @@ const WorkspaceNav = () => {
                         {filteredNavItems?.map((navItem, index) => (
                             <li
                                 key={index}
-                                className={`flex flex-row btn btn-link ${navItem.link.includes(location.pathname) ? 'focus' : ''}`}
+                                className={`flex flex-row btn btn-link ${navItem.link.replace(':workspaceId', currentWorkspaceId?.toString() ?? '').includes(location.pathname) ? 'focus' : ''}`}
                                 onClick={() => handleClick(navItem.link)}
                             >
                                 <img src={navItem.imgPath} />
