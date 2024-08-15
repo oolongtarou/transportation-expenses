@@ -2,12 +2,15 @@ import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { getLabelByAuthorityId } from "@/lib/auth";
 import { User } from "@/lib/user";
+import { getWorkspaceIdFrom } from "@/lib/user-workspace";
 import axios, { AxiosError } from "axios";
 import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 const MyPage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
@@ -64,7 +67,7 @@ const MyPage = () => {
                 </Table>
             </div>
             <div className="flex justify-end gap-5 mb-5">
-                <Button className="btn btn-light">パスワードを変更する</Button>
+                <Link to={`/w/${getWorkspaceIdFrom(location.pathname)}/account/password/change`} className="btn btn-light">パスワードを変更する</Link>
                 <Button className="btn btn-danger">アカウントを削除する</Button>
             </div>
         </div >

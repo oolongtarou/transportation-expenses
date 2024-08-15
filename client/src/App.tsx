@@ -77,7 +77,6 @@ function App() {
           <Route path='/' element={<Login />} />
           <Route path='/account/login' element={<Login />} />
           <Route path='/account/signup' element={<SignUp />} />
-          <Route path='/account/password/change' element={<PasswordChange />} />
           <Route path='/account/password/reset-link' element={<PasswordResetLink />} />
         </Route>
         <Route element={<MainLayout />}>
@@ -89,6 +88,8 @@ function App() {
           <Route path='/w/:workspaceId/workspace/approval-route' element={<ApprovalRoute />} />
           <Route path='/w/:workspaceId/workspace/setting' element={<WorkspaceSetting />} />
           <Route path='/w/:workspaceId/my-page' element={<MyPage />} />
+
+          <Route path='/w/:workspaceId/account/password/change' element={<PasswordChange />} />
         </Route>
       </Routes>
     </AuthContext.Provider>

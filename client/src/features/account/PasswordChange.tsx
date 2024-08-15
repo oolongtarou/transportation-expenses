@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 
 const PasswordChange = () => {
     return (
-        <div className="container max-w-md">
+        <div className="container max-w-xl">
             <h2 className="heading-2">パスワードを変更する</h2>
             <PasswordRulesDescription />
 
