@@ -9,7 +9,7 @@ import WorkspaceNav from '../workspace/WorkspaceNav'
 const MainLayout = () => {
     return (
         <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel minSize={10} maxSize={30}>
+            <ResizablePanel minSize={10} maxSize={20}>
                 <WorkspaceNav />
             </ResizablePanel>
             <ResizableHandle />
