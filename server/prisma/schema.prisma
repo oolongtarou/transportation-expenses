@@ -23,9 +23,10 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
-  userWorkspaces  UserWorkspace[]
-  userAuthorities UserAuthority[]
-  applications    Application[]
+  userWorkspaces     UserWorkspace[]
+  userAuthorities    UserAuthority[]
+  applications       Application[]
+  WorkspaceApprovers WorkspaceApprovers[]
 
   @@map("users")
 }
@@ -34,12 +35,14 @@ model Workspace {
   workspaceId   Int      @id @default(autoincrement()) @map("workspace_id")
   workspaceName String   @map("workspace_name") @db.VarChar(50)
   description   String?  @map("description") @db.VarChar(50)
+  approvalStep  Int      @default(1) @map("approval_step")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
 
-  userWorkspaces  UserWorkspace[]
-  userAuthorities UserAuthority[]
-  applications    Application[]
+  userWorkspaces     UserWorkspace[]
+  userAuthorities    UserAuthority[]
+  applications       Application[]
+  WorkspaceApprovers WorkspaceApprovers[]
 
   @@map("workspaces")
 }
@@ -73,8 +76,9 @@ model UserWorkspace {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
 
-  user      User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  workspace Workspace @relation(fields: [workspaceId], references: [workspaceId], onDelete: Cascade)
+  user               User                 @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  workspace          Workspace            @relation(fields: [workspaceId], references: [workspaceId], onDelete: Cascade)
+  WorkspaceApprovers WorkspaceApprovers[]
 
   @@unique([userId, workspaceId])
   @@map("user_workspaces")
@@ -176,4 +180,19 @@ model ApplicationDetailRoute {
 
   @@id([applicationId, applicationDetailId, routeId])
   @@map("application_detail_routes")
+}
+
+model WorkspaceApprovers {
+  workspapceApproverId Int      @id @default(autoincrement()) @map("workspace_approver_id")
+  workspaceId          Int      @map("workspace_id")
+  approvalStep         Int      @map("approval_step")
+  userId               Int      @map("user_id")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @default(now()) @updatedAt @map("updated_at")
+
+  workspace     Workspace     @relation(fields: [workspaceId], references: [workspaceId], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  userWorkspace UserWorkspace @relation(fields: [workspaceId, userId], references: [workspaceId, userId], onDelete: Cascade)
+
+  @@map("workspace_approvers")
 }
