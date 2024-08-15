@@ -4,17 +4,20 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { WorkspaceApprovers } from "@/lib/approver"
 import { useAuth } from "@/lib/auth"
+import { getWorkspaceIdFrom } from "@/lib/user-workspace"
 import axios, { AxiosError } from "axios"
 import { useEffect, useState } from "react"
+import { useLocation } from "react-router-dom"
 
 const ApprovalRoute = () => {
     const { currentWorkspace } = useAuth();
+    const location = useLocation();
 
     const [approvalStep, setApprovalStep] = useState<number | null>(null);
     const [workspaceApprovers, setWorkspaceApprovers] = useState<WorkspaceApprovers | null>(null);
 
     useEffect(() => {
-        axios.get<WorkspaceApprovers>(`${import.meta.env.VITE_SERVER_DOMAIN}/workspace/approvers`, { params: { workspaceId: currentWorkspace?.workspaceId ?? 1 }, withCredentials: true })
+        axios.get<WorkspaceApprovers>(`${import.meta.env.VITE_SERVER_DOMAIN}/workspace/approvers`, { params: { workspaceId: getWorkspaceIdFrom(location.pathname) ?? 0 }, withCredentials: true })
             .then(response => {
                 console.log(response.data)
                 setWorkspaceApprovers(response.data);
