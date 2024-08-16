@@ -17,11 +17,11 @@ const AppFormCreate = (props: AppFormCreateProps) => {
         console.log(data); // 全データがここに集まります
     };
 
-    const reviewAppForm = () => {
-        setEditing(false);
-        // ページの最上部にスクロール
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+    // const reviewAppForm = () => {
+    //     setEditing(false);
+    //     // ページの最上部にスクロール
+    //     window.scrollTo({ top: 0, behavior: 'smooth' });
+    // };
 
     return (
         <div className="container">
