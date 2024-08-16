@@ -3,6 +3,8 @@ import AppFormTable from "./components/AppFormTable"
 import { ApplicationForm } from "./app-form";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { applicationFormSchema } from "../schema/app-form-schema";
 
 interface AppFormCreateProps {
     appForm: ApplicationForm
@@ -11,17 +13,14 @@ interface AppFormCreateProps {
 const AppFormCreate = (props: AppFormCreateProps) => {
     const { appForm } = props;
     const [editing, setEditing] = useState<boolean>(true);
-    const methods = useForm<ApplicationForm>();
-    // const { watch, setValue } = methods;
+    const methods = useForm<ApplicationForm>({
+        mode: 'all',
+        resolver: zodResolver(applicationFormSchema),
+        defaultValues: appForm,
+    });
     const onSubmit = (data: ApplicationForm) => {
         console.log(data); // 全データがここに集まります
     };
-
-    // const reviewAppForm = () => {
-    //     setEditing(false);
-    //     // ページの最上部にスクロール
-    //     window.scrollTo({ top: 0, behavior: 'smooth' });
-    // };
 
     return (
         <div className="container">

@@ -25,7 +25,7 @@ const AppFormTable = (props: AppFormTableProps) => {
     const [totalAmount, setTotalAmount] = useState(0);
     const [editingRowId, setEditingRowId] = useState<number | null>(null);
 
-    const { control, register } = useFormContext<ApplicationForm>();
+    const { control, register, formState: { errors } } = useFormContext<ApplicationForm>();
     const { append, remove } = useFieldArray({
         control,
         name: "details"
@@ -69,6 +69,7 @@ const AppFormTable = (props: AppFormTableProps) => {
     const handleInputChange = (index: number, field: keyof AppFormDetail, value: string | number | boolean | Route[]) => {
         console.log(value);
         console.log(typeof value);
+
         const updatedRows = [...rows];
         updatedRows[index] = {
             ...updatedRows[index],
@@ -154,6 +155,7 @@ const AppFormTable = (props: AppFormTableProps) => {
 
     return (
         <div className="overflow-x-auto">
+            {errors.details ? <p className="text-red-500">{errors.details.message}</p> : <></>}
             <Table className="min-w-[1200px] table-auto">
                 <TableHeader>
                     <TableRow>
@@ -185,6 +187,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                                         onChange: (e) => handleInputChange(index, 'date', e.target.value)
                                     })}
                                 />
+                                {errors.details && errors.details[index]?.date?.message}
                             </TableCell>
                             <TableCell>
                                 <Input
@@ -196,6 +199,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                                         onChange: (e) => handleInputChange(index, 'description', e.target.value)
                                     })}
                                 />
+                                {errors.details && errors.details[index]?.description?.message}
                             </TableCell>
                             <TableCell>
                                 <Select
@@ -215,6 +219,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                                         </SelectGroup>
                                     </SelectContent>
                                 </Select>
+                                {errors.details && errors.details[index]?.transportation?.message}
                             </TableCell>
                             <TableCell className="min-w-100">
                                 {editing ?
@@ -233,6 +238,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                                                 ))
                                             )}
                                         </DialogTrigger>
+                                        {errors.details && errors.details[index]?.routes?.message}
                                         <DialogContent className="max-w-4xl" aria-describedby="申請書明細行の経路を入力する画面です">
                                             <DialogHeader>
                                                 <DialogTitle className="font-bold text-3xl mb-5">
@@ -261,14 +267,16 @@ const AppFormTable = (props: AppFormTableProps) => {
                             </TableCell>
                             <TableCell className="w-40">
                                 <Input
-                                    type="text"
+                                    type="number"
                                     readOnly={editing ? false : true}
                                     defaultValue={row.oneWayAmount}
-                                    className="text-right"
+                                    className="text-right no-spin"
                                     {...register(`details.${index}.oneWayAmount`, {
-                                        onChange: (e) => handleInputChange(index, 'oneWayAmount', Number(e.target.value))
+                                        onChange: (e) => handleInputChange(index, 'oneWayAmount', e.target.value)
                                     })}
                                 />
+                                {/* {errors.details && errors.details[index]?.oneWayAmount?.message} */}
+                                {errors.details && errors.details[index]?.oneWayAmount?.message ? <p className="text-red-500">{errors.details[index]?.oneWayAmount?.message}</p> : <></>}
                             </TableCell>
                             <TableCell className="text-center">
                                 <Checkbox
