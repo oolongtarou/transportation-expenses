@@ -1,6 +1,6 @@
 import { Application } from "@prisma/client";
 import prisma from "../infra/db";
-import { SearchOption } from "../schema/post";
+import { ApplicationForm, SearchOption } from "../schema/post";
 
 export class AppFormRepository {
     static async findByUserIdAndWorkspaceId(userId: number, workspaceId: number): Promise<Application[] | null> {
@@ -94,6 +94,49 @@ export class AppFormRepository {
         } catch (err) {
             console.error(err);
             return 0;
+        }
+    }
+
+    static async createNewAppForm(form: ApplicationForm) {
+        try {
+            const application = await prisma.application.create({
+                data: {
+                    workspaceId: form.workspaceId,
+                    userId: form.userId,
+                    applicationDate: new Date(form.applicationDate),
+                    statusId: form.statusId,
+                    totalAmount: form.totalAmount,
+                    details: {
+                        create: form.details.map(detail => ({
+                            applicationDetailId: detail.id,
+                            detailDate: new Date(detail.date),
+                            description: detail.description,
+                            transportationId: detail.transportation,
+                            oneWayAmount: detail.oneWayAmount,
+                            isRoundtrip: detail.isRoundTrip,
+                            detailAmount: detail.isRoundTrip ? detail.oneWayAmount * 2 : detail.oneWayAmount,
+                            routes: {
+                                create: detail.routes.map(route => ({
+                                    departure: route.departureName,
+                                    arrival: route.arrivalName,
+                                    line: route.lineName,
+                                })),
+                            },
+                        })),
+                    },
+                },
+                include: {
+                    details: {
+                        include: {
+                            routes: true,
+                        },
+                    },
+                },
+            });
+
+            return application;
+        } catch (err) {
+            console.log(err);
         }
     }
 }

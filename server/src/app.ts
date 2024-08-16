@@ -15,7 +15,7 @@ import { WorkspaceRepository } from "./repositories/workspace-repository";
 import { User } from "@prisma/client";
 import { AuthorityRepository } from "./repositories/authority-repository";
 import { AppFormRepository } from "./repositories/app-form-repository";
-import { SearchOption } from "./schema/post";
+import { ApplicationForm, SearchOption } from "./schema/post";
 import { toNumber } from "./lib/converter";
 
 
@@ -219,6 +219,21 @@ app.get('/workspace/approvers', async (req: Request, res: Response) => {
         res.status(200).json({
             loggedIn: true,
             'message': 'ワークスペースIDが不明です',
+        })
+    }
+});
+
+
+app.post('/app-form/new', async (req: Request, res: Response) => {
+    try {
+
+        const appForm: ApplicationForm = req.body.appForm;
+        const savedAppForm = await AppFormRepository.createNewAppForm(appForm);
+        res.status(200).json(savedAppForm);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            'message': 'サーバーでエラーが発生しています。',
         })
     }
 

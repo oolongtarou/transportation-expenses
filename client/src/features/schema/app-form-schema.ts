@@ -46,6 +46,9 @@ export const appFormDetailSchema = z.object({
         .min(1, "片道金額は1円以上でなければなりません")
         .max(1000000, "片道金額は100万円以下でなければなりません")),
     routes: z.array(routeSchema).min(1, "経路は少なくとも1つ必要です"),
+    isRoundTrip: z.boolean({
+        required_error: "往復かどうかを指定してください"
+    }),
 });
 
 // ApplicationFormのスキーマ
