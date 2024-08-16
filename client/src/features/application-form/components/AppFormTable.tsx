@@ -181,7 +181,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                             <TableCell>
                                 <Input
                                     type="date"
-                                    readOnly={editing ? false : true}
+                                    disabled={!editing}
                                     defaultValue={row.date}
                                     {...register(`details.${index}.date`, {
                                         onChange: (e) => handleInputChange(index, 'date', e.target.value)
@@ -192,7 +192,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                             <TableCell>
                                 <Input
                                     type="text"
-                                    readOnly={editing ? false : true}
+                                    disabled={!editing}
                                     defaultValue={row.description}
                                     maxLength={20}
                                     {...register(`details.${index}.description`, {
@@ -204,6 +204,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                             <TableCell>
                                 <Select
                                     defaultValue={row.transportation.toString()}
+                                    disabled={!editing}
                                     onValueChange={(value) => {
                                         setValue(`details.${index}.transportation`, parseInt(value))
                                         handleInputChange(index, 'transportation', parseInt(value))
@@ -269,7 +270,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                             <TableCell className="w-40">
                                 <Input
                                     type="number"
-                                    readOnly={editing ? false : true}
+                                    disabled={!editing}
                                     defaultValue={row.oneWayAmount}
                                     className="text-right no-spin"
                                     {...register(`details.${index}.oneWayAmount`, {
@@ -282,6 +283,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                                 <Checkbox
                                     onCheckedChange={(checked) => handleInputChange(index, 'isRoundTrip', checked)}
                                     defaultChecked={row.isRoundTrip}
+                                    disabled={!editing}
                                 />
                             </TableCell>
                             <DetailAmountCell index={index} />

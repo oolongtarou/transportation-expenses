@@ -2,15 +2,15 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { loginSchema } from '../schema/user-schema';
 import axios, { AxiosError } from 'axios';
 import { useEffect, useState } from 'react';
-import AlertDestructive from '@/components/Alert';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 import { getWorkspaceWithSmallestId } from '@/lib/user-workspace';
+import MessageBox from '@/components/MessageBox';
 
 type LoginFormData = {
     email: string;
@@ -19,8 +19,10 @@ type LoginFormData = {
 
 const Login = () => {
     const { setIsLoggedIn, setCurrentWorkspace, setMyWorkspaces, setMyAuthorities } = useAuth();
-    const [error, setError] = useState('');
     const navigate = useNavigate();
+    const [messageCode, setMessageCode] = useState<string | null>('');
+    const [searchParams] = useSearchParams();
+
     const {
         register,
         formState: { errors },
@@ -45,6 +47,10 @@ const Login = () => {
             });
     }, [navigate]);
 
+    useEffect(() => {
+        setMessageCode(searchParams.get('m'));
+    }, [searchParams])
+
     const onSubmit = handleSubmit((data: LoginFormData) => {
         axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/account/login`, data, { withCredentials: true })
             .then((response) => {
@@ -55,17 +61,18 @@ const Login = () => {
                     setMyAuthorities(response.data.authorities);
                     navigate(`/w/${getWorkspaceWithSmallestId(response.data.workspaces)?.workspaceId}/app-form/create`);
                 } else {
-                    setError(response.data.message);
+                    setMessageCode('E00002');
                 }
             })
-            .catch((err: AxiosError) => {
-                setError(`サーバーエラーが発生しました：${err.code}`);
+            .catch(() => {
+                // setError(`サーバーエラーが発生しました：${err.code}`);
+                setMessageCode('E00001')
             })
     });
 
     return (
         <>
-            {error ? <AlertDestructive message={error} /> : null}
+            <MessageBox messageCode={messageCode} />
             <form onSubmit={onSubmit}>
                 <div className="w-full mb-5">
                     <Label htmlFor="email">メールアドレス</Label>

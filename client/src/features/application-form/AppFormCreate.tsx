@@ -45,6 +45,9 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         else if (submitType === 'fix') {
+            // console.log(data);
+            // return;
+
             const user = await axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true });
 
             if (!user.data || !currentWorkspaceId) {
@@ -94,8 +97,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     <AppFormTable tableRows={appForm.details} editing={editing} watch={methods.watch} setValue={methods.setValue} />
                     <div className="flex justify-end gap-5 mt-5 mb-5">
                         {variant === 'create' && editing
-                            ?
-                            <>
+                            ? <>
                                 <Button onClick={methods.handleSubmit((data) => onSubmit(data, 'draft'))} className="btn btn-outline-primary" >下書き保存する</Button>
                                 <Button onClick={methods.handleSubmit((data) => onSubmit(data, 'makeSure'))} className="btn btn-primary">申請に進む</Button>
                             </>
@@ -103,6 +105,10 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                                 ? <Button onClick={methods.handleSubmit((data) => onSubmit(data, 'fix'))} className="btn btn-primary">申請を確定する</Button>
                                 : <a href={`/w/${currentWorkspaceId}/app-form/create`} className="btn btn-primary">続けて申請書を作成する</a>
                         }
+                        {/* <Button className="btn btn-danger">下書きを削除する</Button>
+                        <Button className="btn btn-primary">承認する</Button>
+                        <Button className="btn btn-primary">受領する</Button>
+                        <Button className="btn btn-danger">却下する</Button> */}
                     </div>
                 </form>
             </FormProvider>
