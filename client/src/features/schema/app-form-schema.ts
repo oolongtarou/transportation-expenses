@@ -3,11 +3,11 @@ import { z } from "zod";
 export const routeSchema = z.object({
     id: z.number().int(),
     departureId: z.string(),
-    departureName: z.string(),
+    departureName: z.string().max(50, '50字以内で入力してください'),
     arrivalId: z.string(),
-    arrivalName: z.string(),
+    arrivalName: z.string().max(50, '50字以内で入力してください'),
     lineId: z.string(),
-    lineName: z.string(),
+    lineName: z.string().max(50, '50字以内で入力してください'),
 });
 
 // 必要な項目のみを含むAppFormDetailのスキーマ
