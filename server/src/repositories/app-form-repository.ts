@@ -99,44 +99,62 @@ export class AppFormRepository {
 
     static async createNewAppForm(form: ApplicationForm) {
         try {
-            const application = await prisma.application.create({
-                data: {
-                    workspaceId: form.workspaceId,
-                    userId: form.userId,
-                    applicationDate: new Date(form.applicationDate),
-                    statusId: form.statusId,
-                    totalAmount: form.totalAmount,
-                    details: {
-                        create: form.details.map(detail => ({
-                            applicationDetailId: detail.id,
-                            detailDate: new Date(detail.date),
-                            description: detail.description,
-                            transportationId: detail.transportation,
-                            oneWayAmount: detail.oneWayAmount,
-                            isRoundtrip: detail.isRoundTrip,
-                            detailAmount: detail.isRoundTrip ? detail.oneWayAmount * 2 : detail.oneWayAmount,
-                            routes: {
-                                create: detail.routes.map(route => ({
-                                    departure: route.departureName,
-                                    arrival: route.arrivalName,
-                                    line: route.lineName,
-                                })),
-                            },
-                        })),
-                    },
-                },
-                include: {
-                    details: {
-                        include: {
-                            routes: true,
+            // トランザクションを開始
+            const result = await prisma.$transaction(async (prisma) => {
+                // applicationsテーブルにデータをインサート
+                const application = await prisma.application.create({
+                    data: {
+                        workspaceId: form.workspaceId,
+                        userId: form.userId,
+                        applicationDate: new Date(form.applicationDate),
+                        statusId: form.statusId,
+                        totalAmount: form.totalAmount,
+                        details: {
+                            create: form.details.map(detail => ({
+                                applicationDetailId: detail.id,
+                                detailDate: new Date(detail.date),
+                                description: detail.description,
+                                transportationId: detail.transportation,
+                                oneWayAmount: detail.oneWayAmount,
+                                isRoundtrip: detail.isRoundTrip,
+                                detailAmount: detail.isRoundTrip ? detail.oneWayAmount * 2 : detail.oneWayAmount,
+                                routes: {
+                                    create: detail.routes.map(route => ({
+                                        departure: route.departureName,
+                                        arrival: route.arrivalName,
+                                        line: route.lineName,
+                                    })),
+                                },
+                            })),
                         },
                     },
-                },
+                    include: {
+                        details: {
+                            include: {
+                                routes: true,
+                            },
+                        },
+                    },
+                });
+
+                // audit_logテーブルにデータをインサート
+                await prisma.auditLog.create({
+                    data: {
+                        applicationId: application.applicationId,
+                        beforeStatus: null,
+                        afterStatus: form.statusId,
+                        userId: form.userId,
+                        userName: '山田 太郎',
+                    },
+                });
+
+                return application;
             });
 
-            return application;
+            return result;
         } catch (err) {
-            console.log(err);
+            console.error(err);
+            throw new Error("申請書作成処理に失敗しました。");
         }
     }
 }

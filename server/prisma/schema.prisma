@@ -27,6 +27,7 @@ model User {
   userAuthorities    UserAuthority[]
   applications       Application[]
   WorkspaceApprovers WorkspaceApprovers[]
+  AuditLog           AuditLog[]
 
   @@map("users")
 }
@@ -91,6 +92,7 @@ model ApplicationStatus {
   updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
 
   applications Application[]
+  AuditLog     AuditLog[]
 
   @@map("application_statuses")
 }
@@ -142,6 +144,7 @@ model Application {
   workspace Workspace           @relation(fields: [workspaceId], references: [workspaceId])
   status    ApplicationStatus   @relation(fields: [statusId], references: [statusId])
   details   ApplicationDetail[]
+  AuditLog  AuditLog[]
 
   @@map("applications")
 }
@@ -195,4 +198,21 @@ model WorkspaceApprovers {
   userWorkspace UserWorkspace @relation(fields: [workspaceId, userId], references: [workspaceId, userId], onDelete: Cascade)
 
   @@map("workspace_approvers")
+}
+
+model AuditLog {
+  auditLogId    Int      @id @default(autoincrement()) @map("audit_log_id")
+  applicationId Int      @map("application_id")
+  beforeStatus  Int?     @map("before_status") // NULL許容
+  afterStatus   Int      @map("after_status")
+  userId        Int      @map("user_id")
+  userName      String   @map("user_name") @db.VarChar(50)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  application    Application       @relation(fields: [applicationId], references: [applicationId])
+  afterStatusRel ApplicationStatus @relation(fields: [afterStatus], references: [statusId])
+  user           User              @relation(fields: [userId], references: [userId])
+
+  @@map("audit_log")
 }

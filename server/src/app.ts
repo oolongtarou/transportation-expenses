@@ -17,6 +17,7 @@ import { AuthorityRepository } from "./repositories/authority-repository";
 import { AppFormRepository } from "./repositories/app-form-repository";
 import { ApplicationForm, SearchOption } from "./schema/post";
 import { toNumber } from "./lib/converter";
+import { ApplicationStatus } from "./enum/app-form";
 
 
 declare module 'express-session' {
@@ -226,8 +227,18 @@ app.get('/workspace/approvers', async (req: Request, res: Response) => {
 
 app.post('/app-form/new', async (req: Request, res: Response) => {
     try {
-
+        if (!req.session.userName) {
+            res.status(403).json({
+                'message': 'ログインしていません。',
+            })
+            return;
+        }
         const appForm: ApplicationForm = req.body.appForm;
+        // console.log(req.session.userName);  
+        if (!appForm.user || !appForm.user.userName) {
+            appForm.user = { userName: req.session.userName }
+        }
+        appForm.statusId = ApplicationStatus.Approving;
         const savedAppForm = await AppFormRepository.createNewAppForm(appForm);
         res.status(200).json(savedAppForm);
     } catch (err) {
