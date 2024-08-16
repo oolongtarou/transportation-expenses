@@ -187,7 +187,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                                         onChange: (e) => handleInputChange(index, 'date', e.target.value)
                                     })}
                                 />
-                                {errors.details && errors.details[index]?.date?.message}
+                                {errors.details && errors.details[index]?.date?.message ? <p className="text-red-500">{errors.details[index]?.date?.message}</p> : <></>}
                             </TableCell>
                             <TableCell>
                                 <Input
@@ -199,7 +199,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                                         onChange: (e) => handleInputChange(index, 'description', e.target.value)
                                     })}
                                 />
-                                {errors.details && errors.details[index]?.description?.message}
+                                {errors.details && errors.details[index]?.description?.message ? <p className="text-red-500">{errors.details[index]?.description?.message}</p> : <></>}
                             </TableCell>
                             <TableCell>
                                 <Select
@@ -219,7 +219,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                                         </SelectGroup>
                                     </SelectContent>
                                 </Select>
-                                {errors.details && errors.details[index]?.transportation?.message}
+                                {errors.details && errors.details[index]?.transportation?.message ? <p className="text-red-500">{errors.details[index]?.transportation?.message}</p> : <></>}
                             </TableCell>
                             <TableCell className="min-w-100">
                                 {editing ?
@@ -238,7 +238,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                                                 ))
                                             )}
                                         </DialogTrigger>
-                                        {errors.details && errors.details[index]?.routes?.message}
+                                        {errors.details && errors.details[index]?.routes?.message ? <p className="text-red-500">{errors.details[index]?.routes?.message}</p> : <></>}
                                         <DialogContent className="max-w-4xl" aria-describedby="申請書明細行の経路を入力する画面です">
                                             <DialogHeader>
                                                 <DialogTitle className="font-bold text-3xl mb-5">
@@ -275,7 +275,6 @@ const AppFormTable = (props: AppFormTableProps) => {
                                         onChange: (e) => handleInputChange(index, 'oneWayAmount', e.target.value)
                                     })}
                                 />
-                                {/* {errors.details && errors.details[index]?.oneWayAmount?.message} */}
                                 {errors.details && errors.details[index]?.oneWayAmount?.message ? <p className="text-red-500">{errors.details[index]?.oneWayAmount?.message}</p> : <></>}
                             </TableCell>
                             <TableCell className="text-center">

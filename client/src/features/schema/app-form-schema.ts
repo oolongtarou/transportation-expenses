@@ -24,7 +24,9 @@ export const appFormDetailSchema = z.object({
             return isNaN(parsed) ? value : parsed;
         }
         return value;
-    }, z.number()
+    }, z.number({
+        invalid_type_error: "数字を入力してください"
+    })
         .min(1, "片道金額は1以上でなければなりません")
         .max(1000000, "片道金額は100万以下でなければなりません")),
     routes: z.array(routeSchema).min(1, "経路は少なくとも1つ必要です"),
