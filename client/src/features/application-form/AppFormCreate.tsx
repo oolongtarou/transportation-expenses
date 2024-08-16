@@ -5,10 +5,12 @@ import { FormProvider, useForm } from "react-hook-form";
 import AppFormTable from "./components/AppFormTable"
 import { ApplicationForm, calculateTotalAmount } from "./app-form";
 import { applicationFormSchema } from "../schema/app-form-schema";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { getWorkspaceIdFrom } from "@/lib/user-workspace";
 import axios from "axios";
 import { User } from "@/lib/user";
+import { useEffect, useState } from "react";
+import MessageBox from "@/components/MessageBox";
 
 interface AppFormCreateProps {
     appForm: ApplicationForm
@@ -18,6 +20,8 @@ const AppFormCreate = (props: AppFormCreateProps) => {
     const { appForm } = props;
     const navigate = useNavigate();
     const location = useLocation();
+    const [messageCode, setMessageCode] = useState<string | null>('');
+    const [searchParams] = useSearchParams();
     const currentWorkspaceId = getWorkspaceIdFrom(location.pathname);
     const methods = useForm<ApplicationForm>({
         mode: 'all',
@@ -30,17 +34,10 @@ const AppFormCreate = (props: AppFormCreateProps) => {
         } else if (submitType === 2) {
             console.log('申請に進む');
 
-
-
             const user = await axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true });
 
-            if (!user.data) {
-                navigate('/');
-                return;
-            }
-
-            if (!currentWorkspaceId) {
-                navigate('/');
+            if (!user.data || !currentWorkspaceId) {
+                navigate('/account/login?m=E00006');
                 return;
             }
 
@@ -54,12 +51,26 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                 id: index + 1,
             }));
             const appForm: ApplicationForm = data;
-            await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/new`, { appForm: appForm }, { withCredentials: true });
+            const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/new`, { appForm: appForm }, { withCredentials: true });
+            if (result.status === 200) {
+                setMessageCode('S00002');
+            } else if (result.status === 403) {
+                navigate('/account/login?m=E00006');
+            } else if (result.status === 500) {
+                setMessageCode('E00001');
+            } else {
+                setMessageCode('E00005');
+            }
         }
     };
 
+    useEffect(() => {
+        setMessageCode(searchParams.get('m'));
+    }, [searchParams])
+
     return (
         <div className="container">
+            <MessageBox messageCode={messageCode} />
             <h2 className="heading-2">申請書を作成する</h2>
             <FormProvider {...methods}>
                 <form>
