@@ -19,7 +19,7 @@ export interface AppFormTableProps {
 }
 
 const AppFormTable = (props: AppFormTableProps) => {
-    const { tableRows, editing, watch, setValue } = props;
+    const { tableRows, editing, setValue } = props;
     const [rows, setRows] = useState<AppFormDetail[]>(tableRows);
     const [isAddingRow, setIsAddingRow] = useState(false);
     const [totalAmount, setTotalAmount] = useState(0);
@@ -31,16 +31,12 @@ const AppFormTable = (props: AppFormTableProps) => {
         name: "details"
     });
 
-    console.log(rows);
-
     const DetailAmountCell = ({ index }: { index: number }) => {
         const { setValue } = useFormContext<ApplicationForm>();
 
         // フォーム内のoneWayAmountとisRoundTripを監視
         const oneWayAmount = rows[index].oneWayAmount;
         const isRoundTrip = rows[index].isRoundTrip;
-        // const oneWayAmount = watch(`details.${index}.oneWayAmount`);
-        // const isRoundTrip = watch(`details.${index}.isRoundTrip`);
 
         useEffect(() => {
             // detailAmountを自動計算
@@ -70,8 +66,9 @@ const AppFormTable = (props: AppFormTableProps) => {
         setTotalAmount(calculateTotalAmount(rows));
     }, [rows])
 
-    const handleInputChange = (index: number, field: keyof AppFormDetail, value: any) => {
-        // console.log(value);
+    const handleInputChange = (index: number, field: keyof AppFormDetail, value: string | number | boolean | Route[]) => {
+        console.log(value);
+        console.log(typeof value);
         const updatedRows = [...rows];
         updatedRows[index] = {
             ...updatedRows[index],
@@ -79,13 +76,6 @@ const AppFormTable = (props: AppFormTableProps) => {
         };
         setRows(updatedRows);
         setValue(`details.${index}.${field}`, value);
-        // 日付フィールドの場合は yyyy-MM-dd 形式に変換
-        // if (field === 'date' && value instanceof Date) {
-        //     const formattedDate = value.toISOString().slice(0, 10);
-        //     setValue(`details.${index}.${field}`, formattedDate);
-        // } else {
-        //     setValue(`details.${index}.${field}`, value);
-        // }
     };
 
 
@@ -154,7 +144,6 @@ const AppFormTable = (props: AppFormTableProps) => {
         const newRow = {
             ...rowToCopy,
             id: maxId + 1,  // 最も大きいIDに+1した新しいIDを設定
-            // date: rowToCopy.date ? rowToCopy.date : new Date().toISOString().split('T')[0],
         };
 
         // フィールドに新しい行を追加
@@ -192,17 +181,8 @@ const AppFormTable = (props: AppFormTableProps) => {
                                     type="date"
                                     readOnly={editing ? false : true}
                                     defaultValue={row.date}
-                                    // defaultValue={row.date ? row.date.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10)}
-
-                                    // defaultValue={row.date ? row.date.toISOString().substring(0, 10) : new Date().toISOString().substring(0, 10)}
-                                    // defaultValue={row.date.toISOString().substring(0, 10)}
-                                    // onChange={(e) => handleInputChange(row.id, 'date', new Date(e.target.value))}
-
-
-                                    // {...register(`details.${index}.date` as const)}
                                     {...register(`details.${index}.date`, {
                                         onChange: (e) => handleInputChange(index, 'date', e.target.value)
-                                        // onChange: (e) => handleInputChange(index, 'date', new Date(e.target.value))
                                     })}
                                 />
                             </TableCell>
@@ -212,8 +192,6 @@ const AppFormTable = (props: AppFormTableProps) => {
                                     readOnly={editing ? false : true}
                                     defaultValue={row.description}
                                     maxLength={20}
-                                    // onChange={(e) => handleInputChange(row.id, 'description', e.target.value)}
-                                    // {...register(`details.${index}.description` as const)}
                                     {...register(`details.${index}.description`, {
                                         onChange: (e) => handleInputChange(index, 'description', e.target.value)
                                     })}
@@ -225,14 +203,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                                     onValueChange={(value) => {
                                         setValue(`details.${index}.transportation`, parseInt(value))
                                         handleInputChange(index, 'transportation', parseInt(value))
-                                    }
-                                    }
-                                // {...register(`details.${index}.transportation`)}
-
-
-                                // {...register(`details.${index}.transportation`, {
-                                //     onChange: (e) => handleInputChange(index, 'transportation', parseInt(e.target.value))
-                                // })}
+                                    }}
                                 >
                                     <SelectTrigger className="min-w-[80px]">
                                         <SelectValue />
@@ -293,11 +264,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                                     type="text"
                                     readOnly={editing ? false : true}
                                     defaultValue={row.oneWayAmount}
-                                    // defaultValue={row.oneWayAmount.toString()}
                                     className="text-right"
-                                    // onChange={(e) => handleInputChange(row.id, 'oneWayAmount', parseFloat(e.target.value))}
-                                    // {...register(`details.${index}.oneWayAmount` as const)}
-
                                     {...register(`details.${index}.oneWayAmount`, {
                                         onChange: (e) => handleInputChange(index, 'oneWayAmount', Number(e.target.value))
                                     })}
@@ -305,31 +272,18 @@ const AppFormTable = (props: AppFormTableProps) => {
                             </TableCell>
                             <TableCell className="text-center">
                                 <Checkbox
-                                    // checked={watch(`details.${index}.isRoundTrip`)}
-                                    // onCheckedChange={(checked) => {
-                                    //     setValue(`details.${index}.isRoundTrip`, Boolean(checked));
-                                    // }}
                                     onCheckedChange={(checked) => handleInputChange(index, 'isRoundTrip', checked)}
                                     defaultChecked={row.isRoundTrip}
-                                // defaultChecked={watch(`details.${index}.isRoundTrip`)}
-                                // {...register(`details.${index}.isRoundTrip`, {
-                                //     onChange: (e) => handleInputChange(index, 'isRoundTrip', e.target.checked)
-                                // })}
                                 />
                             </TableCell>
                             <DetailAmountCell index={index} />
-                            {/* <TableCell className="text-right max-w-32">
-                                {row.isRoundTrip ? formatWithCommas(row.oneWayAmount * 2) : formatWithCommas(row.oneWayAmount)}
-                            </TableCell> */}
                             {editing ?
                                 <>
                                     <TableCell>
                                         <div className="btn btn-link" onClick={() => deleteRow(index)}>削除</div>
-                                        {/* <div className="btn btn-link" onClick={() => deleteRow(row.id)}>削除</div> */}
                                     </TableCell>
                                     <TableCell>
                                         <div className="btn btn-link" onClick={() => copyRow(index)}>コピー</div>
-                                        {/* <div className="btn btn-link" onClick={() => copyRow(row.id)}>コピー</div> */}
                                     </TableCell>
                                 </>
                                 : <></>
