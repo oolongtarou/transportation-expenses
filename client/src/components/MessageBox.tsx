@@ -3,22 +3,26 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, BadgeCheck } from 'lucide-react';
 import { Button } from './ui/button';
 
+// messages.json をインポート
+import messages from '../../public/messages.json';
+
+type MessageBoxVariant = 'default' | 'destructive' | 'success' | 'warn';
+
 interface MessageBoxProps {
-    variant: 'default' | 'destructive' | 'success' | 'warn';
-    message: string;
+    messageCode: string | undefined;
 }
 
 const MessageBox = (props: MessageBoxProps) => {
-    const { variant, message } = props;
+    const { messageCode } = props;
     const [isVisible, setIsVisible] = useState(true);
-
+    const variant = getVarintByCode(messageCode);
     const handleClose = () => {
         setIsVisible(false);
     };
 
     return (
         <>
-            {isVisible && (
+            {messageCode && isVisible && (
                 <Alert variant={variant} className="mb-5">
                     <div className='flex items-center justify-between'>
                         <div className='flex'>
@@ -36,7 +40,7 @@ const MessageBox = (props: MessageBoxProps) => {
                         </Button>
                     </div>
                     <AlertDescription className='ml-7'>
-                        {message}
+                        {getMessageByCode(messageCode)}
                     </AlertDescription>
                 </Alert>
             )}
@@ -45,3 +49,28 @@ const MessageBox = (props: MessageBoxProps) => {
 };
 
 export default MessageBox;
+
+
+
+// 読み込んだJSONファイルからメッセージをコードで取得する
+const getMessageByCode = (code: string): string | undefined => {
+    const messageObj = messages.find((msg) => msg.code === code);
+    return messageObj ? messageObj.message : undefined;
+}
+
+function getVarintByCode(code: string | undefined): MessageBoxVariant {
+    if (!code) {
+        return 'default'
+    }
+
+    const codeUpperCase = code.toUpperCase();
+    if (codeUpperCase.startsWith('S')) {
+        return 'success'
+    } else if (codeUpperCase.startsWith('E')) {
+        return 'destructive'
+    } else if (codeUpperCase.startsWith('W')) {
+        return 'warn'
+    } else {
+        return 'default'
+    }
+}
