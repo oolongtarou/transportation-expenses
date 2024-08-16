@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, BadgeCheck } from 'lucide-react';
 import { Button } from './ui/button';
 
-interface DismissibleAlertProps {
+interface MessageBoxProps {
     variant: 'default' | 'destructive' | 'success' | 'warn';
     message: string;
 }
 
-const DismissibleAlert: React.FC<DismissibleAlertProps> = ({ variant, message }) => {
+const MessageBox = (props: MessageBoxProps) => {
+    const { variant, message } = props;
     const [isVisible, setIsVisible] = useState(true);
 
     const handleClose = () => {
@@ -43,4 +44,4 @@ const DismissibleAlert: React.FC<DismissibleAlertProps> = ({ variant, message })
     );
 };
 
-export default DismissibleAlert;
+export default MessageBox;
