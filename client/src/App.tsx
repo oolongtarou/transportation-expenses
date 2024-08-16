@@ -83,7 +83,7 @@ function App() {
           <Route path='/account/password/reset-link' element={<PasswordResetLink />} />
         </Route>
         <Route element={<MainLayout />}>
-          <Route path='/w/:workspaceId/app-form/create' element={<AppFormCreate appForm={appFormInitialData} />} />
+          <Route path='/w/:workspaceId/app-form/create' element={<AppFormCreate appForm={appFormInitialData} variant="create" />} />
           <Route path='/w/:workspaceId/app-form/list/me' element={<AppFormList />} />
           <Route path='/w/:workspaceId/app-form/list/approval' element={<AppFormList />} />
 
