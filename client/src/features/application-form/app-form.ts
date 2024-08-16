@@ -80,7 +80,7 @@ export const calculateTotalAmount = (rows: AppFormDetail[]): number => {
     const total = rows.reduce((sum, row) => {
         if (Number.isNaN(row.oneWayAmount)) return sum;
 
-        const rowAmount = row.isRoundTrip ? row.oneWayAmount * 2 : row.oneWayAmount;
+        const rowAmount = row.isRoundTrip ? Number(row.oneWayAmount) * 2 : Number(row.oneWayAmount);
         return sum + rowAmount;
     }, 0);
 
