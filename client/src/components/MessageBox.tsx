@@ -9,7 +9,7 @@ import messages from '../../public/messages.json';
 type MessageBoxVariant = 'default' | 'destructive' | 'success' | 'warn';
 
 interface MessageBoxProps {
-    messageCode: string | undefined;
+    messageCode: string | null;
 }
 
 const MessageBox = (props: MessageBoxProps) => {
@@ -23,7 +23,7 @@ const MessageBox = (props: MessageBoxProps) => {
     return (
         <>
             {messageCode && isVisible && (
-                <Alert variant={variant} className="mb-5">
+                <Alert variant={variant} className="my-5">
                     <div className='flex items-center justify-between'>
                         <div className='flex'>
                             {variant === 'success' && <BadgeCheck className='h-4 w-4' />}
@@ -58,7 +58,7 @@ const getMessageByCode = (code: string): string | undefined => {
     return messageObj ? messageObj.message : undefined;
 }
 
-function getVarintByCode(code: string | undefined): MessageBoxVariant {
+function getVarintByCode(code: string | null): MessageBoxVariant {
     if (!code) {
         return 'default'
     }
