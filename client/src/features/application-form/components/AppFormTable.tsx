@@ -252,6 +252,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                                                 <RouteInput inputRoutes={row.routes} onComplete={(updatedRoutes) => {
                                                     handleRoutesUpdate(row.id, updatedRoutes)
                                                     handleInputChange(index, 'routes', updatedRoutes)
+                                                    handleDialogOpenChange(row.id, false);
                                                 }
                                                 } />
                                             )}
