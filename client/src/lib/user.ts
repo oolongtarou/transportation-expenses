@@ -23,9 +23,32 @@ export function isAdmin(user: User): boolean {
     return user.authorities.some(authority => authority.authorityId === Authorities.ADMIN);
 }
 
-// Authority配列をチェックして、authorityIdが1を含むかどうかを確認する関数
+
+/**
+ * authoritiesの中にtargetAuthorityがあるかどうかを返す(workspaceを考慮していない)
+ *
+ * @export
+ * @param {Authority[]} authorities
+ * @param {number} targetAuthority
+ * @return {*}  {boolean}
+ */
 export function hasAuthority(authorities: Authority[], targetAuthority: number): boolean {
     return authorities.some(authority => authority.authorityId === targetAuthority);
+}
+
+
+
+/**
+ * authoritiesの中に対象のworkspaceIdのtargetAuthorityがあるかどうかを返す
+ *
+ * @export
+ * @param {number} workspaceId
+ * @param {Authority[]} authorities
+ * @param {number} targetAuthority
+ * @return {*}  {boolean}
+ */
+export function hasWorkspaceAuthority(workspaceId: number, authorities: Authority[], targetAuthority: number): boolean {
+    return authorities.some(auth => auth.workspaceId === workspaceId && auth.authorityId === targetAuthority);
 }
 
 

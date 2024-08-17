@@ -3,15 +3,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
 
 import AppFormTable from "./components/AppFormTable"
-import { ApplicationForm, calculateTotalAmount } from "./app-form";
+import { ApplicationForm, ApplicationStatuses, calculateTotalAmount } from "./app-form";
 import { applicationFormSchema } from "../schema/app-form-schema";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { getWorkspaceIdFrom } from "@/lib/user-workspace";
 import axios, { AxiosError } from "axios";
-import { User } from "@/lib/user";
+import { hasWorkspaceAuthority, User } from "@/lib/user";
 import { useEffect, useState } from "react";
 import MessageBox from "@/components/MessageBox";
 import AppFormStatus from "./components/AppFormStatus";
+import { Authorities } from "@/lib/auth";
 
 interface AppFormCreateProps {
     inputAppForm: ApplicationForm
@@ -32,12 +33,17 @@ const AppFormCreate = (props: AppFormCreateProps) => {
     const [completed, setCompleted] = useState<boolean>(false);
     const [messageCode, setMessageCode] = useState<string | null>('');
     const [searchParams] = useSearchParams();
+    const [user, setUser] = useState<User | null>(null);
     const currentWorkspaceId = getWorkspaceIdFrom(location.pathname);
     const methods = useForm<ApplicationForm>({
         mode: 'all',
         resolver: zodResolver(applicationFormSchema),
         defaultValues: appForm,
     });
+
+
+    console.log(user);
+
     const onSubmit = async (data: ApplicationForm, submitType: SubmitType) => {
         if (submitType === 'draft') {
             const user = await axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true });
@@ -168,6 +174,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                         navigate('/account/login?m=E00006');
                     }
 
+                    setUser(user);
                 }).catch(err => {
                     if (err.response?.status === 500) {
                         setMessageCode('E00001');
@@ -181,6 +188,27 @@ const AppFormCreate = (props: AppFormCreateProps) => {
 
         }
     }, [currentWorkspaceId, searchParams, variant, methods, navigate]);
+
+    useEffect(() => {
+        axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true })
+            .then(response => {
+                const user: User = response.data;
+                if (!user.userId) {
+                    navigate('/account/login?m=E00006');
+                }
+
+                setUser(user);
+            }).catch(err => {
+                if (err.response?.status === 500) {
+                    setMessageCode('E00001');
+                    setApplicationId(0);
+                } else if (err.response?.status === 403) {
+                    navigate('/account/login?m=E00006');
+                } else {
+                    setMessageCode('E00005');
+                }
+            })
+    }, [navigate]);
 
     return (
         <div className="container">
@@ -216,20 +244,38 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                 <form>
                     <AppFormTable tableRows={appForm.details} editing={editing} watch={methods.watch} setValue={methods.setValue} />
                     <div className="flex justify-end gap-5 mt-5 mb-5">
-                        {variant === 'create' && editing
+                        {isCreating(variant, editing)
                             ? <>
                                 {applicationId ? <Button type="button" onClick={deleteDraft} className="btn btn-danger">下書きを削除する</Button> : null}
                                 <Button onClick={methods.handleSubmit((data) => onSubmit(data, 'draft'))} className="btn btn-outline-primary" >下書き保存する</Button>
                                 <Button onClick={methods.handleSubmit((data) => onSubmit(data, 'makeSure'))} className="btn btn-primary">申請に進む</Button>
                             </>
-                            : !completed
-                                ? <Button onClick={methods.handleSubmit((data) => onSubmit(data, 'fix'))} className="btn btn-primary">申請を確定する</Button>
-                                : <a href={`/w/${currentWorkspaceId}/app-form/create`} className="btn btn-primary">続けて申請書を作成する</a>
+                            : null
                         }
-                        {/* <Button className="btn btn-danger">下書きを削除する</Button>
-                        <Button className="btn btn-primary">承認する</Button>
-                        <Button className="btn btn-primary">受領する</Button>
-                        <Button className="btn btn-danger">却下する</Button> */}
+
+                        {isMakingSure(variant, editing, completed)
+                            ? <Button onClick={methods.handleSubmit((data) => onSubmit(data, 'fix'))} className="btn btn-primary">申請を確定する</Button>
+                            : null
+                        }
+
+                        {isCreateCompleted(variant, editing, completed)
+                            ? <a href={`/w/${currentWorkspaceId}/app-form/create`} className="btn btn-primary">続けて申請書を作成する</a>
+                            : null
+                        }
+
+                        {currentWorkspaceId && user && needApprove(appForm, user, currentWorkspaceId)
+                            ?
+                            <>
+                                <Button type="button" className="btn btn-danger">却下する</Button>
+                                <Button type="button" className="btn btn-primary">承認する</Button>
+                            </>
+                            : null
+                        }
+
+                        {user && needReceive(appForm, user)
+                            ? <Button type="button" className="btn btn-primary">受領する</Button>
+                            : null
+                        }
                     </div>
                 </form>
             </FormProvider>
@@ -238,3 +284,67 @@ const AppFormCreate = (props: AppFormCreateProps) => {
 }
 
 export default AppFormCreate
+
+
+/**
+ * 新規作成モードかどうかを判定する関数
+ *
+ * @param {AppFormVariant} variant - 現在のフォームのバリアント（`create`や`edit`など）
+ * @param {boolean} editing - フォームが編集モードかどうか
+ * @return {boolean} - 新規作成モードで編集中の場合はtrue、それ以外はfalse
+ */
+function isCreating(variant: AppFormVariant, editing: boolean): boolean {
+    return variant === 'create' && editing;
+}
+
+/**
+ * 確認中かどうかを判定する関数
+ *
+ * @param {AppFormVariant} variant - 現在のフォームのバリアント（`create`や`edit`など）
+ * @param {boolean} editing - フォームが編集モードかどうか
+ * @param {boolean} completed - フォームの作成が完了しているかどうか
+ * @return {boolean} - 新規作成モードで編集が完了しておらず、まだ完了していない場合はtrue、それ以外はfalse
+ */
+function isMakingSure(variant: AppFormVariant, editing: boolean, completed: boolean): boolean {
+    return variant === 'create' && !editing && !completed;
+}
+
+/**
+ * 新規作成が完了しているかどうかを判定する関数
+ *
+ * @param {AppFormVariant} variant - 現在のフォームのバリアント（`create`や`edit`など）
+ * @param {boolean} editing - フォームが編集モードかどうか
+ * @param {boolean} completed - フォームの作成が完了しているかどうか
+ * @return {boolean} - 新規作成モードで編集が完了しており、作成が完了している場合はtrue、それ以外はfalse
+ */
+function isCreateCompleted(variant: AppFormVariant, editing: boolean, completed: boolean): boolean {
+    return variant === 'create' && !editing && completed;
+}
+
+/**
+ * 自分が承認する必要のある申請書を開いているかどうかを判定する関数
+ *
+ * @param {ApplicationForm} appForm - 現在の申請書オブジェクト
+ * @param {User} user - 現在ログインしているユーザー
+ * @param {number} currentWorkspaceId - 現在のワークスペースのID
+ * @return {boolean} - 承認が必要な申請書であればtrue、それ以外はfalse
+ */
+function needApprove(appForm: ApplicationForm, user: User, currentWorkspaceId: number): boolean {
+    const isMyAppForm = appForm.userId === user.userId;
+    const isApproving = appForm.statusId == ApplicationStatuses.APPROVING;
+    const hasApprovalAuthority = hasWorkspaceAuthority(currentWorkspaceId, user.authorities, Authorities.APPROVAL);
+    return !isMyAppForm && isApproving && hasApprovalAuthority;
+}
+
+/**
+ * 自分が受領する必要のある申請書を開いているかどうかを判定する関数
+ *
+ * @param {ApplicationForm} appForm - 現在の申請書オブジェクト
+ * @param {User} user - 現在ログインしているユーザー
+ * @return {boolean} - 受領が必要な申請書であればtrue、それ以外はfalse
+ */
+function needReceive(appForm: ApplicationForm, user: User): boolean {
+    const isMyAppForm = appForm.userId === user.userId;
+    const isReceiving = appForm.statusId === ApplicationStatuses.RECEIVING;
+    return isMyAppForm && isReceiving;
+}
