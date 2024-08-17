@@ -49,7 +49,12 @@ const navItems: NavItem[] = [
     },
 ];
 
-const WorkspaceNav = () => {
+interface WorkspaceNavProps {
+    onToggleNav: () => void;
+}
+
+const WorkspaceNav = (props: WorkspaceNavProps) => {
+    const { onToggleNav } = props;
     const { currentWorkspace, myAuthorities } = useAuth();
     const { workspaceId } = useParams();
     const navigate = useNavigate();
@@ -74,9 +79,9 @@ const WorkspaceNav = () => {
     return (
         <>
             <ul className="min-h-screen-custom py-5 pl-5 min-w-72">
-                <li className="flex justify-between">
+                <li className="flex justify-between btn btn-link" onClick={onToggleNav} style={{ padding: '0px' }}>
                     <h2 className="font-bold text-lg ">{currentWorkspace?.workspaceName}</h2>
-                    <button onClick={() => { }} className="flex justify-center items-center">
+                    <button className="flex justify-center items-center">
                         <img src="/icons/arrow_back.svg" alt="" className="w-5 h-5" />
                     </button>
                 </li>

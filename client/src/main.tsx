@@ -7,6 +7,7 @@ import './styles/global/reset.css'
 import './styles/global/button.css'
 import './styles/global/toggle.css'
 import './styles/global/label.css'
+import './styles/global/animation.css'
 import App from './App'
 
 createRoot(document.getElementById('root')!).render(
