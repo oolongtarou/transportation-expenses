@@ -206,6 +206,34 @@ const AppFormCreate = (props: AppFormCreateProps) => {
         }
     }
 
+    /**
+     *申請書を却下する
+     *
+     * @param {number} applicationId
+     */
+    const reject = async (applicationId: number) => {
+        try {
+            const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/reject`, { applicationId: applicationId, workspaceId: currentWorkspaceId }, { withCredentials: true });
+            if (result.status === 200) {
+                const applicationIdQuery = searchParams.get('applicationId');
+                navigate(`${location.pathname}?applicationId=${applicationIdQuery}&m=S00008`);
+                scrollToTop();
+            } else {
+                setMessageCode('E00005')
+                scrollToTop();
+            }
+        } catch (err) {
+            if (err instanceof AxiosError) {
+                if (err.response?.status === 401) {
+                    navigate('/account/login?m=E00012');
+                    scrollToTop();
+                } else {
+                    setMessageCode(err.response?.data.messageCode);
+                    scrollToTop();
+                }
+            }
+        }
+    }
 
     useEffect(() => {
         setMessageCode(searchParams.get('m'));
@@ -330,7 +358,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                         {currentWorkspaceId && user && needApprove(appForm, user, currentWorkspaceId)
                             ?
                             <>
-                                <Button type="button" className="btn btn-danger">却下する</Button>
+                                <Button type="button" onClick={() => reject(appForm.applicationId)} className="btn btn-danger">却下する</Button>
                                 <Button type="button" onClick={() => approve(appForm.applicationId)} className="btn btn-primary">承認する</Button>
                             </>
                             : null

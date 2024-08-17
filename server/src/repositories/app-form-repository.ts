@@ -367,6 +367,18 @@ export class AppFormRepository {
     }
 
     /**
+     * 申請書を却下する(ステータスを却下に変える)
+     *
+     * @static
+     * @param {number} applicationId
+     * @return {*}  {Promise<number>}
+     * @memberof AppFormRepository
+     */
+    static async reject(applicationId: number): Promise<number> {
+        return await this.updateStatus(applicationId, ApplicationStatus.Rejected);
+    }
+
+    /**
      * 指定されたapplicationIdのレコードのstatusIdを更新し、更新後のstatusIdを返す関数
      *
      * @private
