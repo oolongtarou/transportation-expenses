@@ -161,7 +161,7 @@ model ApplicationDetail {
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @default(now()) @updatedAt @map("updated_at")
 
-  application    Application              @relation(fields: [applicationId], references: [applicationId])
+  application    Application              @relation(fields: [applicationId], references: [applicationId], onDelete: Cascade)
   transportation Transportation           @relation(fields: [transportationId], references: [transportationId])
   routes         ApplicationDetailRoute[]
 
@@ -179,7 +179,7 @@ model ApplicationDetailRoute {
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @default(now()) @updatedAt @map("updated_at")
 
-  applicationDetail ApplicationDetail @relation(fields: [applicationId, applicationDetailId], references: [applicationId, applicationDetailId])
+  applicationDetail ApplicationDetail @relation(fields: [applicationId, applicationDetailId], references: [applicationId, applicationDetailId], onDelete: Cascade)
 
   @@id([applicationId, applicationDetailId, routeId])
   @@map("application_detail_routes")

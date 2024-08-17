@@ -157,4 +157,114 @@ export class AppFormRepository {
             throw new Error("申請書作成処理に失敗しました。");
         }
     }
+
+    static async saveDraft(form: ApplicationForm) {
+        try {
+            const application = await prisma.application.create({
+                data: {
+                    workspaceId: form.workspaceId,
+                    userId: form.userId,
+                    applicationDate: new Date(form.applicationDate),
+                    statusId: form.statusId,
+                    totalAmount: form.totalAmount,
+                    details: {
+                        create: form.details.map(detail => ({
+                            applicationDetailId: detail.id,
+                            detailDate: new Date(detail.date),
+                            description: detail.description,
+                            transportationId: detail.transportation,
+                            oneWayAmount: detail.oneWayAmount,
+                            isRoundtrip: detail.isRoundTrip,
+                            detailAmount: detail.isRoundTrip ? detail.oneWayAmount * 2 : detail.oneWayAmount,
+                            routes: {
+                                create: detail.routes.map(route => ({
+                                    departure: route.departureName,
+                                    arrival: route.arrivalName,
+                                    line: route.lineName,
+                                })),
+                            },
+                        })),
+                    },
+                },
+                include: {
+                    details: {
+                        include: {
+                            routes: true,
+                        },
+                    },
+                },
+            });
+
+            return application;
+        } catch (err) {
+            console.error(err);
+            throw new Error("下書き保存に失敗しました。");
+        }
+    }
+
+    static async updateDraft(form: ApplicationForm) {
+        try {
+            const application = await prisma.application.update({
+                where: { applicationId: form.applicationId },  // 一致する application_id で検索
+                data: {
+                    workspaceId: form.workspaceId,
+                    userId: form.userId,
+                    applicationDate: new Date(form.applicationDate),
+                    statusId: form.statusId,
+                    totalAmount: form.totalAmount,
+                    details: {
+                        deleteMany: {}, // 既存のdetailsを削除
+                        create: form.details.map(detail => ({
+                            applicationDetailId: detail.id,
+                            detailDate: new Date(detail.date),
+                            description: detail.description,
+                            transportationId: detail.transportation,
+                            oneWayAmount: detail.oneWayAmount,
+                            isRoundtrip: detail.isRoundTrip,
+                            detailAmount: detail.isRoundTrip ? detail.oneWayAmount * 2 : detail.oneWayAmount,
+                            routes: {
+                                create: detail.routes.map(route => ({
+                                    departure: route.departureName,
+                                    arrival: route.arrivalName,
+                                    line: route.lineName,
+                                })),
+                            },
+                        })),
+                    },
+                },
+                include: {
+                    details: {
+                        include: {
+                            routes: true,
+                        },
+                    },
+                },
+            });
+
+            return application;
+        } catch (err) {
+            console.error(err);
+            throw new Error("下書き更新に失敗しました。");
+        }
+    }
+
+    static async deleteAppForm(applicationId: number) {
+        try {
+            const deletedApplication = await prisma.application.delete({
+                where: { applicationId: applicationId },  // 一致する application_id で検索して削除
+                include: {
+                    details: {
+                        include: {
+                            routes: true,
+                        },
+                    },
+                },
+            });
+
+            return deletedApplication;
+        } catch (err) {
+            console.error(err);
+            throw new Error("申請書の削除に失敗しました。");
+        }
+    }
 }

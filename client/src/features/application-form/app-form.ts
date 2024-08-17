@@ -59,10 +59,10 @@ export const appFormDetailInitialData: AppFormDetail =
 }
 
 export const appFormInitialData: ApplicationForm = {
-    applicationId: 1,
-    workspaceId: 1,
+    applicationId: 0,
+    workspaceId: 0,
     applicationDate: new Date().toISOString(), // 現在の日付と時刻をISO 8601形式の文字列に変換
-    userId: 1,
+    userId: 0,
     totalAmount: 0,
     statusId: 0,
     user: {

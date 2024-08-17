@@ -7,7 +7,7 @@ import { ApplicationForm, calculateTotalAmount } from "./app-form";
 import { applicationFormSchema } from "../schema/app-form-schema";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { getWorkspaceIdFrom } from "@/lib/user-workspace";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { User } from "@/lib/user";
 import { useEffect, useState } from "react";
 import MessageBox from "@/components/MessageBox";
@@ -23,8 +23,10 @@ type SubmitType = 'draft' | 'makeSure' | 'fix';
 
 const AppFormCreate = (props: AppFormCreateProps) => {
     const { appForm, variant } = props;
+    console.log(`appForm.applicationId:${appForm.applicationId}`);
     const navigate = useNavigate();
     const location = useLocation();
+    const [applicationId, setApplicationId] = useState<number>(appForm.applicationId);
     const [editing, setEditing] = useState<boolean>(variant === 'create');
     const [completed, setCompleted] = useState<boolean>(false);
     const [messageCode, setMessageCode] = useState<string | null>('');
@@ -37,17 +39,42 @@ const AppFormCreate = (props: AppFormCreateProps) => {
     });
     const onSubmit = async (data: ApplicationForm, submitType: SubmitType) => {
         if (submitType === 'draft') {
-            console.log('下書き保存する');
+            const user = await axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true });
 
+            if (!user.data || !currentWorkspaceId) {
+                navigate('/account/login?m=E00006');
+                return;
+            }
+
+            data.userId = user.data.userId;
+            data.applicationId = applicationId;
+            data.workspaceId = currentWorkspaceId;
+            data.applicationDate = new Date().toLocaleString();
+            data.totalAmount = calculateTotalAmount(data.details);
+            data.statusId = 1;
+            data.details = data.details.map((detail, index) => ({
+                ...detail,
+                id: index + 1,
+            }));
+            const appForm: ApplicationForm = data;
+            const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/draft/save`, { appForm: appForm }, { withCredentials: true });
+            if (result.status === 200) {
+                setMessageCode(applicationId ? 'S00004' : 'S00003');
+                setCompleted(true);
+                setApplicationId(result.data.applicationId);
+            } else if (result.status === 403) {
+                navigate('/account/login?m=E00006');
+            } else if (result.status === 500) {
+                setMessageCode('E00001');
+            } else {
+                setMessageCode('E00005');
+            }
         } else if (submitType === 'makeSure') {
             setEditing(false);
             // ページの最上部にスクロール
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         else if (submitType === 'fix') {
-            // console.log(data);
-            // return;
-
             const user = await axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true });
 
             if (!user.data || !currentWorkspaceId) {
@@ -67,8 +94,10 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             const appForm: ApplicationForm = data;
             const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/new`, { appForm: appForm }, { withCredentials: true });
             if (result.status === 200) {
-                setMessageCode('S00002');
+                setMessageCode('S00004');
                 setCompleted(true);
+            } else if (result.status === 400) {
+                setMessageCode('E00007');
             } else if (result.status === 403) {
                 navigate('/account/login?m=E00006');
             } else if (result.status === 500) {
@@ -78,6 +107,35 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             }
         }
     };
+
+    const deleteDraft = async () => {
+        try {
+            const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/draft/delete`, { applicationId: applicationId }, { withCredentials: true });
+            console.log(result);
+            if (result.status === 200) {
+                setMessageCode('S00005');
+                setApplicationId(0);
+            } else if (result.status === 403) {
+                navigate('/account/login?m=E00006');
+            } else if (result.status === 500) {
+                setMessageCode('E00001');
+            } else {
+                setMessageCode('E00005');
+            }
+        } catch (err: AxiosError | unknown) {
+            console.error(err);
+            if (err instanceof AxiosError) {
+                if (err.response?.status === 500) {
+                    setMessageCode('E00001');
+                    setApplicationId(0);
+                } else if (err.response?.status === 403) {
+                    navigate('/account/login?m=E00006');
+                } else {
+                    setMessageCode('E00005');
+                }
+            }
+        }
+    }
 
     useEffect(() => {
         setMessageCode(searchParams.get('m'));
@@ -98,6 +156,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     <div className="flex justify-end gap-5 mt-5 mb-5">
                         {variant === 'create' && editing
                             ? <>
+                                {applicationId ? <Button type="button" onClick={deleteDraft} className="btn btn-danger">下書きを削除する</Button> : null}
                                 <Button onClick={methods.handleSubmit((data) => onSubmit(data, 'draft'))} className="btn btn-outline-primary" >下書き保存する</Button>
                                 <Button onClick={methods.handleSubmit((data) => onSubmit(data, 'makeSure'))} className="btn btn-primary">申請に進む</Button>
                             </>

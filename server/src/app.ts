@@ -247,7 +247,67 @@ app.post('/app-form/new', async (req: Request, res: Response) => {
             'message': 'サーバーでエラーが発生しています。',
         })
     }
+});
 
+app.post('/app-form/draft/save', async (req: Request, res: Response) => {
+    try {
+        if (!req.session.userName) {
+            res.status(403).json({
+                'message': 'ログインしていません。',
+            })
+            return;
+        }
+        const appForm: ApplicationForm = req.body.appForm;
+        if (!appForm.user || !appForm.user.userName) {
+            appForm.user = { userName: req.session.userName }
+        }
+        appForm.statusId = ApplicationStatus.Draft;
+
+        if (appForm.applicationId) {
+            const updatedAppForm = await AppFormRepository.updateDraft(appForm);
+            console.log('下書きを更新しました');
+            console.log(updatedAppForm);
+            res.status(200).json(updatedAppForm);
+        } else {
+            const savedAppForm = await AppFormRepository.saveDraft(appForm);
+            res.status(200).json(savedAppForm);
+            console.log('下書きを保存しました');
+            console.log(savedAppForm);
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            'message': 'サーバーでエラーが発生しています。',
+        })
+    }
+});
+
+
+app.post('/app-form/draft/delete', async (req: Request, res: Response) => {
+    try {
+        if (!req.session.userName) {
+            res.status(403).json({
+                'message': 'ログインしていません。',
+            })
+            return;
+        }
+
+        const applicationId: number = req.body.applicationId;
+        if (!applicationId) {
+            res.status(400).json({
+                'message': '削除対象の申請書IDが不明です。',
+            })
+            return;
+        }
+
+        const result = await AppFormRepository.deleteAppForm(applicationId);
+        res.status(200).json(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            'message': 'サーバーでエラーが発生しています。',
+        })
+    }
 });
 
 
