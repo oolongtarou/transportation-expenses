@@ -20,6 +20,12 @@ import { getWorkspaceIdFrom } from "@/lib/user-workspace";
 
 const options: Options<SelectOption> = statusSelectOptions;
 
+const numberOfItemsOptions: SelectOption[] = [
+    { value: "20", label: "20" },
+    { value: "50", label: "50" },
+    { value: "100", label: "100" },
+];
+
 const AppFormList = () => {
     const workspaceId = getWorkspaceIdFrom(useLocation().pathname);
     const [appForms, setAppForms] = useState<ApplicationForm[]>([]);
@@ -28,6 +34,7 @@ const AppFormList = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const [selectedOptions, setSelectedOptions] = useState<MultiValue<SelectOption>>([]);
+    const [numberOfItems, setNumberOfItems] = useState<SelectOption>(numberOfItemsOptions[0]);
 
     const currentPage = Number(searchParams.get('page') ?? '1');
 
@@ -60,6 +67,7 @@ const AppFormList = () => {
 
             if (res.data.loggedIn) {
                 setAppForms(fetchedAppForms);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
                 setIsLoggedIn(false);
                 navigate('/');
@@ -231,15 +239,32 @@ const AppFormList = () => {
                             />
                         </div>
                     </section>
-                    <div className="flex flex-row justify-end gap-5 mb-5">
-                        <Button className="btn btn-light w-24">クリア</Button>
-                        <Button type="submit" className="btn btn-primary w-24">検索</Button>
+                    <div className="flex flex-row justify-between gap-5">
+                        <div className="flex items-center">
+                            <Label htmlFor="numberOfItems" className="">表示件数：</Label>
+                            <Select
+                                id="numberOfItems"
+                                options={numberOfItemsOptions}
+                                defaultValue={numberOfItems}
+                                isSearchable={false}
+                                // onChange={handleChange}
+                                components={{
+                                    IndicatorSeparator: () => null,
+                                }}
+                            />
+                        </div>
+                        <div className="flex items-center gap-5">
+                            <p>{currentPage * 20 - 20 + 1}-{currentPage * 20 >= total ? total : currentPage * 20} ({total}件中)</p>
+                            <Button className="btn btn-light w-24">クリア</Button>
+                            <Button type="submit" className="btn btn-primary w-24">検索</Button>
+
+                        </div>
                     </div>
                 </form>
             </header>
             <main>
                 <AppListTable appForms={appForms} className="mb-3" />
-                <CustomPagination currentPage={currentPage} total={total} itemsPerPage={5} onPageChange={handlePageChange} />
+                <CustomPagination currentPage={currentPage} total={total} itemsPerPage={20} onPageChange={handlePageChange} />
             </main>
         </div>
     )
