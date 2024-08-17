@@ -148,6 +148,11 @@ const AppFormCreate = (props: AppFormCreateProps) => {
         }
     }
 
+    /**
+     *申請書を承認する
+     *
+     * @param {number} applicationId
+     */
     const approve = async (applicationId: number) => {
         try {
             const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/approve`, { applicationId: applicationId, workspaceId: currentWorkspaceId }, { withCredentials: true });
@@ -163,13 +168,44 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             if (err instanceof AxiosError) {
                 if (err.response?.status === 401) {
                     navigate('/account/login?m=E00006');
+                    scrollToTop();
                 } else {
                     setMessageCode(err.response?.data.messageCode);
+                    scrollToTop();
                 }
             }
         }
-
     }
+
+    /**
+     *申請書を受領登録する
+     *
+     * @param {number} applicationId
+     */
+    const receive = async (applicationId: number) => {
+        try {
+            const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/receive`, { applicationId: applicationId, workspaceId: currentWorkspaceId }, { withCredentials: true });
+            if (result.status === 200) {
+                const applicationIdQuery = searchParams.get('applicationId');
+                navigate(`${location.pathname}?applicationId=${applicationIdQuery}&m=S00007`);
+                scrollToTop();
+            } else {
+                setMessageCode('E00005')
+                scrollToTop();
+            }
+        } catch (err) {
+            if (err instanceof AxiosError) {
+                if (err.response?.status === 401) {
+                    navigate('/account/login?m=E00006');
+                    scrollToTop();
+                } else {
+                    setMessageCode(err.response?.data.messageCode);
+                    scrollToTop();
+                }
+            }
+        }
+    }
+
 
     useEffect(() => {
         setMessageCode(searchParams.get('m'));
@@ -301,7 +337,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                         }
 
                         {user && needReceive(appForm, user)
-                            ? <Button type="button" className="btn btn-primary">受領する</Button>
+                            ? <Button type="button" onClick={() => receive(appForm.applicationId)} className="btn btn-primary">受領する</Button>
                             : null
                         }
                     </div>

@@ -417,6 +417,57 @@ app.post('/app-form/approve', async (req: Request, res: Response) => {
     }
 });
 
+app.post('/app-form/receive', async (req: Request, res: Response) => {
+    try {
+        if (!req.session.userName) {
+            res.status(401).json({
+                'messageCode': 'E00006',
+            })
+            return;
+        }
+
+        const applicationId: number = req.body.applicationId;
+        if (!applicationId) {
+            res.status(400).json({
+                'messageCode': 'E00009',
+            })
+            return;
+        }
+
+        const workspaceId: number = req.body.workspaceId;
+        if (!workspaceId) {
+            res.status(400).json({
+                'messageCode': 'E00010',
+            })
+            return;
+        }
+
+        const appForm = await AppFormRepository.findBy(applicationId);
+        if (!appForm) {
+            res.status(400).json({
+                'messageCode': 'E00011',
+            })
+            return;
+        }
+
+        // 受領登録していい申請書かどうかを確認する
+        if (appForm.userId === req.session.userId && appForm.statusId === ApplicationStatus.Receiving) {
+            const result = await AppFormRepository.receive(applicationId);
+            res.status(200).json(result);
+        } else {
+            res.status(403).json({
+                'messageCode': `E00012`,
+            })
+            return;
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            'messageCode': 'E00001',
+        })
+    }
+});
+
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

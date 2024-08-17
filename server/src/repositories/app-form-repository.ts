@@ -342,8 +342,6 @@ export class AppFormRepository {
         }
     }
 
-
-
     /**
      * 申請書を承認する(ステータスを受領待ちに変える)
      *
@@ -354,6 +352,18 @@ export class AppFormRepository {
      */
     static async approve(applicationId: number): Promise<number> {
         return await this.updateStatus(applicationId, ApplicationStatus.Receiving);
+    }
+
+    /**
+     * 申請書を受領登録する(ステータスを受領済みに変える)
+     *
+     * @static
+     * @param {number} applicationId
+     * @return {*}  {Promise<number>}
+     * @memberof AppFormRepository
+     */
+    static async receive(applicationId: number): Promise<number> {
+        return await this.updateStatus(applicationId, ApplicationStatus.Received);
     }
 
     /**
