@@ -1,6 +1,7 @@
 import { Application } from "@prisma/client";
 import prisma from "../infra/db";
 import { AppFormDetail, ApplicationForm, Route, SearchOption } from "../schema/post";
+import { ApplicationStatus } from "../enum/app-form";
 
 export class AppFormRepository {
     static async findBy(applicationId: number): Promise<ApplicationForm | null> {
@@ -338,6 +339,45 @@ export class AppFormRepository {
         } catch (err) {
             console.error(err);
             throw new Error("申請書の削除に失敗しました。");
+        }
+    }
+
+
+
+    /**
+     * 申請書を承認する(ステータスを受領待ちに変える)
+     *
+     * @static
+     * @param {number} applicationId
+     * @return {*}  {Promise<number>}
+     * @memberof AppFormRepository
+     */
+    static async approve(applicationId: number): Promise<number> {
+        return await this.updateStatus(applicationId, ApplicationStatus.Receiving);
+    }
+
+    /**
+     * 指定されたapplicationIdのレコードのstatusIdを更新し、更新後のstatusIdを返す関数
+     *
+     * @private
+     * @static
+     * @param {number} applicationId - 更新対象のアプリケーションID
+     * @param {number} statusId - 更新するステータスID
+     * @return {Promise<number>} - 更新後のステータスIDを返すPromise
+     * @memberof AppFormRepository
+     */
+    private static async updateStatus(applicationId: number, statusId: number): Promise<number> {
+        try {
+            const updatedApplication = await prisma.application.update({
+                where: { applicationId: applicationId },
+                data: { statusId: statusId },
+                select: { statusId: true }, // 更新後のstatusIdのみを取得
+            });
+
+            return updatedApplication.statusId;
+        } catch (error) {
+            console.error(error);
+            throw new Error(`Application ID ${applicationId} のステータス更新に失敗しました:`);
         }
     }
 }

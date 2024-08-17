@@ -1,5 +1,5 @@
 // 外部ライブラリ
-import express, { Request, Response } from "express";
+import express, { application, Request, Response } from "express";
 import dotenv from "dotenv";
 import bodyParser from 'body-parser';
 import session from 'express-session';
@@ -18,6 +18,7 @@ import { AppFormRepository } from "./repositories/app-form-repository";
 import { ApplicationForm, SearchOption } from "./schema/post";
 import { toNumber } from "./lib/converter";
 import { ApplicationStatus } from "./enum/app-form";
+import { Authorities, Authority, hasAuthority, hasWorkspaceAuthority } from '../../lib/auth';
 
 
 declare module 'express-session' {
@@ -26,7 +27,7 @@ declare module 'express-session' {
         userName: string;
         mailAddress: string;
         workspaces: Workspace[];
-        authorities: Authrity[];
+        authorities: Authority[];
     }
 
     interface Workspace {
@@ -34,10 +35,6 @@ declare module 'express-session' {
         workspaceName: string;
     }
 
-    interface Authrity {
-        workspaceId: number;
-        authorityId: number;
-    }
 }
 
 // アプリケーションで動作するようにdotenvを設定する
@@ -254,7 +251,7 @@ app.get('/workspace/approvers', async (req: Request, res: Response) => {
 app.get('/app-form/review', async (req: Request, res: Response) => {
     try {
         if (!req.session.userName) {
-            res.status(403).json({
+            res.status(401).json({
                 'message': 'ログインしていません。',
             })
             return;
@@ -286,7 +283,7 @@ app.get('/app-form/review', async (req: Request, res: Response) => {
 app.post('/app-form/new', async (req: Request, res: Response) => {
     try {
         if (!req.session.userName) {
-            res.status(403).json({
+            res.status(401).json({
                 'message': 'ログインしていません。',
             })
             return;
@@ -310,7 +307,7 @@ app.post('/app-form/new', async (req: Request, res: Response) => {
 app.post('/app-form/draft/save', async (req: Request, res: Response) => {
     try {
         if (!req.session.userName) {
-            res.status(403).json({
+            res.status(401).json({
                 'message': 'ログインしていません。',
             })
             return;
@@ -344,7 +341,7 @@ app.post('/app-form/draft/save', async (req: Request, res: Response) => {
 app.post('/app-form/draft/delete', async (req: Request, res: Response) => {
     try {
         if (!req.session.userName) {
-            res.status(403).json({
+            res.status(401).json({
                 'message': 'ログインしていません。',
             })
             return;
@@ -364,6 +361,58 @@ app.post('/app-form/draft/delete', async (req: Request, res: Response) => {
         console.error(err);
         res.status(500).json({
             'message': 'サーバーでエラーが発生しています。',
+        })
+    }
+});
+
+app.post('/app-form/approve', async (req: Request, res: Response) => {
+    try {
+        if (!req.session.userName) {
+            res.status(401).json({
+                'messageCode': 'E00006',
+            })
+            return;
+        }
+
+        const applicationId: number = req.body.applicationId;
+        if (!applicationId) {
+            res.status(400).json({
+                'messageCode': 'E00009',
+            })
+            return;
+        }
+
+        const workspaceId: number = req.body.workspaceId;
+        if (!workspaceId) {
+            res.status(400).json({
+                'messageCode': 'E00010',
+            })
+            return;
+        }
+
+        const appForm = await AppFormRepository.findBy(applicationId);
+        if (!appForm) {
+            res.status(400).json({
+                'messageCode': 'E00011',
+            })
+            return;
+        }
+
+        // 承認していい申請書かどうかを確認する
+        if (req.session.authorities && appForm.userId !== req.session.userId && appForm.statusId === ApplicationStatus.Approving && hasWorkspaceAuthority(workspaceId, req.session.authorities, Authorities.APPROVAL)) {
+            const result = await AppFormRepository.approve(applicationId);
+            res.status(200).json(result);
+        } else {
+            res.status(403).json({
+                'messageCode': `E00008`,
+            })
+            return;
+        }
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            'messageCode': 'E00001',
         })
     }
 });

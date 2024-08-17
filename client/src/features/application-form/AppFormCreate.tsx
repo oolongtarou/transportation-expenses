@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import MessageBox from "@/components/MessageBox";
 import AppFormStatus from "./components/AppFormStatus";
 import { Authorities } from "@/lib/auth";
+import { scrollToTop } from "@/lib/utils";
 
 interface AppFormCreateProps {
     inputAppForm: ApplicationForm
@@ -41,9 +42,6 @@ const AppFormCreate = (props: AppFormCreateProps) => {
         defaultValues: appForm,
     });
 
-
-    console.log(user);
-
     const onSubmit = async (data: ApplicationForm, submitType: SubmitType) => {
         if (submitType === 'draft') {
             const user = await axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true });
@@ -69,7 +67,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                 setMessageCode(applicationId ? 'S00004' : 'S00003');
                 setCompleted(true);
                 setApplicationId(result.data.applicationId);
-            } else if (result.status === 403) {
+            } else if (result.status === 401) {
                 navigate('/account/login?m=E00006');
             } else if (result.status === 500) {
                 setMessageCode('E00001');
@@ -78,8 +76,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             }
         } else if (submitType === 'makeSure') {
             setEditing(false);
-            // ページの最上部にスクロール
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            scrollToTop();
         }
         else if (submitType === 'fix') {
             const user = await axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true });
@@ -103,14 +100,18 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             if (result.status === 200) {
                 setMessageCode('S00002');
                 setCompleted(true);
+                scrollToTop();
             } else if (result.status === 400) {
                 setMessageCode('E00007');
-            } else if (result.status === 403) {
+                scrollToTop();
+            } else if (result.status === 401) {
                 navigate('/account/login?m=E00006');
             } else if (result.status === 500) {
                 setMessageCode('E00001');
+                scrollToTop();
             } else {
                 setMessageCode('E00005');
+                scrollToTop();
             }
         }
     };
@@ -120,27 +121,54 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/draft/delete`, { applicationId: applicationId }, { withCredentials: true });
             if (result.status === 200) {
                 setMessageCode('S00005');
+                scrollToTop();
                 setApplicationId(0);
-            } else if (result.status === 403) {
+            } else if (result.status === 401) {
                 navigate('/account/login?m=E00006');
             } else if (result.status === 500) {
                 setMessageCode('E00001');
+                scrollToTop();
             } else {
                 setMessageCode('E00005');
+                scrollToTop();
             }
         } catch (err: AxiosError | unknown) {
-            console.error(err);
             if (err instanceof AxiosError) {
                 if (err.response?.status === 500) {
                     setMessageCode('E00001');
+                    scrollToTop();
                     setApplicationId(0);
-                } else if (err.response?.status === 403) {
+                } else if (err.response?.status === 401) {
                     navigate('/account/login?m=E00006');
                 } else {
                     setMessageCode('E00005');
+                    scrollToTop();
                 }
             }
         }
+    }
+
+    const approve = async (applicationId: number) => {
+        try {
+            const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/approve`, { applicationId: applicationId, workspaceId: currentWorkspaceId }, { withCredentials: true });
+            if (result.status === 200) {
+                const applicationIdQuery = searchParams.get('applicationId');
+                navigate(`${location.pathname}?applicationId=${applicationIdQuery}&m=S00006`);
+                scrollToTop();
+            } else {
+                setMessageCode('E00005')
+                scrollToTop();
+            }
+        } catch (err) {
+            if (err instanceof AxiosError) {
+                if (err.response?.status === 401) {
+                    navigate('/account/login?m=E00006');
+                } else {
+                    setMessageCode(err.response?.data.messageCode);
+                }
+            }
+        }
+
     }
 
     useEffect(() => {
@@ -160,7 +188,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     if (err.response?.status === 500) {
                         setMessageCode('E00001');
                         setApplicationId(0);
-                    } else if (err.response?.status === 403) {
+                    } else if (err.response?.status === 401) {
                         navigate('/account/login?m=E00006');
                     } else {
                         setMessageCode('E00005');
@@ -179,7 +207,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     if (err.response?.status === 500) {
                         setMessageCode('E00001');
                         setApplicationId(0);
-                    } else if (err.response?.status === 403) {
+                    } else if (err.response?.status === 401) {
                         navigate('/account/login?m=E00006');
                     } else {
                         setMessageCode('E00005');
@@ -202,7 +230,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                 if (err.response?.status === 500) {
                     setMessageCode('E00001');
                     setApplicationId(0);
-                } else if (err.response?.status === 403) {
+                } else if (err.response?.status === 401) {
                     navigate('/account/login?m=E00006');
                 } else {
                     setMessageCode('E00005');
@@ -267,7 +295,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                             ?
                             <>
                                 <Button type="button" className="btn btn-danger">却下する</Button>
-                                <Button type="button" className="btn btn-primary">承認する</Button>
+                                <Button type="button" onClick={() => approve(appForm.applicationId)} className="btn btn-primary">承認する</Button>
                             </>
                             : null
                         }
