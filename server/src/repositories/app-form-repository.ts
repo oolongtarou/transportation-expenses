@@ -59,8 +59,8 @@ export class AppFormRepository {
                         },
                     },
                 },
-                skip: (options.page - 1) * Number(process.env.ITEMS_PER_PAGE), // 最初の20件をスキップ
-                take: Number(process.env.ITEMS_PER_PAGE), // 次の20件を取得
+                skip: (options.page - 1) * options.numberOfItems,
+                take: options.numberOfItems,
             });
             return applications;
         } catch (err) {

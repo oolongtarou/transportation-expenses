@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import Select, { MultiValue, Options } from 'react-select';
+import Select, { MultiValue, Options, SingleValue } from 'react-select';
 
 import AppListTable from "./components/AppListTable"
 import { ApplicationForm, statusSelectOptions } from "./app-form"
@@ -34,14 +34,21 @@ const AppFormList = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const [selectedOptions, setSelectedOptions] = useState<MultiValue<SelectOption>>([]);
-    const [numberOfItems, setNumberOfItems] = useState<SelectOption>(numberOfItemsOptions[0]);
+    const [numberOfItems, setNumberOfItems] = useState<SingleValue<SelectOption>>(numberOfItemsOptions[0]);
 
     const currentPage = Number(searchParams.get('page') ?? '1');
 
-
-    const handleChange = (selected: MultiValue<SelectOption>) => {
+    const onStatusOptionChanged = (selected: MultiValue<SelectOption>) => {
         setSelectedOptions(selected);
     };
+
+    const onNumberOfItemsChanged = (selected: SingleValue<SelectOption>) => {
+        setNumberOfItems(selected);
+        const currentSearchOptions = watch();
+        currentSearchOptions.status = toNumberArray(selectedOptions);
+        currentSearchOptions.numberOfItems = Number(selected?.value ?? 20);
+        fetchData(1, currentSearchOptions);
+    }
 
     const {
         register,
@@ -80,6 +87,7 @@ const AppFormList = () => {
     const getCurrentSearchOptions = (): SearchFormInputs => {
         const currentSearchOptions = watch();
         currentSearchOptions.status = toNumberArray(selectedOptions);
+        currentSearchOptions.numberOfItems = Number(numberOfItems?.value);
         return currentSearchOptions;
     }
 
@@ -90,6 +98,7 @@ const AppFormList = () => {
 
     const onSubmit = async (data: SearchFormInputs) => {
         data.status = toNumberArray(selectedOptions);
+        data.numberOfItems = Number(numberOfItems?.value);
         fetchData(1, data);  // 検索フォーム送信時は1ページ目を取得
     };
 
@@ -232,7 +241,7 @@ const AppFormList = () => {
                                 isMulti
                                 options={options}
                                 value={selectedOptions}
-                                onChange={handleChange}
+                                onChange={onStatusOptionChanged}
                                 components={{
                                     IndicatorSeparator: () => null,
                                 }}
@@ -247,14 +256,14 @@ const AppFormList = () => {
                                 options={numberOfItemsOptions}
                                 defaultValue={numberOfItems}
                                 isSearchable={false}
-                                // onChange={handleChange}
+                                onChange={onNumberOfItemsChanged}
                                 components={{
                                     IndicatorSeparator: () => null,
                                 }}
                             />
                         </div>
                         <div className="flex items-center gap-5">
-                            <p>{currentPage * 20 - 20 + 1}-{currentPage * 20 >= total ? total : currentPage * 20} ({total}件中)</p>
+                            <p>{currentPage * Number(numberOfItems?.value) - Number(numberOfItems?.value) + 1}-{currentPage * Number(numberOfItems?.value) >= total ? total : currentPage * Number(numberOfItems?.value)} ({total}件中)</p>
                             <Button className="btn btn-light w-24">クリア</Button>
                             <Button type="submit" className="btn btn-primary w-24">検索</Button>
 
@@ -264,7 +273,7 @@ const AppFormList = () => {
             </header>
             <main>
                 <AppListTable appForms={appForms} className="mb-3" />
-                <CustomPagination currentPage={currentPage} total={total} itemsPerPage={20} onPageChange={handlePageChange} />
+                <CustomPagination currentPage={currentPage} total={total} itemsPerPage={Number(numberOfItems?.value)} onPageChange={handlePageChange} />
             </main>
         </div>
     )

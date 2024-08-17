@@ -18,6 +18,7 @@ export const searchSchema = z.object({
     startDate: z.string().optional(),
     endDate: z.string().optional(),
     userName: z.string().optional(),
+    numberOfItems: z.number().optional(),
     totalAmountMin: z
         .string()
         .nullable()
