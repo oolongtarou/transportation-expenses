@@ -12,7 +12,7 @@ import { ChevronRight, Menu } from 'lucide-react'
 
 const MainLayout = () => {
     const { isLoggedin } = useAuth();
-    const [isNavigationVisible, setIsNavigationVisible] = useState(false);
+    const [isNavigationVisible, setIsNavigationVisible] = useState(true);
 
     return (
         <>
