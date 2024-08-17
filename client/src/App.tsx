@@ -3,7 +3,6 @@ import Login from "./features/account/Login"
 import SignUp from "./features/account/SignUp"
 import PasswordChange from "./features/account/PasswordChange"
 import PasswordResetLink from "./features/account/PasswordResetLink"
-import Header from "./components/Header"
 import AppFormCreate from "./features/application-form/AppFormCreate"
 import LoginLayout from "./features/layout/LoginLayout"
 import MainLayout from "./features/layout/MainLayout"
@@ -17,6 +16,7 @@ import MyPage from "./features/account/MyPage"
 import { getWorkspaceWithSmallestId, Workspace } from "./lib/user-workspace"
 import { Authority } from "./lib/auth"
 import axios, { AxiosError } from "axios"
+import AppFormPrint from "./features/application-form/AppFormPrint"
 
 // 型定義
 interface AuthContextType {
@@ -74,7 +74,6 @@ function App() {
       myWorkspaces, setMyWorkspaces,
       myAuthorities, setMyAuthorities
     }}>
-      <Header isLoggedin={isLoggedin} />
       <Routes>
         <Route element={<LoginLayout />}>
           <Route path='/' element={<Login />} />
@@ -95,6 +94,8 @@ function App() {
 
           <Route path='/w/:workspaceId/account/password/change' element={<PasswordChange />} />
         </Route>
+
+        <Route path='/w/:workspaceId/app-form/print' element={<AppFormPrint />} />
       </Routes>
     </AuthContext.Provider>
   )

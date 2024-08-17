@@ -3,11 +3,10 @@ import AppFormStatus from "./AppFormStatus"
 
 interface AppFormHeaderProps {
     appForm: ApplicationForm;
-    isPrint: boolean;
 }
 
 const AppFormHeader = (props: AppFormHeaderProps) => {
-    const { appForm, isPrint } = props;
+    const { appForm } = props;
     return (
         <section className="grid lg:grid-cols-2 mx-5 my-3">
             <div className="flex items-center mb-5">
@@ -24,11 +23,7 @@ const AppFormHeader = (props: AppFormHeaderProps) => {
             </div>
             <div className="flex items-center mb-5">
                 <label className="font-bold text-lg w-40">ステータス：</label>
-                {isPrint
-                    ? <p>{appForm.status.statusName}</p>
-                    : <AppFormStatus statusId={appForm.statusId} statusName={appForm.status.statusName} />
-                }
-
+                <AppFormStatus statusId={appForm.statusId} statusName={appForm.status.statusName} />
             </div>
         </section>
     )

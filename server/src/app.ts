@@ -576,6 +576,63 @@ app.get('/app-form/copy', async (req: Request, res: Response) => {
     }
 });
 
+app.get('/app-form/print', async (req: Request, res: Response) => {
+    try {
+        if (!req.session.userName) {
+            res.status(401).json({
+                'messageCode': 'E00006',
+            })
+            return;
+        }
+
+        const applicationIdQuery = req.query.applicationId;
+        const applicationId = toNumber(applicationIdQuery);
+        if (!applicationId) {
+            res.status(400).json({
+                'messageCode': 'E00009',
+            })
+            return;
+        }
+
+        const workspaceIdQuery = req.query.workspaceId;
+        const workspaceId = toNumber(workspaceIdQuery);
+        if (!workspaceId) {
+            res.status(400).json({
+                'messageCode': 'E00010',
+            })
+            return;
+        }
+
+        const appForm = await AppFormRepository.findBy(applicationId);
+        if (!appForm) {
+            res.status(400).json({
+                'messageCode': 'E00011',
+            })
+            return;
+        }
+
+        // 印刷していい申請書かどうかを確認する
+        const canPrintAsMyself = appForm.userId === req.session.userId;
+        const canPrintAsApprover = req.session.authorities
+            && appForm.userId !== req.session.userId
+            && appForm.workspaceId === workspaceId
+            && hasWorkspaceAuthority(workspaceId, req.session.authorities, Authorities.APPROVAL);
+        if (appForm.statusId !== ApplicationStatus.Draft && (canPrintAsMyself || canPrintAsApprover)) {
+            res.status(200).json(appForm);
+        } else {
+            res.status(403).json({
+                'messageCode': `E00014`,
+            })
+            return;
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            'messageCode': 'E00001',
+        })
+    }
+});
+
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

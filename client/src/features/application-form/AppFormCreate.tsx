@@ -242,7 +242,6 @@ const AppFormCreate = (props: AppFormCreateProps) => {
     */
     const copy = async (applicationId: number) => {
         navigate(`/w/${currentWorkspaceId}/app-form/create?copyFrom=${applicationId}`);
-
     }
 
     useEffect(() => {
@@ -344,13 +343,20 @@ const AppFormCreate = (props: AppFormCreateProps) => {
     return (
         <div className="container">
             <MessageBox messageCode={messageCode} />
-            <h2 className="heading-2">
-                {variant === "create"
-                    ? editing ? '申請書を作成する' : '申請書の内容を確認する'
-                    : '申請書の内容を確認する'
+            <div className="flex justify-between items-center">
+                <h2 className="heading-2">
+                    {variant === "create"
+                        ? editing ? '申請書を作成する' : '申請書の内容を確認する'
+                        : '申請書の内容を確認する'
+                    }
+                </h2>
+                {user && currentWorkspaceId && canPrint(variant, appForm, user, currentWorkspaceId)
+                    ? <a href={`/w/${currentWorkspaceId}/app-form/print?applicationId=${appForm.applicationId}`} target="_blank" className="btn btn-light">印刷する</a>
+                    : null
                 }
-            </h2>
-            {variant === 'review' ? <AppFormHeader appForm={appForm} isPrint={false} /> : null
+
+            </div>
+            {variant === 'review' ? <AppFormHeader appForm={appForm} /> : null
             }
             <FormProvider {...methods}>
                 <form>
@@ -470,4 +476,10 @@ function canCopy(variant: AppFormVariant, appForm: ApplicationForm, user: User):
     const isMyAppForm = appForm.userId === user.userId;
     const isDraft = appForm.statusId === ApplicationStatuses.DRAFT;
     return variant === "review" && isMyAppForm && !isDraft;
+}
+
+function canPrint(variant: AppFormVariant, appForm: ApplicationForm, user: User, currentWorkspaceId: number): boolean {
+    const canPrintAsMyself = appForm.userId === user.userId;
+    const canPrintAsApprover = hasWorkspaceAuthority(currentWorkspaceId, user.authorities, Authorities.APPROVAL);
+    return variant === 'review' && (canPrintAsMyself || canPrintAsApprover);
 }
