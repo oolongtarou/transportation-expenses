@@ -11,9 +11,9 @@ import axios, { AxiosError } from "axios";
 import { hasWorkspaceAuthority, User } from "@/lib/user";
 import { useEffect, useState } from "react";
 import MessageBox from "@/components/MessageBox";
-import AppFormStatus from "./components/AppFormStatus";
 import { Authorities } from "@/lib/auth";
 import { scrollToTop } from "@/lib/utils";
+import AppFormHeader from "./components/AppFormHeader";
 
 interface AppFormCreateProps {
     inputAppForm: ApplicationForm
@@ -350,26 +350,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     : '申請書の内容を確認する'
                 }
             </h2>
-            {variant === 'review'
-                ? <section className="grid lg:grid-cols-2 mx-5 my-3" hidden={variant === 'review'}>
-                    <div className="flex items-center mb-5">
-                        <label className="font-bold text-lg w-40">申請書ID：</label>
-                        <p className="text-lg">{appForm.applicationId}</p>
-                    </div>
-                    <div className="flex items-center mb-5">
-                        <label className="font-bold text-lg w-40">申請者：</label>
-                        <p className="text-lg">{appForm.user.userName}</p>
-                    </div>
-                    <div className="flex items-center mb-5">
-                        <label className="font-bold text-lg w-40">申請日：</label>
-                        <p className="text-lg">{new Date(appForm.applicationDate).toLocaleDateString()}</p>
-                    </div>
-                    <div className="flex items-center mb-5">
-                        <label className="font-bold text-lg w-40">ステータス：</label>
-                        <AppFormStatus statusId={appForm.statusId} statusName={appForm.status.statusName} />
-                    </div>
-                </section>
-                : null
+            {variant === 'review' ? <AppFormHeader appForm={appForm} isPrint={false} /> : null
             }
             <FormProvider {...methods}>
                 <form>
