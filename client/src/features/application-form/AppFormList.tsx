@@ -17,6 +17,11 @@ import { toNumberArray } from "@/lib/select";
 import { CustomPagination } from "@/components/Pagination";
 import { getWorkspaceIdFrom } from "@/lib/user-workspace";
 
+type AppFormListType = 'me' | 'approver';
+
+interface AppFormListProps {
+    appFormListType: AppFormListType
+}
 
 const options: Options<SelectOption> = statusSelectOptions;
 
@@ -26,7 +31,8 @@ const numberOfItemsOptions: SelectOption[] = [
     { value: "100", label: "100" },
 ];
 
-const AppFormList = () => {
+const AppFormList = (props: AppFormListProps) => {
+    const { appFormListType } = props;
     const workspaceId = getWorkspaceIdFrom(useLocation().pathname);
     const [appForms, setAppForms] = useState<ApplicationForm[]>([]);
     const [total, setTotal] = useState<number>(0);  // total stateを追加
@@ -39,7 +45,6 @@ const AppFormList = () => {
 
     const currentPage = Number(searchParams.get('page') ?? '1');
     const currentWorkSpace = getWorkspaceIdFrom(location.pathname);
-
     const onStatusOptionChanged = (selected: MultiValue<SelectOption>) => {
         setSelectedOptions(selected);
     };
@@ -50,7 +55,12 @@ const AppFormList = () => {
         currentSearchOptions.status = toNumberArray(selectedOptions);
         currentSearchOptions.numberOfItems = Number(selected?.value ?? 20);
         fetchData(1, currentSearchOptions);
-        navigate(`/w/${currentWorkSpace}/app-form/list/me?page=1`);
+        const url = appFormListType === 'me'
+            ? `/w/${currentWorkSpace}/app-form/list/me?page=1`
+            : appFormListType === 'approver'
+                ? `/w/${currentWorkSpace}/app-form/list/approver?page=1`
+                : '';
+        navigate(url);
     }
 
     const {
@@ -67,7 +77,13 @@ const AppFormList = () => {
     // データを取得する関数
     const fetchData = async (page: number, searchOptions: SearchFormInputs) => {
         try {
-            const res = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-forms/me`, {
+            const endPoint = appFormListType === 'me'
+                ? `${import.meta.env.VITE_SERVER_DOMAIN}/app-forms/me`
+                : appFormListType === 'approver'
+                    ? `${import.meta.env.VITE_SERVER_DOMAIN}/app-forms/approver`
+                    : '';
+
+            const res = await axios.post(endPoint, {
                 workspaceId: workspaceId ?? 0,
                 page: page,
                 searchOptions: searchOptions
@@ -120,7 +136,14 @@ const AppFormList = () => {
         <div className="container">
             <header>
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    <h2 className="heading-2">申請一覧</h2>
+                    <h2 className="heading-2">
+                        {appFormListType === 'me'
+                            ? '申請一覧'
+                            : appFormListType === 'approver'
+                                ? '承認一覧'
+                                : ''
+                        }
+                    </h2>
                     <section className="grid md:grid-cols-2 gap-4 mb-5">
                         <div>
                             <Label htmlFor="applicationIdMin">申請書ID</Label>

@@ -32,7 +32,7 @@ const navItems: NavItem[] = [
     {
         label: '承認一覧',
         imgPath: '/icons/approval_list.svg',
-        link: '/w/:workspaceId/app-form/list/approval',
+        link: '/w/:workspaceId/app-form/list/approver',
         requiredAuthorities: [Authorities.APPROVAL],
     },
     {

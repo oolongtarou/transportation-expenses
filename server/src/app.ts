@@ -171,9 +171,8 @@ app.post("/app-forms/me", async (req: Request, res: Response) => {
         searchOption.page = req.body.page;
         console.log(searchOption)
         const workspaceId: number = parseInt(req.body.workspaceId);
-        console.log(`userId:${req.session.userId} workspaceId:${workspaceId}`);
-        const appForms = await AppFormRepository.findBySearchOption(req.session.userId, workspaceId, searchOption);
-        const count = await AppFormRepository.fetchCountBySearchOption(req.session.userId, workspaceId, searchOption);
+        const appForms = await AppFormRepository.findBySearchOption(workspaceId, searchOption, req.session.userId);
+        const count = await AppFormRepository.fetchCountBySearchOption(workspaceId, searchOption, req.session.userId);
         res.status(200).json(
             {
                 loggedIn: true,
@@ -187,6 +186,34 @@ app.post("/app-forms/me", async (req: Request, res: Response) => {
         })
     }
 });
+
+app.post("/app-forms/approver", async (req: Request, res: Response) => {
+    if (!req.session.userId) {
+        res.status(200).json({ loggedIn: false });
+        return;
+    }
+
+    try {
+        const searchOption: SearchOption = req.body.searchOptions;
+        searchOption.page = req.body.page;
+        console.log(searchOption)
+        const workspaceId: number = parseInt(req.body.workspaceId);
+        const appForms = await AppFormRepository.findBySearchOption(workspaceId, searchOption);
+        const count = await AppFormRepository.fetchCountBySearchOption(workspaceId, searchOption);
+        res.status(200).json(
+            {
+                loggedIn: true,
+                appForms: appForms,
+                count: count,
+            });
+    } catch (err) {
+        res.status(500).json({
+            loggedIn: true,
+            'message': 'サーバーでエラーが発生しています。',
+        })
+    }
+});
+
 
 app.get('/workspace/member-list', async (req: Request, res: Response) => {
     const workspaceIdQuery = req.query.workspaceId;

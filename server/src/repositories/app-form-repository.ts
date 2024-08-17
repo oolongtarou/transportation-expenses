@@ -27,7 +27,7 @@ export class AppFormRepository {
         }
     }
 
-    static async findBySearchOption(userId: number, workspaceId: number, options: SearchOption): Promise<Application[] | null> {
+    static async findBySearchOption(workspaceId: number, options: SearchOption, userId?: number,): Promise<Application[] | null> {
         try {
             const applications = await prisma.application.findMany({
                 where: {
@@ -69,7 +69,7 @@ export class AppFormRepository {
         }
     }
 
-    static async fetchCountBySearchOption(userId: number, workspaceId: number, options: SearchOption): Promise<number> {
+    static async fetchCountBySearchOption(workspaceId: number, options: SearchOption, userId?: number): Promise<number> {
         try {
             const count = await prisma.application.count({
                 where: {

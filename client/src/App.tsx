@@ -84,8 +84,8 @@ function App() {
         </Route>
         <Route element={<MainLayout />}>
           <Route path='/w/:workspaceId/app-form/create' element={<AppFormCreate appForm={appFormInitialData} variant="create" />} />
-          <Route path='/w/:workspaceId/app-form/list/me' element={<AppFormList />} />
-          <Route path='/w/:workspaceId/app-form/list/approval' element={<AppFormList />} />
+          <Route path='/w/:workspaceId/app-form/list/me' element={<AppFormList appFormListType="me" />} />
+          <Route path='/w/:workspaceId/app-form/list/approver' element={<AppFormList appFormListType="approver" />} />
 
           <Route path='/w/:workspaceId/workspace/members' element={<MemberList />} />
           <Route path='/w/:workspaceId/workspace/approval-route' element={<ApprovalRoute />} />
