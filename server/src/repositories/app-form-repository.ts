@@ -1,8 +1,81 @@
 import { Application } from "@prisma/client";
 import prisma from "../infra/db";
-import { ApplicationForm, SearchOption } from "../schema/post";
+import { AppFormDetail, ApplicationForm, Route, SearchOption } from "../schema/post";
 
 export class AppFormRepository {
+    static async findBy(applicationId: number): Promise<ApplicationForm | null> {
+        try {
+            const applicationData = await prisma.application.findUnique({
+                where: {
+                    applicationId: applicationId,
+                },
+                include: {
+                    user: true, // User情報を取得
+                    workspace: true, // Workspace情報を取得
+                    status: true, // ApplicationStatus情報を取得
+                    details: {
+                        include: {
+                            transportation: true, // Transportation情報を取得
+                            routes: true, // ApplicationDetailRoute情報を取得
+                        },
+                    },
+                },
+            });
+
+            if (!applicationData) {
+                return null;
+            }
+
+            // ApplicationFormにマッピング
+            const applicationForm: ApplicationForm = {
+                applicationId: applicationData.applicationId,
+                workspaceId: applicationData.workspaceId,
+                applicationDate: applicationData.applicationDate?.toISOString() || '',
+                userId: applicationData.userId,
+                totalAmount: applicationData.totalAmount,
+                statusId: applicationData.statusId,
+                user: {
+                    userName: applicationData.user.userName,
+                },
+                status: {
+                    statusName: applicationData.status.statusName,
+                },
+                details: applicationData.details.map(detail => {
+                    const appFormDetail: AppFormDetail = {
+                        id: detail.applicationDetailId,
+                        date: detail.detailDate.toISOString().split('T')[0],
+                        description: detail.description || '',
+                        transportation: detail.transportationId,
+                        transportationName: detail.transportation.transportationName,
+                        routes: detail.routes.map(route => {
+                            const routeDetail: Route = {
+                                id: route.routeId,
+                                departureId: route.departure,
+                                departureName: route.departure, // 必要に応じて変換
+                                arrivalId: route.arrival,
+                                arrivalName: route.arrival, // 必要に応じて変換
+                                lineId: route.line,
+                                lineName: route.line, // 必要に応じて変換
+                            };
+                            return routeDetail;
+                        }),
+                        oneWayAmount: detail.oneWayAmount,
+                        isRoundTrip: detail.isRoundtrip,
+                        detailAmount: detail.detailAmount,
+                        // `isDialogOpen` は外部で管理するのが望ましいが、暫定的にfalseで初期化
+                        isDialogOpen: false,
+                    };
+                    return appFormDetail;
+                }),
+            };
+
+            return applicationForm;
+        } catch (error) {
+            console.error("Failed to retrieve application data:", error);
+            throw new Error("Failed to retrieve application data");
+        }
+    }
+
     static async findByUserIdAndWorkspaceId(userId: number, workspaceId: number): Promise<Application[] | null> {
         try {
             const applications = await prisma.application.findMany({

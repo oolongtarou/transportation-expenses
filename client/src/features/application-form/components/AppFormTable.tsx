@@ -24,8 +24,7 @@ const AppFormTable = (props: AppFormTableProps) => {
     const [isAddingRow, setIsAddingRow] = useState(false);
     const [totalAmount, setTotalAmount] = useState(0);
     const [editingRowId, setEditingRowId] = useState<number | null>(null);
-
-    const { control, register, formState: { errors } } = useFormContext<ApplicationForm>();
+    const { control, register, formState: { errors }, reset } = useFormContext<ApplicationForm>();
     const { append, remove } = useFieldArray({
         control,
         name: "details"
@@ -63,13 +62,19 @@ const AppFormTable = (props: AppFormTableProps) => {
     };
 
     useEffect(() => {
+        setRows(tableRows);
+    }, [tableRows]);
+
+    useEffect(() => {
+        reset({ details: rows });
+    }, [reset, rows]);
+
+
+    useEffect(() => {
         setTotalAmount(calculateTotalAmount(rows));
     }, [rows])
 
     const handleInputChange = (index: number, field: keyof AppFormDetail, value: string | number | boolean | Route[]) => {
-        console.log(value);
-        console.log(typeof value);
-
         const updatedRows = [...rows];
         updatedRows[index] = {
             ...updatedRows[index],
@@ -259,8 +264,7 @@ const AppFormTable = (props: AppFormTableProps) => {
                                             )}
                                         </DialogContent>
                                     </Dialog>
-                                    :
-                                    row.routes.map((route, index) => (
+                                    : row.routes.map((route, index) => (
                                         <div key={index} >
                                             {route.departureName} - {route.arrivalName} ({route.lineName})
                                         </div>

@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import MessageBox from "@/components/MessageBox";
 
 interface AppFormCreateProps {
-    appForm: ApplicationForm
+    inputAppForm: ApplicationForm
     variant: AppFormVariant
 }
 
@@ -22,11 +22,11 @@ type AppFormVariant = 'create' | 'review';
 type SubmitType = 'draft' | 'makeSure' | 'fix';
 
 const AppFormCreate = (props: AppFormCreateProps) => {
-    const { appForm, variant } = props;
-    console.log(`appForm.applicationId:${appForm.applicationId}`);
+    const { inputAppForm, variant } = props;
     const navigate = useNavigate();
     const location = useLocation();
-    const [applicationId, setApplicationId] = useState<number>(appForm.applicationId);
+    const [appForm, setAppForm] = useState<ApplicationForm>(inputAppForm);
+    const [applicationId, setApplicationId] = useState<number>(inputAppForm.applicationId);
     const [editing, setEditing] = useState<boolean>(variant === 'create');
     const [completed, setCompleted] = useState<boolean>(false);
     const [messageCode, setMessageCode] = useState<string | null>('');
@@ -94,7 +94,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             const appForm: ApplicationForm = data;
             const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/new`, { appForm: appForm }, { withCredentials: true });
             if (result.status === 200) {
-                setMessageCode('S00004');
+                setMessageCode('S00002');
                 setCompleted(true);
             } else if (result.status === 400) {
                 setMessageCode('E00007');
@@ -111,7 +111,6 @@ const AppFormCreate = (props: AppFormCreateProps) => {
     const deleteDraft = async () => {
         try {
             const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/draft/delete`, { applicationId: applicationId }, { withCredentials: true });
-            console.log(result);
             if (result.status === 200) {
                 setMessageCode('S00005');
                 setApplicationId(0);
@@ -141,6 +140,21 @@ const AppFormCreate = (props: AppFormCreateProps) => {
         setMessageCode(searchParams.get('m'));
     }, [searchParams])
 
+    useEffect(() => {
+        const applicationIdQuery = searchParams.get('applicationId');
+        if (applicationIdQuery) {
+            axios.get<ApplicationForm>(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/review`, { params: { applicationId: searchParams.get('applicationId'), workspaceId: currentWorkspaceId }, withCredentials: true })
+                .then(response => {
+                    const data: ApplicationForm = response.data;
+
+                    setAppForm(data);
+                    methods.reset(data);  // フォームをリセットして新しい値を反映
+                }).catch(err => {
+                    console.error(err);
+                })
+        }
+    }, [currentWorkspaceId, searchParams, variant, methods]);
+
     return (
         <div className="container">
             <MessageBox messageCode={messageCode} />
@@ -152,6 +166,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             </h2>
             <FormProvider {...methods}>
                 <form>
+                    {/* <AppFormTable tableRows={appForm.details} editing={editing} watch={methods.watch} setValue={methods.setValue} /> */}
                     <AppFormTable tableRows={appForm.details} editing={editing} watch={methods.watch} setValue={methods.setValue} />
                     <div className="flex justify-end gap-5 mt-5 mb-5">
                         {variant === 'create' && editing

@@ -251,6 +251,37 @@ app.get('/workspace/approvers', async (req: Request, res: Response) => {
     }
 });
 
+app.get('/app-form/review', async (req: Request, res: Response) => {
+    try {
+        if (!req.session.userName) {
+            res.status(403).json({
+                'message': 'ログインしていません。',
+            })
+            return;
+        }
+
+        const workspaceIdQuery = req.query.workspaceId;
+        const workspaceId = toNumber(workspaceIdQuery);
+
+        const applicationIdQuery = req.query.applicationId;
+        const applicationId = toNumber(applicationIdQuery);
+
+        if (!workspaceId || !applicationId) {
+            res.status(400).json({
+                'message': 'パラメータが不足しています。',
+            })
+            return;
+        }
+
+        const appForm = await AppFormRepository.findBy(applicationId);
+        res.status(200).json(appForm);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            'message': 'サーバーでエラーが発生しています。',
+        })
+    }
+});
 
 app.post('/app-form/new', async (req: Request, res: Response) => {
     try {
