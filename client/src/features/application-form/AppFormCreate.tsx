@@ -11,6 +11,7 @@ import axios, { AxiosError } from "axios";
 import { User } from "@/lib/user";
 import { useEffect, useState } from "react";
 import MessageBox from "@/components/MessageBox";
+import AppFormStatus from "./components/AppFormStatus";
 
 interface AppFormCreateProps {
     inputAppForm: ApplicationForm
@@ -206,7 +207,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     </div>
                     <div className="flex items-center mb-5">
                         <label className="font-bold text-lg w-40">ステータス：</label>
-                        <p className="text-lg">{appForm.status.statusName}</p>
+                        <AppFormStatus statusId={appForm.statusId} statusName={appForm.status.statusName} />
                     </div>
                 </section>
                 : null

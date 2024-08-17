@@ -4,6 +4,7 @@ import { formatWithCommas } from '@/lib/math';
 import { useLocation } from 'react-router-dom';
 import { getWorkspaceIdFrom } from '@/lib/user-workspace';
 import { Link } from 'react-router-dom';
+import AppFormStatus from './AppFormStatus';
 
 
 interface AppListTableProps {
@@ -45,13 +46,7 @@ const AppListTable = (props: AppListTableProps) => {
                             <TableCell>{appForm.user.userName}</TableCell>
                             <TableCell className='font-bold text-right'>{formatWithCommas(appForm.totalAmount)}</TableCell>
                             <TableCell className='flex flex-row justify-center'>
-                                {appForm.statusId === ApplicationStatuses.APPROVING || appForm.statusId === ApplicationStatuses.RECEIVING ? (
-                                    <span className="label-fill label-fill-action w-32">{appForm.status.statusName}</span>
-                                ) : appForm.statusId === ApplicationStatuses.RECEIVED ? (
-                                    <span className="label-fill label-fill-success w-32">{appForm.status.statusName}</span>
-                                ) : (
-                                    <span className="label-fill label-fill-light w-32">{appForm.status.statusName}</span>
-                                )}
+                                <AppFormStatus statusId={appForm.statusId} statusName={appForm.status.statusName} />
                             </TableCell>
                         </TableRow>
                     ))}
