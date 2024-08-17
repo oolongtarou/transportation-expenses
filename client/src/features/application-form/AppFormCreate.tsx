@@ -150,10 +150,36 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     setAppForm(data);
                     methods.reset(data);  // フォームをリセットして新しい値を反映
                 }).catch(err => {
-                    console.error(err);
+                    if (err.response?.status === 500) {
+                        setMessageCode('E00001');
+                        setApplicationId(0);
+                    } else if (err.response?.status === 403) {
+                        navigate('/account/login?m=E00006');
+                    } else {
+                        setMessageCode('E00005');
+                    }
                 })
+        } else {
+            axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true })
+                .then(response => {
+                    const user: User = response.data;
+                    if (!user.userId) {
+                        navigate('/account/login?m=E00006');
+                    }
+
+                }).catch(err => {
+                    if (err.response?.status === 500) {
+                        setMessageCode('E00001');
+                        setApplicationId(0);
+                    } else if (err.response?.status === 403) {
+                        navigate('/account/login?m=E00006');
+                    } else {
+                        setMessageCode('E00005');
+                    }
+                })
+
         }
-    }, [currentWorkspaceId, searchParams, variant, methods]);
+    }, [currentWorkspaceId, searchParams, variant, methods, navigate]);
 
     return (
         <div className="container">
@@ -164,9 +190,29 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     : '申請書の内容を確認する'
                 }
             </h2>
+            {variant === 'review'
+                ? <section className="grid lg:grid-cols-2 mx-5 my-3" hidden={variant === 'review'}>
+                    <div className="flex items-center mb-5">
+                        <label className="font-bold text-lg w-40">申請書ID：</label>
+                        <p className="text-lg">{appForm.applicationId}</p>
+                    </div>
+                    <div className="flex items-center mb-5">
+                        <label className="font-bold text-lg w-40">申請者：</label>
+                        <p className="text-lg">{appForm.user.userName}</p>
+                    </div>
+                    <div className="flex items-center mb-5">
+                        <label className="font-bold text-lg w-40">申請日：</label>
+                        <p className="text-lg">{new Date(appForm.applicationDate).toLocaleDateString()}</p>
+                    </div>
+                    <div className="flex items-center mb-5">
+                        <label className="font-bold text-lg w-40">ステータス：</label>
+                        <p className="text-lg">{appForm.status.statusName}</p>
+                    </div>
+                </section>
+                : null
+            }
             <FormProvider {...methods}>
                 <form>
-                    {/* <AppFormTable tableRows={appForm.details} editing={editing} watch={methods.watch} setValue={methods.setValue} /> */}
                     <AppFormTable tableRows={appForm.details} editing={editing} watch={methods.watch} setValue={methods.setValue} />
                     <div className="flex justify-end gap-5 mt-5 mb-5">
                         {variant === 'create' && editing
