@@ -32,11 +32,13 @@ const AppFormList = () => {
     const [total, setTotal] = useState<number>(0);  // total stateを追加
     const { setIsLoggedIn } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
     const [searchParams, setSearchParams] = useSearchParams();
     const [selectedOptions, setSelectedOptions] = useState<MultiValue<SelectOption>>([]);
     const [numberOfItems, setNumberOfItems] = useState<SingleValue<SelectOption>>(numberOfItemsOptions[0]);
 
     const currentPage = Number(searchParams.get('page') ?? '1');
+    const currentWorkSpace = getWorkspaceIdFrom(location.pathname);
 
     const onStatusOptionChanged = (selected: MultiValue<SelectOption>) => {
         setSelectedOptions(selected);
@@ -48,6 +50,7 @@ const AppFormList = () => {
         currentSearchOptions.status = toNumberArray(selectedOptions);
         currentSearchOptions.numberOfItems = Number(selected?.value ?? 20);
         fetchData(1, currentSearchOptions);
+        navigate(`/w/${currentWorkSpace}/app-form/list/me?page=1`);
     }
 
     const {
@@ -55,6 +58,7 @@ const AppFormList = () => {
         handleSubmit,
         formState: { errors },
         watch,
+        reset,
     } = useForm<SearchFormInputs>({
         mode: 'onChange',
         resolver: zodResolver(searchSchema),
@@ -106,6 +110,11 @@ const AppFormList = () => {
         setSearchParams({ page: page.toString() });  // URLのクエリを更新
         fetchData(page, getCurrentSearchOptions());  // ページ変更時にデータを再取得
     };
+
+    const clearSearchOptions = () => {
+        reset();
+        setSelectedOptions([]);
+    }
 
     return (
         <div className="container">
@@ -264,7 +273,7 @@ const AppFormList = () => {
                         </div>
                         <div className="flex items-center gap-5">
                             <p>{currentPage * Number(numberOfItems?.value) - Number(numberOfItems?.value) + 1}-{currentPage * Number(numberOfItems?.value) >= total ? total : currentPage * Number(numberOfItems?.value)} ({total}件中)</p>
-                            <Button className="btn btn-light w-24">クリア</Button>
+                            <Button type="button" onClick={clearSearchOptions} className="btn btn-light w-24">クリア</Button>
                             <Button type="submit" className="btn btn-primary w-24">検索</Button>
 
                         </div>
