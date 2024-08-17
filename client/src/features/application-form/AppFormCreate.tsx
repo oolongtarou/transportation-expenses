@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
 
 import AppFormTable from "./components/AppFormTable"
-import { ApplicationForm, ApplicationStatuses, calculateTotalAmount } from "./app-form";
+import { appFormInitialData, ApplicationForm, ApplicationStatuses, calculateTotalAmount } from "./app-form";
 import { applicationFormSchema } from "../schema/app-form-schema";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { getWorkspaceIdFrom } from "@/lib/user-workspace";
@@ -235,14 +235,34 @@ const AppFormCreate = (props: AppFormCreateProps) => {
         }
     }
 
+    /**
+     *申請書をコピーする
+    *
+    * @param {number} applicationId
+    */
+    const copy = async (applicationId: number) => {
+        navigate(`/w/${currentWorkspaceId}/app-form/create?copyFrom=${applicationId}`);
+
+    }
+
     useEffect(() => {
         setMessageCode(searchParams.get('m'));
     }, [searchParams])
 
     useEffect(() => {
+        if (variant === 'create') {
+            setAppForm(appFormInitialData);
+            setEditing(true);
+        } else if (variant === 'review') {
+            setEditing(false);
+        }
+    }, [variant])
+
+    useEffect(() => {
         const applicationIdQuery = searchParams.get('applicationId');
+        const copyFromQuery = searchParams.get('copyFrom');
         if (applicationIdQuery) {
-            axios.get<ApplicationForm>(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/review`, { params: { applicationId: searchParams.get('applicationId'), workspaceId: currentWorkspaceId }, withCredentials: true })
+            axios.get<ApplicationForm>(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/review`, { params: { applicationId: applicationIdQuery, workspaceId: currentWorkspaceId }, withCredentials: true })
                 .then(response => {
                     const data: ApplicationForm = response.data;
 
@@ -256,6 +276,25 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                         navigate('/account/login?m=E00006');
                     } else {
                         setMessageCode('E00005');
+                    }
+                })
+        } else if (copyFromQuery) {
+            axios.get<ApplicationForm>(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/copy`, { params: { applicationId: copyFromQuery, workspaceId: currentWorkspaceId }, withCredentials: true })
+                .then(response => {
+                    const data: ApplicationForm = response.data;
+
+                    setAppForm(data);
+                    methods.reset(data);  // フォームをリセットして新しい値を反映
+                    setMessageCode('S00009')
+                }).catch(err => {
+                    if (err instanceof AxiosError) {
+                        if (err.response?.status === 401) {
+                            navigate('/account/login?m=E00012');
+                            scrollToTop();
+                        } else {
+                            setMessageCode(err.response?.data.messageCode);
+                            scrollToTop();
+                        }
                     }
                 })
         } else {
@@ -336,6 +375,11 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                 <form>
                     <AppFormTable tableRows={appForm.details} editing={editing} watch={methods.watch} setValue={methods.setValue} />
                     <div className="flex justify-end gap-5 mt-5 mb-5">
+                        {user && canCopy(variant, appForm, user)
+                            ? <Button type="button" onClick={() => copy(appForm.applicationId)} className="btn btn-outline-primary">申請書をコピーする</Button>
+                            : null
+                        }
+
                         {isCreating(variant, editing)
                             ? <>
                                 {applicationId ? <Button type="button" onClick={deleteDraft} className="btn btn-danger">下書きを削除する</Button> : null}
@@ -439,4 +483,10 @@ function needReceive(appForm: ApplicationForm, user: User): boolean {
     const isMyAppForm = appForm.userId === user.userId;
     const isReceiving = appForm.statusId === ApplicationStatuses.RECEIVING;
     return isMyAppForm && isReceiving;
+}
+
+function canCopy(variant: AppFormVariant, appForm: ApplicationForm, user: User): boolean {
+    const isMyAppForm = appForm.userId === user.userId;
+    const isDraft = appForm.statusId === ApplicationStatuses.DRAFT;
+    return variant === "review" && isMyAppForm && !isDraft;
 }

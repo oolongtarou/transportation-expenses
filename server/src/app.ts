@@ -521,6 +521,61 @@ app.post('/app-form/receive', async (req: Request, res: Response) => {
     }
 });
 
+app.get('/app-form/copy', async (req: Request, res: Response) => {
+    try {
+        if (!req.session.userName) {
+            res.status(401).json({
+                'messageCode': 'E00006',
+            })
+            return;
+        }
+
+        const applicationIdQuery = req.query.applicationId;
+        const applicationId = toNumber(applicationIdQuery);
+        if (!applicationId) {
+            res.status(400).json({
+                'messageCode': 'E00009',
+            })
+            return;
+        }
+
+        const workspaceIdQuery = req.query.workspaceId;
+        const workspaceId = toNumber(workspaceIdQuery);
+        if (!workspaceId) {
+            res.status(400).json({
+                'messageCode': 'E00010',
+            })
+            return;
+        }
+
+        const appForm = await AppFormRepository.findBy(applicationId);
+        if (!appForm) {
+            res.status(400).json({
+                'messageCode': 'E00011',
+            })
+            return;
+        }
+
+        // コピーしていい申請書かどうかを確認する
+        if (appForm.userId === req.session.userId && appForm.statusId !== ApplicationStatus.Draft) {
+            appForm.applicationId = 0;
+            appForm.applicationDate = '';
+            appForm.statusId = -1;
+            res.status(200).json(appForm);
+        } else {
+            res.status(403).json({
+                'messageCode': `E00013`,
+            })
+            return;
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            'messageCode': 'E00001',
+        })
+    }
+});
+
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
