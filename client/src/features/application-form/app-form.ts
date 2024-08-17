@@ -87,25 +87,23 @@ export const calculateTotalAmount = (rows: AppFormDetail[]): number => {
     return total;
 };
 
-export const statusSelectOptions: SelectOption[] = [
-    {
-        label: '下書き',
-        value: '0',
-    },
-    {
-        label: '承認中',
-        value: '1',
-    },
-    {
-        label: '受領待ち',
-        value: '2',
-    },
-    {
-        label: '受領済み',
-        value: '3',
-    },
-    {
-        label: '却下',
-        value: '10',
-    },
-]
+export const ApplicationStatuses = {
+    DRAFT: 0,
+    APPROVING: 1,
+    RECEIVING: 2,
+    RECEIVED: 3,
+    REJECTED: 10,
+} as const;
+
+export const ApplicationStatusLabels: { [key in keyof typeof ApplicationStatuses]: string } = {
+    DRAFT: "下書き",
+    APPROVING: "承認中",
+    RECEIVING: "受領待ち",
+    RECEIVED: "受領済み",
+    REJECTED: "却下"
+};
+
+export const statusSelectOptions: SelectOption[] = Object.keys(ApplicationStatuses).map(key => ({
+    label: ApplicationStatusLabels[key as keyof typeof ApplicationStatuses],
+    value: String(ApplicationStatuses[key as keyof typeof ApplicationStatuses]),
+}));

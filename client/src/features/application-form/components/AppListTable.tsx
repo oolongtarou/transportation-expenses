@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { ApplicationForm } from '../app-form'
+import { ApplicationForm, ApplicationStatuses } from '../app-form'
 import { formatWithCommas } from '@/lib/math';
 import { useLocation } from 'react-router-dom';
 import { getWorkspaceIdFrom } from '@/lib/user-workspace';
@@ -31,15 +31,23 @@ const AppListTable = (props: AppListTableProps) => {
                     {appForms.map(appForm => (
                         <TableRow key={appForm.applicationId}>
                             <TableCell className='font-bold text-lg text-right py-0'>
-                                <Link to={`/w/${currentWorkspaceId}/app-form/review?applicationId=${appForm.applicationId}`} className='block btn btn-link' style={{ textAlign: 'right' }}>{appForm.applicationId}</Link>
+                                <Link
+                                    to={appForm.statusId === ApplicationStatuses.DRAFT
+                                        ? `/w/${currentWorkspaceId}/app-form/create?applicationId=${appForm.applicationId}`
+                                        : `/w/${currentWorkspaceId}/app-form/review?applicationId=${appForm.applicationId}`
+                                    }
+                                    className='block btn btn-link' style={{ textAlign: 'right' }}
+                                >
+                                    {appForm.applicationId}
+                                </Link>
                             </TableCell>
                             <TableCell>{new Date(appForm.applicationDate).toLocaleDateString()}</TableCell>
                             <TableCell>{appForm.user.userName}</TableCell>
                             <TableCell className='font-bold text-right'>{formatWithCommas(appForm.totalAmount)}</TableCell>
                             <TableCell className='flex flex-row justify-center'>
-                                {appForm.statusId === 1 || appForm.statusId === 2 ? (
+                                {appForm.statusId === ApplicationStatuses.APPROVING || appForm.statusId === ApplicationStatuses.RECEIVING ? (
                                     <span className="label-fill label-fill-action w-32">{appForm.status.statusName}</span>
-                                ) : appForm.statusId === 3 ? (
+                                ) : appForm.statusId === ApplicationStatuses.RECEIVED ? (
                                     <span className="label-fill label-fill-success w-32">{appForm.status.statusName}</span>
                                 ) : (
                                     <span className="label-fill label-fill-light w-32">{appForm.status.statusName}</span>
