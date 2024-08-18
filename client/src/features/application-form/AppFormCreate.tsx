@@ -33,7 +33,6 @@ const AppFormCreate = (props: AppFormCreateProps) => {
     const [appForm, setAppForm] = useState<ApplicationForm>(inputAppForm);
     const [applicationId, setApplicationId] = useState<number>(inputAppForm.applicationId);
     const [editing, setEditing] = useState<boolean>(variant === 'create');
-    const [completed, setCompleted] = useState<boolean>(false);
     const [messageCode, setMessageCode] = useState<string | null>('');
     const [searchParams] = useSearchParams();
     const [user, setUser] = useState<User | null>(null);
@@ -47,6 +46,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
 
     const [isDraftSaveDialogOpen, setIsDraftSaveDialogOpen] = useState(false);
     const [isDraftDeleteDialogOpen, setIsDraftDeleteDialogOpen] = useState(false);
+    const [isCreateFixDialogOpen, setIsCreateFixDialogOpen] = useState(false);
 
 
     const onSubmit = async (data: ApplicationForm, submitType: SubmitType) => {
@@ -140,40 +140,34 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             try {
                 const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/new`, { appForm: appForm }, { withCredentials: true });
                 if (result.status === 200) {
-                    setMessageCode('S00002');
-                    setCompleted(true);
-                    scrollToTop();
+                    navigate(`/w/${currentWorkspaceId}/app-form/review?applicationId=${result.data.applicationId}&m=S00002`);
                 } else if (result.status === 400) {
                     setMessageCode('E00007');
-                    scrollToTop();
                 } else if (result.status === 401) {
                     navigate('/account/login?m=E00006');
                 } else if (result.status === 500) {
                     setMessageCode('E00001');
-                    scrollToTop();
                 } else {
                     setMessageCode('E00005');
-                    scrollToTop();
                 }
             } catch (err) {
                 console.error(err)
                 if (err instanceof AxiosError && err.response?.status) {
                     if (err.response.status === 400) {
                         setMessageCode('E00007');
-                        scrollToTop();
                     } else if (err.response.status === 401) {
                         navigate('/account/login?m=E00006');
                     } else if (err.response.status === 500) {
                         setMessageCode('E00001');
-                        scrollToTop();
                     } else {
                         setMessageCode('E00005');
-                        scrollToTop();
                     }
                 } else {
                     setMessageCode('E00005');
-                    scrollToTop();
                 }
+            } finally {
+                setIsCreateFixDialogOpen(false);
+                scrollToTop();
             }
         }
     };
@@ -519,17 +513,29 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                             : null
                         }
 
-                        {isMakingSure(variant, editing, completed)
+                        {isMakingSure(variant, editing)
                             ?
                             <>
                                 <Button onClick={methods.handleSubmit((data) => onSubmit(data, 'correct'))} type="button" className="btn btn-light">入力をやり直す</Button>
-                                <Button onClick={methods.handleSubmit((data) => onSubmit(data, 'fix'))} className="btn btn-primary">申請を確定する</Button>
-                            </>
-                            : null
-                        }
 
-                        {isCreateCompleted(variant, editing, completed)
-                            ? <a href={`/w/${currentWorkspaceId}/app-form/create`} className="btn btn-primary">続けて申請書を作成する</a>
+                                <Button type="button" onClick={() => setIsCreateFixDialogOpen(true)} className="btn btn-primary">申請を確定する</Button>
+                                <AlertDialog open={isCreateFixDialogOpen} onOpenChange={setIsCreateFixDialogOpen}>
+                                    <AlertDialogTrigger>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>申請を確定しますか？</AlertDialogTitle>
+                                            <AlertDialogDescription hidden>
+                                                申請書の作成を完了するための確認ダイアログです。
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                                            <AlertDialogAction onClick={methods.handleSubmit((data) => onSubmit(data, 'fix'))} className="btn btn-primary">確定する</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </>
                             : null
                         }
 
@@ -575,20 +581,8 @@ function isCreating(variant: AppFormVariant, editing: boolean): boolean {
  * @param {boolean} completed - フォームの作成が完了しているかどうか
  * @return {boolean} - 新規作成モードで編集が完了しておらず、まだ完了していない場合はtrue、それ以外はfalse
  */
-function isMakingSure(variant: AppFormVariant, editing: boolean, completed: boolean): boolean {
-    return variant === 'create' && !editing && !completed;
-}
-
-/**
- * 新規作成が完了しているかどうかを判定する関数
- *
- * @param {AppFormVariant} variant - 現在のフォームのバリアント（`create`や`edit`など）
- * @param {boolean} editing - フォームが編集モードかどうか
- * @param {boolean} completed - フォームの作成が完了しているかどうか
- * @return {boolean} - 新規作成モードで編集が完了しており、作成が完了している場合はtrue、それ以外はfalse
- */
-function isCreateCompleted(variant: AppFormVariant, editing: boolean, completed: boolean): boolean {
-    return variant === 'create' && !editing && completed;
+function isMakingSure(variant: AppFormVariant, editing: boolean): boolean {
+    return variant === 'create' && !editing;
 }
 
 /**
