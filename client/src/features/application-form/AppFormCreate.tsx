@@ -47,6 +47,10 @@ const AppFormCreate = (props: AppFormCreateProps) => {
     const [isDraftSaveDialogOpen, setIsDraftSaveDialogOpen] = useState(false);
     const [isDraftDeleteDialogOpen, setIsDraftDeleteDialogOpen] = useState(false);
     const [isCreateFixDialogOpen, setIsCreateFixDialogOpen] = useState(false);
+    const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
+    const [isReceiveDialogOpen, setIsReceiveDialogOpen] = useState(false);
+    const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+    const [isCopyDialogOpen, setIsCopyDialogOpen] = useState(false);
 
 
     const onSubmit = async (data: ApplicationForm, submitType: SubmitType) => {
@@ -202,6 +206,8 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     scrollToTop();
                 }
             }
+        } finally {
+            setIsDraftDeleteDialogOpen(false);
         }
     }
 
@@ -231,6 +237,8 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     scrollToTop();
                 }
             }
+        } finally {
+            setIsApproveDialogOpen(false);
         }
     }
 
@@ -261,7 +269,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                 }
             }
         } finally {
-            setIsDraftDeleteDialogOpen(false);
+            setIsReceiveDialogOpen(false);
         }
     }
 
@@ -291,6 +299,8 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     scrollToTop();
                 }
             }
+        } finally {
+            setIsRejectDialogOpen(false);
         }
     }
 
@@ -300,6 +310,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
     * @param {number} applicationId
     */
     const copy = async (applicationId: number) => {
+        setIsCopyDialogOpen(false);
         navigate(`/w/${currentWorkspaceId}/app-form/create?copyFrom=${applicationId}`);
     }
 
@@ -468,7 +479,26 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     <AppFormTable tableRows={appForm.details} editing={editing} watch={methods.watch} setValue={methods.setValue} />
                     <div className="flex justify-end gap-5 mt-5 mb-5">
                         {user && canCopy(variant, appForm, user)
-                            ? <Button type="button" onClick={() => copy(appForm.applicationId)} className="btn btn-outline-primary">申請書をコピーする</Button>
+                            ?
+                            <>
+                                <Button type="button" onClick={() => setIsCopyDialogOpen(true)} className="btn btn-outline-primary">申請書をコピーする</Button>
+                                <AlertDialog open={isCopyDialogOpen} onOpenChange={setIsCopyDialogOpen}>
+                                    <AlertDialogTrigger>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>申請書をコピーしますか？</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                申請書の内容をコピーして新たに作成画面を開きます。
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => copy(appForm.applicationId)} className="btn btn-primary">コピーする</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </>
                             : null
                         }
 
@@ -547,14 +577,66 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                         {currentWorkspaceId && user && needApprove(appForm, user, currentWorkspaceId)
                             ?
                             <>
-                                <Button type="button" onClick={() => reject(appForm.applicationId)} className="btn btn-danger">却下する</Button>
-                                <Button type="button" onClick={() => approve(appForm.applicationId)} className="btn btn-primary">承認する</Button>
+                                <Button type="button" onClick={() => setIsRejectDialogOpen(true)} className="btn btn-danger">却下する</Button>
+                                <AlertDialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+                                    <AlertDialogTrigger>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>申請書を却下しますか？</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                申請書を却下したら元に戻すことはできません。
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                                            <Button type="button" onClick={() => reject(appForm.applicationId)} className="btn btn-danger">却下する</Button>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+
+                                <Button type="button" onClick={() => setIsApproveDialogOpen(true)} className="btn btn-primary">承認する</Button>
+                                <AlertDialog open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen}>
+                                    <AlertDialogTrigger>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>申請書を承認しますか？</AlertDialogTitle>
+                                            <AlertDialogDescription hidden>
+                                                申請書を承認するための確認ダイアログです。
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => approve(appForm.applicationId)} className="btn btn-primary">承認する</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </>
                             : null
                         }
 
                         {user && needReceive(appForm, user)
-                            ? <Button type="button" onClick={() => receive(appForm.applicationId)} className="btn btn-primary">受領する</Button>
+                            ?
+                            <>
+                                <Button type="button" onClick={() => setIsReceiveDialogOpen(true)} className="btn btn-primary">受領する</Button>
+                                <AlertDialog open={isReceiveDialogOpen} onOpenChange={setIsReceiveDialogOpen}>
+                                    <AlertDialogTrigger>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>申請書を受領登録しますか？</AlertDialogTitle>
+                                            <AlertDialogDescription hidden>
+                                                申請書を受領登録するための確認ダイアログです。
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => receive(appForm.applicationId)} className="btn btn-primary">受領する</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </>
                             : null
                         }
                     </div>
