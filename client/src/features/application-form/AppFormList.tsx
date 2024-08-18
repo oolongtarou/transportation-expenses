@@ -152,7 +152,6 @@ const AppFormList = (props: AppFormListProps) => {
                                     <Input
                                         type="text"
                                         id="applicationIdMin"
-                                        placeholder="12345"
                                         {...register('applicationIdMin', {
                                             onChange: (e) => {
                                                 e.target.value = e.target.value.replace(/[^0-9]/g, '');
@@ -165,7 +164,6 @@ const AppFormList = (props: AppFormListProps) => {
                                     <Input
                                         type="text"
                                         id="applicationIdMax"
-                                        placeholder="12345"
                                         {...register('applicationIdMax', {
                                             onChange: (e) => {
                                                 e.target.value = e.target.value.replace(/[^0-9]/g, '');
@@ -219,8 +217,13 @@ const AppFormList = (props: AppFormListProps) => {
                         </div>
                         <div>
                             <Label htmlFor="userName">申請者名</Label>
-                            <Input id="userName" placeholder="12345" className="mt-1" {...register('userName')} />
+                            <Input id="userName" className="mt-1" {...register('userName')} />
                             {errors.userName ? <p className="text-red-500">{errors.userName.message}</p> : null}
+                        </div>
+                        <div>
+                            <Label htmlFor="title">タイトル</Label>
+                            <Input id="title" className="mt-1" {...register('title')} />
+                            {errors.title ? <p className="text-red-500">{errors.title.message}</p> : null}
                         </div>
                         <div>
                             <Label htmlFor="totalAmountMin">金額</Label>

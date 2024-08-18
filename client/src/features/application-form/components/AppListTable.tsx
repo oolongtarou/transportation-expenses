@@ -24,6 +24,7 @@ const AppListTable = (props: AppListTableProps) => {
                         <TableHead className="w-[100px] text-right">申請書ID</TableHead>
                         <TableHead>申請日</TableHead>
                         <TableHead>申請者名</TableHead>
+                        <TableHead>タイトル</TableHead>
                         <TableHead className='text-right'>金額</TableHead>
                         <TableHead className='text-center'>申請書ステータス</TableHead>
                     </TableRow>
@@ -44,6 +45,7 @@ const AppListTable = (props: AppListTableProps) => {
                             </TableCell>
                             <TableCell>{new Date(appForm.applicationDate).toLocaleDateString()}</TableCell>
                             <TableCell>{appForm.user.userName}</TableCell>
+                            <TableCell>{appForm.title}</TableCell>
                             <TableCell className='font-bold text-right'>{formatWithCommas(appForm.totalAmount)}</TableCell>
                             <TableCell className='flex flex-row justify-center'>
                                 <AppFormStatus statusId={appForm.statusId} statusName={appForm.status.statusName} />

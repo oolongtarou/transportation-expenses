@@ -121,6 +121,14 @@ export class AppFormRepository {
                         gte: options.startDate ? new Date(options.startDate) : undefined,
                         lte: options.endDate ? new Date(options.endDate) : undefined,
                     },
+                    user: options.userName ? {
+                        userName: {
+                            contains: options.userName,
+                        },
+                    } : undefined,
+                    title: options.title ? {
+                        contains: options.title,
+                    } : undefined,
                 },
                 include: {
                     user: {
@@ -163,6 +171,14 @@ export class AppFormRepository {
                         gte: options.startDate ? new Date(options.startDate) : undefined,
                         lte: options.endDate ? new Date(options.endDate) : undefined,
                     },
+                    user: options.userName ? {
+                        userName: {
+                            contains: options.userName,
+                        },
+                    } : undefined,
+                    title: options.title ? {
+                        contains: options.title,
+                    } : undefined,
                 },
             });
             return count;
