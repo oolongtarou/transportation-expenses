@@ -13,7 +13,8 @@ import { useEffect, useState } from "react";
 import MessageBox from "@/components/MessageBox";
 import { Authorities } from "@/lib/auth";
 import { scrollToTop } from "@/lib/utils";
-import AppFormHeader from "./components/AppFormHeader";
+import { Input } from "@/components/ui/input";
+import AppFormStatus from "./components/AppFormStatus";
 
 interface AppFormCreateProps {
     inputAppForm: ApplicationForm
@@ -22,7 +23,7 @@ interface AppFormCreateProps {
 
 type AppFormVariant = 'create' | 'review';
 
-type SubmitType = 'draft' | 'makeSure' | 'fix';
+type SubmitType = 'draft' | 'makeSure' | 'correct' | 'fix';
 
 const AppFormCreate = (props: AppFormCreateProps) => {
     const { inputAppForm, variant } = props;
@@ -42,6 +43,8 @@ const AppFormCreate = (props: AppFormCreateProps) => {
         defaultValues: appForm,
     });
 
+    const { register, formState: { errors } } = methods;
+
     const onSubmit = async (data: ApplicationForm, submitType: SubmitType) => {
         if (submitType === 'draft') {
             const user = await axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true });
@@ -50,7 +53,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                 navigate('/account/login?m=E00006');
                 return;
             }
-
+            console.log(data);
             data.userId = user.data.userId;
             data.applicationId = applicationId;
             data.workspaceId = currentWorkspaceId;
@@ -62,23 +65,51 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                 id: index + 1,
             }));
             const appForm: ApplicationForm = data;
-            const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/draft/save`, { appForm: appForm }, { withCredentials: true });
-            if (result.status === 200) {
-                setMessageCode(applicationId ? 'S00004' : 'S00003');
-                setCompleted(true);
-                setApplicationId(result.data.applicationId);
-            } else if (result.status === 401) {
-                navigate('/account/login?m=E00006');
-            } else if (result.status === 500) {
-                setMessageCode('E00001');
-            } else {
-                setMessageCode('E00005');
+
+            try {
+                const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/draft/save`, { appForm: appForm }, { withCredentials: true }); if (result.status === 200) {
+                    setMessageCode('S00002');
+                    setCompleted(true);
+                    scrollToTop();
+                } else if (result.status === 400) {
+                    setMessageCode('E00007');
+                    scrollToTop();
+                } else if (result.status === 401) {
+                    navigate('/account/login?m=E00006');
+                } else if (result.status === 500) {
+                    setMessageCode('E00001');
+                    scrollToTop();
+                } else {
+                    setMessageCode('E00005');
+                    scrollToTop();
+                }
+            } catch (err) {
+                console.error(err)
+                if (err instanceof AxiosError && err.response?.status) {
+                    if (err.response.status === 400) {
+                        setMessageCode('E00007');
+                        scrollToTop();
+                    } else if (err.response.status === 401) {
+                        navigate('/account/login?m=E00006');
+                    } else if (err.response.status === 500) {
+                        setMessageCode('E00001');
+                        scrollToTop();
+                    } else {
+                        setMessageCode('E00005');
+                        scrollToTop();
+                    }
+                } else {
+                    setMessageCode('E00005');
+                    scrollToTop();
+                }
             }
         } else if (submitType === 'makeSure') {
             setEditing(false);
             scrollToTop();
-        }
-        else if (submitType === 'fix') {
+        } else if (submitType === 'correct') {
+            setEditing(true);
+            scrollToTop();
+        } else if (submitType === 'fix') {
             const user = await axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true });
 
             if (!user.data || !currentWorkspaceId) {
@@ -96,22 +127,43 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                 id: index + 1,
             }));
             const appForm: ApplicationForm = data;
-            const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/new`, { appForm: appForm }, { withCredentials: true });
-            if (result.status === 200) {
-                setMessageCode('S00002');
-                setCompleted(true);
-                scrollToTop();
-            } else if (result.status === 400) {
-                setMessageCode('E00007');
-                scrollToTop();
-            } else if (result.status === 401) {
-                navigate('/account/login?m=E00006');
-            } else if (result.status === 500) {
-                setMessageCode('E00001');
-                scrollToTop();
-            } else {
-                setMessageCode('E00005');
-                scrollToTop();
+            try {
+                const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/new`, { appForm: appForm }, { withCredentials: true });
+                if (result.status === 200) {
+                    setMessageCode('S00002');
+                    setCompleted(true);
+                    scrollToTop();
+                } else if (result.status === 400) {
+                    setMessageCode('E00007');
+                    scrollToTop();
+                } else if (result.status === 401) {
+                    navigate('/account/login?m=E00006');
+                } else if (result.status === 500) {
+                    setMessageCode('E00001');
+                    scrollToTop();
+                } else {
+                    setMessageCode('E00005');
+                    scrollToTop();
+                }
+            } catch (err) {
+                console.error(err)
+                if (err instanceof AxiosError && err.response?.status) {
+                    if (err.response.status === 400) {
+                        setMessageCode('E00007');
+                        scrollToTop();
+                    } else if (err.response.status === 401) {
+                        navigate('/account/login?m=E00006');
+                    } else if (err.response.status === 500) {
+                        setMessageCode('E00001');
+                        scrollToTop();
+                    } else {
+                        setMessageCode('E00005');
+                        scrollToTop();
+                    }
+                } else {
+                    setMessageCode('E00005');
+                    scrollToTop();
+                }
             }
         }
     };
@@ -354,10 +406,50 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     ? <a href={`/w/${currentWorkspaceId}/app-form/print?applicationId=${appForm.applicationId}`} target="_blank" className="btn btn-light">印刷する</a>
                     : null
                 }
-
             </div>
-            {variant === 'review' ? <AppFormHeader appForm={appForm} /> : null
-            }
+            <section className="grid lg:grid-cols-2 mx-5 my-3">
+                {variant === 'review'
+                    ? <>
+                        <div className="flex items-center mb-5">
+                            <label className="font-bold text-lg w-32">申請書ID：</label>
+                            <p className="text-lg">{appForm.applicationId}</p>
+                        </div>
+                        <div className="flex items-center mb-5">
+                            <label className="font-bold text-lg w-32">申請者：</label>
+                            <p className="text-lg">{appForm.user.userName}</p>
+                        </div>
+                        <div className="flex items-center mb-5">
+                            <label className="font-bold text-lg w-32">申請日：</label>
+                            <p className="text-lg">{new Date(appForm.applicationDate).toLocaleDateString()}</p>
+                        </div>
+                        <div className="flex items-center mb-5">
+                            <label className="font-bold text-lg w-32">ステータス：</label>
+                            <AppFormStatus statusId={appForm.statusId} statusName={appForm.status.statusName} />
+                        </div>
+                    </>
+                    : null
+                }
+                <div className="flex items-center mb-5">
+                    <label htmlFor="applicationTitle" className="font-bold text-lg w-32">タイトル：</label>
+                    <div>
+                        {variant === 'create'
+                            ? <Input
+                                type='text'
+                                id="applicationTitle"
+                                className="w-72"
+                                defaultValue={appForm.title}
+                                disabled={!editing}
+                                {...register('title')}
+                            />
+                            : <p className="text-lg w-72 ">
+                                {appForm.title}
+                            </p>
+                        }
+                        {errors && errors.title?.message ? <p className="text-red-500">{errors.title.message}</p> : <></>}
+                    </div>
+                </div>
+
+            </section>
             <FormProvider {...methods}>
                 <form>
                     <AppFormTable tableRows={appForm.details} editing={editing} watch={methods.watch} setValue={methods.setValue} />
@@ -377,7 +469,11 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                         }
 
                         {isMakingSure(variant, editing, completed)
-                            ? <Button onClick={methods.handleSubmit((data) => onSubmit(data, 'fix'))} className="btn btn-primary">申請を確定する</Button>
+                            ?
+                            <>
+                                <Button onClick={methods.handleSubmit((data) => onSubmit(data, 'correct'))} type="button" className="btn btn-light">入力をやり直す</Button>
+                                <Button onClick={methods.handleSubmit((data) => onSubmit(data, 'fix'))} className="btn btn-primary">申請を確定する</Button>
+                            </>
                             : null
                         }
 

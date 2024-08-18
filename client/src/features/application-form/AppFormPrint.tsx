@@ -50,7 +50,7 @@ const AppFormPrint = () => {
                 ? null
                 : <div className="w-[750px] mx-auto">
                     < header className="flex justify-between items-center" >
-                        <h2 className="heading-2">交通費申請書</h2>
+                        <h2 className="heading-2">{appForm.title}</h2>
                         <p className="text-lg">出力日：{new Date().toLocaleDateString()}</p>
                     </header >
                     <main>

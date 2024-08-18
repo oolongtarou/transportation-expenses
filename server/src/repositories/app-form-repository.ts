@@ -34,6 +34,7 @@ export class AppFormRepository {
                 applicationDate: applicationData.applicationDate?.toISOString() || '',
                 userId: applicationData.userId,
                 totalAmount: applicationData.totalAmount,
+                title: applicationData.title,
                 statusId: applicationData.statusId,
                 user: {
                     userName: applicationData.user.userName,
@@ -183,6 +184,7 @@ export class AppFormRepository {
                         applicationDate: new Date(form.applicationDate),
                         statusId: form.statusId,
                         totalAmount: form.totalAmount,
+                        title: form.title,
                         details: {
                             create: form.details.map(detail => ({
                                 applicationDetailId: detail.id,
@@ -241,6 +243,7 @@ export class AppFormRepository {
                     applicationDate: new Date(form.applicationDate),
                     statusId: form.statusId,
                     totalAmount: form.totalAmount,
+                    title: form.title,
                     details: {
                         create: form.details.map(detail => ({
                             applicationDetailId: detail.id,
@@ -286,6 +289,7 @@ export class AppFormRepository {
                     applicationDate: new Date(form.applicationDate),
                     statusId: form.statusId,
                     totalAmount: form.totalAmount,
+                    title: form.title,
                     details: {
                         deleteMany: {}, // 既存のdetailsを削除
                         create: form.details.map(detail => ({

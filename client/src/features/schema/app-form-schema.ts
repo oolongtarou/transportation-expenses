@@ -53,6 +53,9 @@ export const appFormDetailSchema = z.object({
 
 // ApplicationFormのスキーマ
 export const applicationFormSchema = z.object({
+    title: z.string()
+        .min(1, 'タイトルを入力してください')
+        .max(50, '50字以内で入力してください'),
     details: z.array(appFormDetailSchema).min(1, '明細は少なくとも1行必要です'),
 });
 

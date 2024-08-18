@@ -6,6 +6,7 @@ export interface ApplicationForm {
     applicationDate: string;
     userId: number;
     totalAmount: number;
+    title: string;
     statusId: number;
     user: User;
     status: Status;
@@ -64,6 +65,7 @@ export const appFormInitialData: ApplicationForm = {
     applicationDate: new Date().toISOString(), // 現在の日付と時刻をISO 8601形式の文字列に変換
     userId: 0,
     totalAmount: 0,
+    title: '',
     statusId: 0,
     user: {
         userName: "",

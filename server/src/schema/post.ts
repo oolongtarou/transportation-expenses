@@ -19,6 +19,7 @@ export interface ApplicationForm {
     applicationDate: string;
     userId: number;
     totalAmount: number;
+    title: string;
     statusId: number;
     user: User;
     status: Status;
