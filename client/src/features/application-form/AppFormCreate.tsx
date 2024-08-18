@@ -75,9 +75,8 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             try {
                 const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/draft/save`, { appForm: appForm }, { withCredentials: true });
                 if (result.status === 200) {
-                    setMessageCode('S00003');
-                    console.log(result.data);
                     setApplicationId(result.data.applicationId);
+                    navigate(`/w/${currentWorkspaceId}/app-form/create?applicationId=${result.data.applicationId}&m=S00003`);
                     scrollToTop();
                 } else if (result.status === 400) {
                     setMessageCode('E00007');
@@ -176,9 +175,10 @@ const AppFormCreate = (props: AppFormCreateProps) => {
         try {
             const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/draft/delete`, { applicationId: applicationId }, { withCredentials: true });
             if (result.status === 200) {
-                setMessageCode('S00005');
+                methods.reset(appFormInitialData);
                 setApplicationId(0);
                 setAppForm(appFormInitialData);
+                setMessageCode('S00005');
                 scrollToTop();
             } else if (result.status === 401) {
                 navigate('/account/login?m=E00006');
@@ -310,11 +310,13 @@ const AppFormCreate = (props: AppFormCreateProps) => {
     useEffect(() => {
         if (variant === 'create') {
             setAppForm(appFormInitialData);
+            setApplicationId(0);
+            methods.reset(appFormInitialData);
             setEditing(true);
         } else if (variant === 'review') {
             setEditing(false);
         }
-    }, [variant])
+    }, [variant, methods])
 
     useEffect(() => {
         const applicationIdQuery = searchParams.get('applicationId');
@@ -323,10 +325,13 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             axios.get<ApplicationForm>(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/review`, { params: { applicationId: applicationIdQuery, workspaceId: currentWorkspaceId }, withCredentials: true })
                 .then(response => {
                     const data: ApplicationForm = response.data;
-
-                    setAppForm(data);
-                    methods.reset(data);  // フォームをリセットして新しい値を反映
-                    setApplicationId(data.applicationId);
+                    if (data) {
+                        setAppForm(data);
+                        methods.reset(data);  // フォームをリセットして新しい値を反映
+                        setApplicationId(data.applicationId);
+                    } else {
+                        setMessageCode('E00011')
+                    }
                 }).catch(err => {
                     if (err.response?.status === 500) {
                         setMessageCode('E00001');
