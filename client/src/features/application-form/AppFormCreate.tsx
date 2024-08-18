@@ -38,18 +38,20 @@ const AppFormCreate = (props: AppFormCreateProps) => {
     const [searchParams] = useSearchParams();
     const [user, setUser] = useState<User | null>(null);
     const currentWorkspaceId = getWorkspaceIdFrom(location.pathname);
-    const [isDraftDialogOpen, setIsDraftDialogOpen] = useState(false);
     const methods = useForm<ApplicationForm>({
         mode: 'all',
         resolver: zodResolver(applicationFormSchema),
         defaultValues: appForm,
     });
-
     const { register, formState: { errors } } = methods;
+
+    const [isDraftSaveDialogOpen, setIsDraftSaveDialogOpen] = useState(false);
+    const [isDraftDeleteDialogOpen, setIsDraftDeleteDialogOpen] = useState(false);
+
 
     const onSubmit = async (data: ApplicationForm, submitType: SubmitType) => {
         if (submitType === 'draft') {
-            setIsDraftDialogOpen(true);
+            setIsDraftSaveDialogOpen(true);
         } else if (submitType === 'draftFix') {
             const user = await axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true });
 
@@ -71,9 +73,11 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             const appForm: ApplicationForm = data;
 
             try {
-                const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/draft/save`, { appForm: appForm }, { withCredentials: true }); if (result.status === 200) {
-                    setMessageCode('S00002');
-                    setCompleted(true);
+                const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/draft/save`, { appForm: appForm }, { withCredentials: true });
+                if (result.status === 200) {
+                    setMessageCode('S00003');
+                    console.log(result.data);
+                    setApplicationId(result.data.applicationId);
                     scrollToTop();
                 } else if (result.status === 400) {
                     setMessageCode('E00007');
@@ -107,7 +111,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     scrollToTop();
                 }
             } finally {
-                setIsDraftDialogOpen(false);
+                setIsDraftSaveDialogOpen(false);
             }
         } else if (submitType === 'makeSure') {
             setEditing(false);
@@ -179,8 +183,9 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/draft/delete`, { applicationId: applicationId }, { withCredentials: true });
             if (result.status === 200) {
                 setMessageCode('S00005');
-                scrollToTop();
                 setApplicationId(0);
+                setAppForm(appFormInitialData);
+                scrollToTop();
             } else if (result.status === 401) {
                 navigate('/account/login?m=E00006');
             } else if (result.status === 500) {
@@ -261,6 +266,8 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     scrollToTop();
                 }
             }
+        } finally {
+            setIsDraftDeleteDialogOpen(false);
         }
     }
 
@@ -325,6 +332,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
 
                     setAppForm(data);
                     methods.reset(data);  // フォームをリセットして新しい値を反映
+                    setApplicationId(data.applicationId);
                 }).catch(err => {
                     if (err.response?.status === 500) {
                         setMessageCode('E00001');
@@ -467,9 +475,30 @@ const AppFormCreate = (props: AppFormCreateProps) => {
 
                         {isCreating(variant, editing)
                             ? <>
-                                {applicationId ? <Button type="button" onClick={deleteDraft} className="btn btn-danger">下書きを削除する</Button> : null}
+                                {applicationId
+                                    ? <>
+                                        <Button type="button" onClick={() => setIsDraftDeleteDialogOpen(true)} className="btn btn-danger">下書きを削除する</Button>
+                                        <AlertDialog open={isDraftDeleteDialogOpen} onOpenChange={setIsDraftDeleteDialogOpen}>
+                                            <AlertDialogTrigger>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>下書きを削除しますか？</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        下書きを削除したら元に戻すことはできません。
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                                                    <Button type="button" onClick={deleteDraft} className="btn btn-danger">削除する</Button>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </>
+                                    : null}
+
                                 <Button onClick={methods.handleSubmit((data) => onSubmit(data, 'draft'))} className="btn btn-outline-primary" >下書き保存する</Button>
-                                <AlertDialog open={isDraftDialogOpen} onOpenChange={setIsDraftDialogOpen}>
+                                <AlertDialog open={isDraftSaveDialogOpen} onOpenChange={setIsDraftSaveDialogOpen}>
                                     <AlertDialogTrigger>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
