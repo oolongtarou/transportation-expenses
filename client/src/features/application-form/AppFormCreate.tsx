@@ -4,6 +4,7 @@ import { FormProvider, useForm } from "react-hook-form";
 
 import AppFormTable from "./components/AppFormTable"
 import { appFormInitialData, ApplicationForm, ApplicationStatuses, calculateTotalAmount } from "./app-form";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
 import { applicationFormSchema } from "../schema/app-form-schema";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { getWorkspaceIdFrom } from "@/lib/user-workspace";
@@ -23,7 +24,7 @@ interface AppFormCreateProps {
 
 type AppFormVariant = 'create' | 'review';
 
-type SubmitType = 'draft' | 'makeSure' | 'correct' | 'fix';
+type SubmitType = 'draft' | 'draftFix' | 'makeSure' | 'correct' | 'fix';
 
 const AppFormCreate = (props: AppFormCreateProps) => {
     const { inputAppForm, variant } = props;
@@ -37,6 +38,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
     const [searchParams] = useSearchParams();
     const [user, setUser] = useState<User | null>(null);
     const currentWorkspaceId = getWorkspaceIdFrom(location.pathname);
+    const [isDraftDialogOpen, setIsDraftDialogOpen] = useState(false);
     const methods = useForm<ApplicationForm>({
         mode: 'all',
         resolver: zodResolver(applicationFormSchema),
@@ -47,6 +49,8 @@ const AppFormCreate = (props: AppFormCreateProps) => {
 
     const onSubmit = async (data: ApplicationForm, submitType: SubmitType) => {
         if (submitType === 'draft') {
+            setIsDraftDialogOpen(true);
+        } else if (submitType === 'draftFix') {
             const user = await axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true });
 
             if (!user.data || !currentWorkspaceId) {
@@ -102,6 +106,8 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     setMessageCode('E00005');
                     scrollToTop();
                 }
+            } finally {
+                setIsDraftDialogOpen(false);
             }
         } else if (submitType === 'makeSure') {
             setEditing(false);
@@ -463,6 +469,22 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                             ? <>
                                 {applicationId ? <Button type="button" onClick={deleteDraft} className="btn btn-danger">下書きを削除する</Button> : null}
                                 <Button onClick={methods.handleSubmit((data) => onSubmit(data, 'draft'))} className="btn btn-outline-primary" >下書き保存する</Button>
+                                <AlertDialog open={isDraftDialogOpen} onOpenChange={setIsDraftDialogOpen}>
+                                    <AlertDialogTrigger>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>下書きとして保存しますか？</AlertDialogTitle>
+                                            <AlertDialogDescription hidden>
+                                                下書き保存するための確認ダイアログです。
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                                            <AlertDialogAction onClick={methods.handleSubmit((data) => onSubmit(data, 'draftFix'))} className="btn btn-primary">保存する</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                                 <Button onClick={methods.handleSubmit((data) => onSubmit(data, 'makeSure'))} className="btn btn-primary">申請に進む</Button>
                             </>
                             : null
@@ -498,7 +520,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     </div>
                 </form>
             </FormProvider>
-        </div>
+        </div >
     )
 }
 
