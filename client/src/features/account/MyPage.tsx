@@ -4,7 +4,6 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { getLabelByAuthorityId } from "@/lib/auth";
 import { User } from "@/lib/user";
 import { getWorkspaceIdFrom } from "@/lib/user-workspace";
-import { waitFor } from "@/lib/utils";
 import axios, { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -18,24 +17,21 @@ const MyPage = () => {
 
     useEffect(() => {
         setLoading(true);
-        waitFor(3).then(() => {
-            axios.get(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true })
-                .then((response) => {
-                    if (response.data.userId) {
-                        setUser(response.data);
-                    } else {
-                        navigate('/');
-                    }
-                })
-                .catch((err: AxiosError) => {
-                    console.error(`サーバーエラーが発生しました：${err.code}`);
-                    navigate("/");
-                }).
-                finally(() => {
-                    setLoading(false);
-                })
-        })
-
+        axios.get(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true })
+            .then((response) => {
+                if (response.data.userId) {
+                    setUser(response.data);
+                } else {
+                    navigate('/');
+                }
+            })
+            .catch((err: AxiosError) => {
+                console.error(`サーバーエラーが発生しました：${err.code}`);
+                navigate("/");
+            }).
+            finally(() => {
+                setLoading(false);
+            })
     }, [navigate]);
 
     return (
