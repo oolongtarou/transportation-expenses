@@ -1,7 +1,8 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import { Authorities, Authority, getAuthoritiesByWorkspaceId, useAuth } from "@/lib/auth";
 import { getWorkspaceIdFrom } from "@/lib/user-workspace";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface NavItem {
     label: string;
@@ -56,24 +57,28 @@ interface WorkspaceNavProps {
 const WorkspaceNav = (props: WorkspaceNavProps) => {
     const { onToggleNav } = props;
     const { currentWorkspace, myAuthorities } = useAuth();
-    const { workspaceId } = useParams();
     const navigate = useNavigate();
     const location = useLocation();  // 現在のURLを取得
     const currentWorkspaceId = getWorkspaceIdFrom(location.pathname);
     const [filteredNavItems, setFilteredNavItems] = useState<NavItem[]>([]);
+    const [isLoading, setLoading] = useState(true);
 
     useEffect(() => {
+        setLoading(true);
+
         const currentWorkspaceAuthorities: Authority[] = getAuthoritiesByWorkspaceId(myAuthorities, currentWorkspaceId ?? 0);
         const currentAuthorityIds = currentWorkspaceAuthorities.map(authority => authority.authorityId);
 
         setFilteredNavItems(navItems.filter(navItem =>
             navItem.requiredAuthorities.some(id => currentAuthorityIds.includes(id))
         ));
+        setLoading(false);
+
     }, [currentWorkspace, myAuthorities, currentWorkspaceId]);
 
 
     const handleClick = (link: string) => {
-        navigate(link.replace(':workspaceId', workspaceId ?? '0'));
+        navigate(link.replace(':workspaceId', currentWorkspaceId?.toString() ?? '0'));
     }
 
     return (
@@ -87,16 +92,23 @@ const WorkspaceNav = (props: WorkspaceNavProps) => {
                 </li>
                 <li>
                     <ul className="mt-4 mx-2 flex flex-col gap-2">
-                        {filteredNavItems?.map((navItem, index) => (
-                            <li
-                                key={index}
-                                className={`flex flex-row btn btn-link ${navItem.link.replace(':workspaceId', currentWorkspaceId?.toString() ?? '').includes(location.pathname) ? 'focus' : ''}`}
-                                onClick={() => handleClick(navItem.link)}
-                            >
-                                <img src={navItem.imgPath} />
-                                <span className="ml-2">{navItem.label}</span>
-                            </li>
-                        ))}
+                        {isLoading
+                            ?
+                            navItems.map(navItem =>
+                                <li key={navItem.label} >
+                                    <Skeleton className="h-8 w-full mb-3" />
+                                </li>
+                            )
+                            : filteredNavItems?.map((navItem, index) => (
+                                <li
+                                    key={index}
+                                    className={`flex flex-row btn btn-link ${navItem.link.replace(':workspaceId', currentWorkspaceId?.toString() ?? '').includes(location.pathname) ? 'focus' : ''}`}
+                                    onClick={() => handleClick(navItem.link)}
+                                >
+                                    <img src={navItem.imgPath} />
+                                    <span className="ml-2">{navItem.label}</span>
+                                </li>
+                            ))}
                     </ul>
                 </li >
             </ul >
