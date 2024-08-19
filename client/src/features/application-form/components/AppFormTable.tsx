@@ -52,7 +52,11 @@ const AppFormTable = (props: AppFormTableProps) => {
             <TableCell className="text-right max-w-32">
                 {isLoading
                     ? <Skeleton className="h-10 w-full" />
-                    : formatWithCommas(isRoundTrip ? oneWayAmount * 2 : oneWayAmount)
+                    : <Input
+                        readOnly
+                        value={formatWithCommas(isRoundTrip ? oneWayAmount * 2 : oneWayAmount)}
+                        className="text-right"
+                    />
                 }
             </TableCell>
         );
@@ -342,8 +346,8 @@ const AppFormTable = (props: AppFormTableProps) => {
                 </TableBody>
                 <TableFooter>
                     <TableRow>
-                        <TableCell colSpan={6} className="font-bold text-lg">合計金額</TableCell>
-                        <TableCell colSpan={1} className="text-right font-bold text-lg">
+                        <TableCell colSpan={4} className="font-bold text-lg">合計金額</TableCell>
+                        <TableCell colSpan={3} className="text-right font-bold text-lg">
                             {isLoading
                                 ? <Skeleton className="h-10 w-full" />
                                 : `¥${totalAmount.toLocaleString()}`
