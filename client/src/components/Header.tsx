@@ -63,7 +63,7 @@ const Header = (props: HeaderProps) => {
                                         className='btn btn-link my-3 h-14 leading-10'
                                         style={{ textAlign: 'left' }}
                                     >
-                                        <a href={`/w/${workspace.workspaceId}/app-form/create`} className='block'>
+                                        <a href={`/w/${workspace.workspaceId}/app-form/create`} className='block text-nowrap'>
                                             {workspace.workspaceName}
                                         </a>
                                     </li>
