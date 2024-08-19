@@ -2,6 +2,7 @@ import { User, UserAuthority } from "@prisma/client";
 import prisma from "../infra/db";
 import { SignupFormData } from "../schema/post";
 import { toHashed } from "../lib/cipher";
+import { Authorities } from "../lib/auth";
 
 
 export class UserRepository {
@@ -80,21 +81,63 @@ export class UserRepository {
 
     static async createUser(data: SignupFormData): Promise<User | null> {
         try {
-            const hashedPassword = toHashed(data.password);
+            const transaction = await prisma.$transaction(async (prisma) => {
+                // 1. ユーザーを作成する
+                const hashedPassword = toHashed(data.password);
+                const newUser = await prisma.user.create({
+                    data: {
+                        firstName: data.firstName,
+                        lastName: data.lastName,
+                        userName: data.userName,
+                        email: data.email,
+                        password: hashedPassword,
+                    },
+                });
 
-            const newUser = await prisma.user.create({
-                data: {
-                    firstName: data.firstName,
-                    lastName: data.lastName,
-                    userName: data.userName,
-                    email: data.email,
-                    password: hashedPassword,
-                },
+                // 2. ワークスペースを作成する
+                const newWorkspace = await prisma.workspace.create({
+                    data: {
+                        workspaceName: `${newUser.userName}さんのワークスペース`,
+                        description: `${newUser.userName}さんのワークスペースです。`,
+                        approvalStep: 1,
+                    },
+                });
+
+                // 3. user_workspaces テーブルにデータをインサートする
+                await prisma.userWorkspace.create({
+                    data: {
+                        userId: newUser.userId,
+                        workspaceId: newWorkspace.workspaceId,
+                    },
+                });
+
+                // 4. user_authorities テーブルにデータをインサートする
+                const authorityIds = [Authorities.APPLICATION, Authorities.APPROVAL, Authorities.ADMIN];
+                for (const authorityId of authorityIds) {
+                    await prisma.userAuthority.create({
+                        data: {
+                            userId: newUser.userId,
+                            workspaceId: newWorkspace.workspaceId,
+                            authorityId: authorityId,
+                        },
+                    });
+                }
+
+                // 5. workspace_approvers テーブルにデータをインサートする
+                await prisma.workspaceApprovers.create({
+                    data: {
+                        userId: newUser.userId,
+                        workspaceId: newWorkspace.workspaceId,
+                        approvalStep: 1,
+                    },
+                });
+
+                return newUser;
             });
 
-            return newUser;
+            return transaction;
         } catch (error) {
-            console.error('Error creating user:', error);
+            console.error('ユーザー作成処理でエラーが発生しました。', error);
             throw error;
         }
     }
