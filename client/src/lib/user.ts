@@ -3,6 +3,8 @@ import { Workspace } from "./user-workspace"
 
 export interface User {
     userId: number
+    firstName: string
+    lastName: string
     userName: string
     mailAddress: string
     password: string
@@ -56,11 +58,13 @@ export function hasWorkspaceAuthority(workspaceId: number, authorities: Authorit
 export function ToWorkspaceMembers(data: RawUserData[]): User[] {
     return data.map(item => ({
         userId: item.userId,
+        firstName: item.firstName,
+        lastName: item.lastName,
         userName: item.userName,
         mailAddress: item.email,
         password: '', // パスワードは指定されていないので空にする
         roles: [], // rolesも指定されていないので空の配列にする
-        workspaces: [{ workspaceId: item.workspaceId, workspaceName: '' }], // workspaceIdをworkspacesフィールドに変換
+        workspaces: [{ workspaceId: item.workspaceId, workspaceName: '', approvalStep: 1 }], // workspaceIdをworkspacesフィールドに変換
         authorities: item.authorityIds.map(authorityId => ({
             workspaceId: item.workspaceId,
             authorityId

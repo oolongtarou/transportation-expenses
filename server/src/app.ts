@@ -14,7 +14,7 @@ import { WorkspaceRepository } from "./repositories/workspace-repository";
 import { User } from "@prisma/client";
 import { AuthorityRepository } from "./repositories/authority-repository";
 import { AppFormRepository } from "./repositories/app-form-repository";
-import { ApplicationForm, SearchOption } from "./schema/post";
+import { ApplicationForm, SearchOption, SignupFormData } from "./schema/post";
 import { toNumber } from "./lib/converter";
 import { ApplicationStatus } from "./enum/app-form";
 import { Authorities, Authority, hasAuthority, hasWorkspaceAuthority } from './lib/auth';
@@ -60,12 +60,11 @@ app.use(session({
     secret: process.env.SESSION_SECRET as string,
     resave: false,
     saveUninitialized: false,
-    // unset: 'destroy',
     cookie: {
         httpOnly: true,
         secure: process.env.MODE_ENV === 'production',
         sameSite: process.env.MODE_ENV === 'production' ? 'none' : 'lax',
-        maxAge: 1000 * 60 * 60 * 24 * 365
+        maxAge: 1000 * 60 * 60 * 24,
     },
     store: new RedisStore({
         client: redisClient,
@@ -119,7 +118,6 @@ app.post("/account/login", async (req: Request, res: Response) => {
         req.session.mailAddress = user.email;
         req.session.workspaces = userWorkspaces ?? []
         req.session.authorities = userAuthorities ?? [];
-
         req.session.save((err) => {
             if (err) {
                 console.error('セッションの保存に失敗しました:', err);
@@ -149,6 +147,35 @@ app.get("/account/logout", async (req: Request, res: Response) => {
     req.session.destroy(() => { });
     res.redirect('/auth/status');
 });
+
+app.post("/account/signup", async (req: Request, res: Response) => {
+    const signupFormData: SignupFormData = req.body.signFormData;
+
+    const user = await UserRepository.findByEmail(signupFormData.email);
+    if (user) {
+        res.status(400).json({ messageCode: 'E00015' });
+        return;
+    }
+
+    if (signupFormData.password !== signupFormData.confirmPassword) {
+        res.status(400).json({ messageCode: 'E00016' });
+        return;
+    }
+
+    if (signupFormData.firstName && signupFormData.lastName && signupFormData.userName && signupFormData.email && signupFormData.password) {
+        const createdUser = await UserRepository.createUser(signupFormData);
+        if (createdUser) {
+            res.status(200).json(createdUser);
+        } else {
+            res.status(500).json({ messageCode: 'E00001' });
+            return;
+        }
+    } else {
+        res.status(400).json({ messageCode: 'E00017' });
+        return;
+    }
+});
+
 
 // ログイン状態を確認するエンドポイント
 app.get('/auth/status', (req: Request, res: Response) => {

@@ -10,10 +10,11 @@ type MessageBoxVariant = 'default' | 'destructive' | 'success' | 'warn';
 
 interface MessageBoxProps {
     messageCode: string | null;
+    className?: string; // classNameをオプションとして定義
 }
 
 const MessageBox = (props: MessageBoxProps) => {
-    const { messageCode } = props;
+    const { messageCode, className } = props;
     const [isVisible, setIsVisible] = useState(true);
     const variant = getVarintByCode(messageCode);
     const handleClose = () => {
@@ -23,7 +24,7 @@ const MessageBox = (props: MessageBoxProps) => {
     return (
         <>
             {messageCode && isVisible && (
-                <Alert variant={variant} className="my-5">
+                <Alert variant={variant} className={`my-5 ${className}`}>
                     <div className='flex items-center justify-between'>
                         <div className='flex'>
                             {variant === 'success' && <BadgeCheck className='h-4 w-4' />}
