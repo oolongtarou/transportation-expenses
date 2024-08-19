@@ -13,7 +13,7 @@ import { hasWorkspaceAuthority, User } from "@/lib/user";
 import { useEffect, useState } from "react";
 import MessageBox from "@/components/MessageBox";
 import { Authorities } from "@/lib/auth";
-import { scrollToTop, waitFor } from "@/lib/utils";
+import { scrollToTop } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import AppFormStatus from "./components/AppFormStatus";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -343,74 +343,70 @@ const AppFormCreate = (props: AppFormCreateProps) => {
 
     useEffect(() => {
         setLoading(true);
-        waitFor(3)
-            .then(() => {
+        const applicationIdQuery = searchParams.get('applicationId');
+        const copyFromQuery = searchParams.get('copyFrom');
+        if (applicationIdQuery) {
+            axios.get<ApplicationForm>(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/review`, { params: { applicationId: applicationIdQuery, workspaceId: currentWorkspaceId }, withCredentials: true })
+                .then(response => {
+                    const data: ApplicationForm = response.data;
+                    if (data) {
+                        setAppForm(data);
+                        methods.reset(data);  // フォームをリセットして新しい値を反映
+                        setApplicationId(data.applicationId);
+                    } else {
+                        setMessageCode('E00011')
+                    }
+                }).catch(err => {
+                    if (err.response?.status === 500) {
+                        setMessageCode('E00001');
+                        setApplicationId(0);
+                    } else if (err.response?.status === 401) {
+                        navigate('/account/login?m=E00006');
+                    } else {
+                        setMessageCode('E00005');
+                    }
+                })
+        } else if (copyFromQuery) {
+            axios.get<ApplicationForm>(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/copy`, { params: { applicationId: copyFromQuery, workspaceId: currentWorkspaceId }, withCredentials: true })
+                .then(response => {
+                    const data: ApplicationForm = response.data;
 
-                const applicationIdQuery = searchParams.get('applicationId');
-                const copyFromQuery = searchParams.get('copyFrom');
-                if (applicationIdQuery) {
-                    axios.get<ApplicationForm>(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/review`, { params: { applicationId: applicationIdQuery, workspaceId: currentWorkspaceId }, withCredentials: true })
-                        .then(response => {
-                            const data: ApplicationForm = response.data;
-                            if (data) {
-                                setAppForm(data);
-                                methods.reset(data);  // フォームをリセットして新しい値を反映
-                                setApplicationId(data.applicationId);
-                            } else {
-                                setMessageCode('E00011')
-                            }
-                        }).catch(err => {
-                            if (err.response?.status === 500) {
-                                setMessageCode('E00001');
-                                setApplicationId(0);
-                            } else if (err.response?.status === 401) {
-                                navigate('/account/login?m=E00006');
-                            } else {
-                                setMessageCode('E00005');
-                            }
-                        })
-                } else if (copyFromQuery) {
-                    axios.get<ApplicationForm>(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/copy`, { params: { applicationId: copyFromQuery, workspaceId: currentWorkspaceId }, withCredentials: true })
-                        .then(response => {
-                            const data: ApplicationForm = response.data;
+                    setAppForm(data);
+                    methods.reset(data);  // フォームをリセットして新しい値を反映
+                    setMessageCode('S00009')
+                }).catch(err => {
+                    if (err instanceof AxiosError) {
+                        if (err.response?.status === 401) {
+                            navigate('/account/login?m=E00012');
+                            scrollToTop();
+                        } else {
+                            setMessageCode(err.response?.data.messageCode);
+                            scrollToTop();
+                        }
+                    }
+                })
+        } else {
+            axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true })
+                .then(response => {
+                    const user: User = response.data;
+                    if (!user.userId) {
+                        navigate('/account/login?m=E00006');
+                    }
 
-                            setAppForm(data);
-                            methods.reset(data);  // フォームをリセットして新しい値を反映
-                            setMessageCode('S00009')
-                        }).catch(err => {
-                            if (err instanceof AxiosError) {
-                                if (err.response?.status === 401) {
-                                    navigate('/account/login?m=E00012');
-                                    scrollToTop();
-                                } else {
-                                    setMessageCode(err.response?.data.messageCode);
-                                    scrollToTop();
-                                }
-                            }
-                        })
-                } else {
-                    axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true })
-                        .then(response => {
-                            const user: User = response.data;
-                            if (!user.userId) {
-                                navigate('/account/login?m=E00006');
-                            }
+                    setUser(user);
+                }).catch(err => {
+                    if (err.response?.status === 500) {
+                        setMessageCode('E00001');
+                        setApplicationId(0);
+                    } else if (err.response?.status === 401) {
+                        navigate('/account/login?m=E00006');
+                    } else {
+                        setMessageCode('E00005');
+                    }
+                })
 
-                            setUser(user);
-                        }).catch(err => {
-                            if (err.response?.status === 500) {
-                                setMessageCode('E00001');
-                                setApplicationId(0);
-                            } else if (err.response?.status === 401) {
-                                navigate('/account/login?m=E00006');
-                            } else {
-                                setMessageCode('E00005');
-                            }
-                        })
-
-                }
-                setLoading(false);
-            })
+        }
+        setLoading(false);
     }, [currentWorkspaceId, searchParams, variant, methods, navigate]);
 
     useEffect(() => {
