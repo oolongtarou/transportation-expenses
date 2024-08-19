@@ -19,6 +19,8 @@ coverage
 
 # API keys and secrets
 .env
+.env.local
+.env.production
 
 # Dependency directory
 node_modules
@@ -34,6 +36,7 @@ Thumbs.db
 
 # Ignore built ts files
 dist/**/*
+build
 
 # ignore yarn.lock
 yarn.lock
@@ -60,3 +63,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+.gitignore

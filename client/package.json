@@ -4,10 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev": "vite",
+    "heroku-postbuild": "npm run build --mode production",
+    "start": "serve -s build",
+    "build": "tsc && vite build --mode production",
+    "serve": "vite preview"
   },
   "dependencies": {
     "@emotion/react": "^11.13.0",
@@ -39,6 +42,7 @@
     "react-resizable-panels": "^2.0.23",
     "react-router-dom": "^6.26.0",
     "react-select": "^5.8.0",
+    "serve": "^14.2.3",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.23.8"

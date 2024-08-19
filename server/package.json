@@ -4,7 +4,10 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "dev": "npx nodemon src/app.ts"
+    "dev": "npx nodemon src/app.ts",
+    "build": "npx tsc ",
+    "start": "node build/app.js",
+    "postinstall": "npx prisma generate"
   },
   "keywords": [],
   "author": "",

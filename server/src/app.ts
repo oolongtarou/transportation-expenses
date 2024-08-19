@@ -7,7 +7,6 @@ import Redis from 'ioredis';
 import RedisStore from 'connect-redis'
 
 // 自作
-import prisma from "./infra/db";
 import { toHashed } from "./lib/cipher";
 import { UserRepository } from "./repositories/user-repository";
 import rateLimit from "express-rate-limit";
@@ -18,7 +17,7 @@ import { AppFormRepository } from "./repositories/app-form-repository";
 import { ApplicationForm, SearchOption } from "./schema/post";
 import { toNumber } from "./lib/converter";
 import { ApplicationStatus } from "./enum/app-form";
-import { Authorities, Authority, hasAuthority, hasWorkspaceAuthority } from '../../lib/auth';
+import { Authorities, Authority, hasAuthority, hasWorkspaceAuthority } from './lib/auth';
 
 
 declare module 'express-session' {
@@ -46,31 +45,33 @@ const redisClient = new Redis(redisUrl, {
     password: process.env.REDIS_PASSWORD,
 });
 
-// const limiter = rateLimit({
-//     windowMs: 15 * 60 * 1000,
-//     max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
-//     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-//     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-// });
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 1000, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
 
-// app.use(limiter);
+app.use(limiter);
 
+app.set('trust proxy', true);
 
 app.use(session({
     secret: process.env.SESSION_SECRET as string,
     resave: false,
-    saveUninitialized: false,
+    // unset: 'destroy',
     cookie: {
-        path: '/',
         httpOnly: true,
-        secure: false,
-        maxAge: 1000 * 60 * 60
+        secure: true,
+        sameSite: 'none',
+        maxAge: 1000 * 60 * 60 * 24 * 365
     },
     store: new RedisStore({
         client: redisClient,
         disableTouch: true
     })
 }));
+
 
 // CORSの許可
 app.use((req, res, next) => {
@@ -110,18 +111,28 @@ app.post("/account/login", async (req: Request, res: Response) => {
         const userWorkspaces = await WorkspaceRepository.findByUserId(user.userId);
         const userAuthorities = await AuthorityRepository.findByUserId(user.userId);
 
+
         // ログイン成功。
         req.session.userId = user.userId;
         req.session.userName = user.userName;
         req.session.mailAddress = user.email;
         req.session.workspaces = userWorkspaces ?? []
         req.session.authorities = userAuthorities ?? [];
-        res.status(200).json({
-            'userId': req.session.userId,
-            'userName': req.session.userName,
-            'workspaces': req.session.workspaces,
-            'authorities': req.session.authorities,
+
+        req.session.save((err) => {
+            if (err) {
+                console.error('セッションの保存に失敗しました:', err);
+
+                return res.status(500).send('セッションの保存に失敗しました');
+            }
+            res.status(200).json({
+                'userId': req.session.userId,
+                'userName': req.session.userName,
+                'workspaces': req.session.workspaces,
+                'authorities': req.session.authorities,
+            });
         });
+
     } catch (err) {
         console.error(`メールアドレスとパスワードをキーにしてユーザー情報を取得する処理でエラーが発生しました：${err}`);
         res.status(500).json({
