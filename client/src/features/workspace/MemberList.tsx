@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import WorkspaceInviteDialog from "./WorkspaceInviteDialog";
 import { useLocation } from "react-router-dom";
 import { getWorkspaceIdFrom } from "@/lib/user-workspace";
+import { waitFor } from "@/lib/utils";
 
 const MemberList = () => {
     const { currentWorkspace, myAuthorities } = useAuth();
@@ -17,17 +18,24 @@ const MemberList = () => {
     const [originalMembers, setOriginalMembers] = useState<User[]>([]);
     const [filterText, setFilterText] = useState<string>("");
     const [selectedAuthorities, setSelectedAuthorities] = useState<number[]>([]); // 選択された権限IDを管理する状態
+    const [isLoading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get<RawUserData[]>(`${import.meta.env.VITE_SERVER_DOMAIN}/workspace/member-list`, { params: { workspaceId: getWorkspaceIdFrom(location.pathname) } })
-            .then(response => {
-                const workspaceMembers = ToWorkspaceMembers(response.data);
-                setMembers(workspaceMembers);
-                setOriginalMembers(workspaceMembers);  // オリジナルのリストを保存しておく
-            })
-            .catch(error => {
-                console.error(error);
-            });
+        setLoading(true);
+        waitFor(3).then(() => {
+
+            axios.get<RawUserData[]>(`${import.meta.env.VITE_SERVER_DOMAIN}/workspace/member-list`, { params: { workspaceId: getWorkspaceIdFrom(location.pathname) } })
+                .then(response => {
+                    const workspaceMembers = ToWorkspaceMembers(response.data);
+                    setMembers(workspaceMembers);
+                    setOriginalMembers(workspaceMembers);  // オリジナルのリストを保存しておく
+                })
+                .catch(error => {
+                    console.error(error);
+                }).finally(() => {
+                    setLoading(false);
+                });
+        })
     }, [currentWorkspace?.workspaceId, location.pathname]);
 
     useEffect(() => {
@@ -75,7 +83,7 @@ const MemberList = () => {
                         ))}
                     </ToggleGroup>
                 </section>
-                <MemberTable members={members} myAuthorities={myAuthorities} />
+                <MemberTable members={members} myAuthorities={myAuthorities} isLoading={isLoading} />
                 <Separator className="mb-5 max-w-[1200px]" />
             </main>
         </div>

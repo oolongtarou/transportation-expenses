@@ -6,16 +6,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import MemberEdit from './MemberEdit';
 import { useLocation } from 'react-router-dom';
 import { getWorkspaceIdFrom } from '@/lib/user-workspace';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface MemberTableProps {
     members: User[]
     myAuthorities: Authority[]
+    isLoading: boolean
 }
 
 const MemberTable = (props: MemberTableProps) => {
     const location = useLocation();
 
-    const { members, myAuthorities } = props;
+    const { members, myAuthorities, isLoading } = props;
     return (
         <Table className="max-w-[1200px] table-auto text-pale-blue">
             <TableHeader>
@@ -33,40 +35,60 @@ const MemberTable = (props: MemberTableProps) => {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {members.map(member => (
-                    <TableRow
-                        key={member.userId}
-                        style={{ textAlign: 'left' }}
-                    >
-                        <TableCell className='font-bold text-lg'>{member.userName}</TableCell>
-                        <TableCell>{member.mailAddress}</TableCell>
-                        {AuthorityArray.map(authority => (
-                            <TableCell key={authority.authorityId} className='text-center px-0'>
-                                <Checkbox checked={hasAuthority(member.authorities, authority.authorityId)} />
-                            </TableCell>
-                        ))}
-                        {hasAuthority(myAuthorities.filter(authority => authority.workspaceId === getWorkspaceIdFrom(location.pathname)), Authorities.ADMIN)
-                            ?
-                            <TableCell>
-                                <Dialog>
-                                    <DialogTrigger className="text-right">
-                                        <span className='btn btn-link'>編集</span>
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-xl" aria-describedby="ワークスペースに招待するためのダイアログです">
-                                        <DialogHeader>
-                                            <DialogTitle>
-                                            </DialogTitle>
-                                        </DialogHeader>
-                                        <MemberEdit user={member} />
-                                    </DialogContent>
-                                </Dialog>
-                            </TableCell>
-                            : <></>}
-                    </TableRow>
-                ))}
+                {isLoading
+                    ? <SkeletonTableRows rowCount={5} />
+                    : members.map(member => (
+                        <TableRow
+                            key={member.userId}
+                            style={{ textAlign: 'left' }}
+                        >
+                            <TableCell className='font-bold text-lg'>{member.userName}</TableCell>
+                            <TableCell>{member.mailAddress}</TableCell>
+                            {AuthorityArray.map(authority => (
+                                <TableCell key={authority.authorityId} className='text-center px-0'>
+                                    <Checkbox checked={hasAuthority(member.authorities, authority.authorityId)} />
+                                </TableCell>
+                            ))}
+                            {hasAuthority(myAuthorities.filter(authority => authority.workspaceId === getWorkspaceIdFrom(location.pathname)), Authorities.ADMIN)
+                                ?
+                                <TableCell>
+                                    <Dialog>
+                                        <DialogTrigger className="text-right">
+                                            <span className='btn btn-link'>編集</span>
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-xl" aria-describedby="ワークスペースに招待するためのダイアログです">
+                                            <DialogHeader>
+                                                <DialogTitle>
+                                                </DialogTitle>
+                                            </DialogHeader>
+                                            <MemberEdit user={member} />
+                                        </DialogContent>
+                                    </Dialog>
+                                </TableCell>
+                                : <></>}
+                        </TableRow>
+                    ))}
             </TableBody>
         </Table>
     )
 }
 
 export default MemberTable
+
+
+const SkeletonTableRows: React.FC<{ rowCount: number }> = ({ rowCount }) => {
+    return (
+        <>
+            {Array.from({ length: rowCount }).map((_, index) => (
+                <TableRow key={index}>
+                    <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                    {AuthorityArray.map(authority => (
+                        <TableCell key={authority.authorityId}><Skeleton className="h-4 w-full" /></TableCell>
+                    ))}
+                    <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                </TableRow>
+            ))}
+        </>
+    );
+};
