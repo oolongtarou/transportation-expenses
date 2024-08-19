@@ -8,3 +8,11 @@ export function cn(...inputs: ClassValue[]) {
 export function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+export function waitFor(seconds: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, seconds * 1000);
+  });
+}

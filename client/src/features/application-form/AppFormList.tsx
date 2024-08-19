@@ -16,6 +16,8 @@ import { SelectOption } from "@/components/SelectBox";
 import { toNumberArray } from "@/lib/select";
 import { CustomPagination } from "@/components/Pagination";
 import { getWorkspaceIdFrom } from "@/lib/user-workspace";
+import { waitFor } from "@/lib/utils";
+import MessageBox from "@/components/MessageBox";
 
 type AppFormListType = 'me' | 'approver';
 
@@ -42,9 +44,10 @@ const AppFormList = (props: AppFormListProps) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [selectedOptions, setSelectedOptions] = useState<MultiValue<SelectOption>>([]);
     const [numberOfItems, setNumberOfItems] = useState<SingleValue<SelectOption>>(numberOfItemsOptions[0]);
-
+    const [isLoading, setLoading] = useState(true);
     const currentPage = Number(searchParams.get('page') ?? '1');
     const currentWorkSpace = getWorkspaceIdFrom(location.pathname);
+    const [messageCode, setMessageCode] = useState<string>('');
     const onStatusOptionChanged = (selected: MultiValue<SelectOption>) => {
         setSelectedOptions(selected);
     };
@@ -93,14 +96,17 @@ const AppFormList = (props: AppFormListProps) => {
             setTotal(res.data.count);  // totalをセット
 
             if (res.data.loggedIn) {
+                await waitFor(3);
                 setAppForms(fetchedAppForms);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+                setLoading(false);
             } else {
                 setIsLoggedIn(false);
                 navigate('/');
             }
         } catch (error) {
             console.error("データの取得に失敗しました", error);
+            setMessageCode('E00001');
         }
     };
 
@@ -134,6 +140,7 @@ const AppFormList = (props: AppFormListProps) => {
 
     return (
         <div className="container">
+            <MessageBox messageCode={messageCode} />
             <header>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <h2 className="heading-2">
@@ -307,7 +314,7 @@ const AppFormList = (props: AppFormListProps) => {
                 </form>
             </header>
             <main>
-                <AppListTable appForms={appForms} className="mb-3" />
+                <AppListTable appForms={appForms} className="mb-3" isLoading={isLoading} />
                 <CustomPagination currentPage={currentPage} total={total} itemsPerPage={Number(numberOfItems?.value)} onPageChange={handlePageChange} />
             </main>
         </div>
