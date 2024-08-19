@@ -260,6 +260,27 @@ app.get('/workspace/approvers', async (req: Request, res: Response) => {
     }
 });
 
+app.get('/workspace/settings', async (req: Request, res: Response) => {
+    const workspaceIdQuery = req.query.workspaceId;
+    const workspaceId = toNumber(workspaceIdQuery);
+    if (workspaceId) {
+        try {
+            const approvers = await WorkspaceRepository.findWorkspaceInfoBy(workspaceId);
+            res.status(200).json(approvers);
+        } catch (err) {
+            console.log(err);
+            res.status(500).json({
+                'messageCode': 'E00001',
+            })
+        }
+    } else {
+        res.status(200).json({
+            loggedIn: true,
+            'messageCode': 'E00010',
+        })
+    }
+});
+
 app.get('/app-form/review', async (req: Request, res: Response) => {
     try {
         if (!req.session.userName) {

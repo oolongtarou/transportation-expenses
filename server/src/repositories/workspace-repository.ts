@@ -81,4 +81,19 @@ export class WorkspaceRepository {
 
         return formattedResult[0];
     }
+
+    static async findWorkspaceInfoBy(workspaceId: number): Promise<Workspace | null> {
+        try {
+            const workspace = await prisma.workspace.findUnique({
+                where: {
+                    workspaceId: workspaceId,
+                },
+            });
+
+            return workspace;
+        } catch (error) {
+            console.error('Error retrieving workspace:', error);
+            throw error;
+        }
+    }
 }

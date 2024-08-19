@@ -1,6 +1,8 @@
 export interface Workspace {
     workspaceId: number
     workspaceName: string
+    description?: string
+    approvalStep: number
     workspaceIcon?: File
 }
 
