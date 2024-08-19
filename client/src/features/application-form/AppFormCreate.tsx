@@ -17,6 +17,7 @@ import { scrollToTop } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import AppFormStatus from "./components/AppFormStatus";
 import { Skeleton } from "@/components/ui/skeleton";
+import MustBadge from "@/components/MustBadge";
 
 interface AppFormCreateProps {
     inputAppForm: ApplicationForm
@@ -479,25 +480,32 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     </>
                     : null
                 }
-                <div className="flex items-center mb-5">
-                    <label htmlFor="applicationTitle" className="font-bold text-lg w-32">タイトル：</label>
-                    <div>
-                        {isLoading
-                            ? <Skeleton className="h-8 w-72" />
-                            : variant === 'create'
-                                ? <Input
-                                    type='text'
-                                    id="applicationTitle"
-                                    className="w-72"
-                                    defaultValue={appForm.title}
-                                    disabled={!editing}
-                                    {...register('title')}
-                                />
-                                : <p className="text-lg w-72 ">
-                                    {appForm.title}
-                                </p>
-                        }
-                        {errors && errors.title?.message ? <p className="text-red-500">{errors.title.message}</p> : <></>}
+
+
+                <div className=" mb-5">
+                    {editing ? <MustBadge /> : null}
+                    <div className="flex items-center">
+                        <div className="w-32">
+                            <label htmlFor="applicationTitle" className="font-bold text-lg ml-1">タイトル：</label>
+                        </div>
+                        <div>
+                            {isLoading
+                                ? <Skeleton className="h-8 w-72" />
+                                : variant === 'create'
+                                    ? <Input
+                                        type='text'
+                                        id="applicationTitle"
+                                        className="w-72"
+                                        defaultValue={appForm.title}
+                                        disabled={!editing}
+                                        {...register('title')}
+                                    />
+                                    : <p className="text-lg w-72 ">
+                                        {appForm.title}
+                                    </p>
+                            }
+                            {errors && errors.title?.message ? <p className="text-red-500">{errors.title.message}</p> : <></>}
+                        </div>
                     </div>
                 </div>
 

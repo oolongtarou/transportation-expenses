@@ -11,6 +11,7 @@ import { AppFormDetail, appFormDetailInitialData, ApplicationForm, calculateTota
 import { DialogDescription } from "@radix-ui/react-dialog"
 import { useFieldArray, useFormContext, UseFormSetValue, UseFormWatch } from "react-hook-form"
 import { Skeleton } from "@/components/ui/skeleton"
+import MustBadge from "@/components/MustBadge"
 
 export interface AppFormTableProps {
     tableRows: AppFormDetail[]
@@ -169,11 +170,11 @@ const AppFormTable = (props: AppFormTableProps) => {
             <Table className="min-w-[1200px] table-auto">
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-[100px]">日付</TableHead>
+                        <TableHead className="w-[100px]">日付{editing ? <MustBadge /> : null}</TableHead>
                         <TableHead>説明</TableHead>
                         <TableHead>移動手段</TableHead>
-                        <TableHead>経路</TableHead>
-                        <TableHead className="text-right w-40">片道金額</TableHead>
+                        <TableHead>経路{editing ? <MustBadge /> : null}</TableHead>
+                        <TableHead className="text-right w-40">片道金額{editing ? <MustBadge /> : null}</TableHead>
                         <TableHead className="text-center">往復</TableHead>
                         <TableHead className="text-right max-w-32">金額</TableHead>
                         {editing ?
