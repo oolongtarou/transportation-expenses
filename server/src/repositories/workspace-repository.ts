@@ -1,4 +1,6 @@
+import { UserWorkspace } from "@prisma/client";
 import prisma from "../infra/db";
+import { Authorities } from "../lib/auth";
 import { Workspace, WorkspaceMember } from "../lib/workspace";
 
 export class WorkspaceRepository {
@@ -92,7 +94,52 @@ export class WorkspaceRepository {
 
             return workspace;
         } catch (error) {
-            console.error('Error retrieving workspace:', error);
+            console.error('ワークスペース情報を取得する処理でエラーが発生しました。:', error);
+            throw error;
+        }
+    }
+
+    static async inviteUser(userId: number, workspaceId: number) {
+        try {
+            await prisma.$transaction(async (prisma) => {
+                // 1. user_workspaces テーブルにデータをインサート
+                await prisma.userWorkspace.create({
+                    data: {
+                        userId: userId,
+                        workspaceId: workspaceId,
+                    },
+                });
+
+                // 2. user_authorities テーブルにデータをインサート
+                await prisma.userAuthority.create({
+                    data: {
+                        userId: userId,
+                        workspaceId: workspaceId,
+                        authorityId: Authorities.APPLICATION,
+                    },
+                });
+            });
+
+        } catch (error) {
+            console.error('ユーザーをワークスペースに招待する処理でエラーが発生しました:', error);
+            throw error; // エラーが発生した場合、トランザクションはロールバックされます
+        }
+    }
+
+    static async findUserWorkspace(userId: number, workspaceId: number): Promise<UserWorkspace | null> {
+        try {
+            const userWorkspace = await prisma.userWorkspace.findUnique({
+                where: {
+                    userId_workspaceId: {
+                        userId: userId,
+                        workspaceId: workspaceId,
+                    },
+                },
+            });
+
+            return userWorkspace;
+        } catch (error) {
+            console.error('ユーザーワークスペースを取得する処理でエラーが発生しました:', error);
             throw error;
         }
     }

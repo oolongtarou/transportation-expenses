@@ -39,7 +39,7 @@ const ApprovalRoute = () => {
                 .map(approver => approver.userName) || [];
             rows.push(
                 isLoading
-                    ? <TableRow>
+                    ? <TableRow key={step}>
                         <TableCell className="h-12 w-12">
                             <Skeleton className="h-12 w-12" />
                         </TableCell>

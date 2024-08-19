@@ -7,8 +7,9 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Separator } from "@/components/ui/separator";
 import WorkspaceInviteDialog from "./WorkspaceInviteDialog";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { getWorkspaceIdFrom } from "@/lib/user-workspace";
+import MessageBox from "@/components/MessageBox";
 
 const MemberList = () => {
     const { currentWorkspace, myAuthorities } = useAuth();
@@ -18,6 +19,8 @@ const MemberList = () => {
     const [filterText, setFilterText] = useState<string>("");
     const [selectedAuthorities, setSelectedAuthorities] = useState<number[]>([]); // 選択された権限IDを管理する状態
     const [isLoading, setLoading] = useState(true);
+    const [messageCode, setMessageCode] = useState<string | null>('');
+    const [searchParams] = useSearchParams();
 
     useEffect(() => {
         setLoading(true);
@@ -30,9 +33,10 @@ const MemberList = () => {
             .catch(error => {
                 console.error(error);
             }).finally(() => {
+                setMessageCode(searchParams.get('m'));
                 setLoading(false);
             });
-    }, [currentWorkspace?.workspaceId, location.pathname]);
+    }, [currentWorkspace?.workspaceId, location.pathname, searchParams]);
 
     useEffect(() => {
         const filteredMembers = originalMembers.filter(member =>
@@ -58,6 +62,7 @@ const MemberList = () => {
 
     return (
         <div className="container">
+            <MessageBox messageCode={messageCode} />
             <header className="flex justify-between items-center">
                 <h2 className="heading-2">メンバー一覧</h2>
                 <WorkspaceInviteDialog />
