@@ -1,17 +1,19 @@
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { ThreeDots } from 'react-loader-spinner'
+
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
+
 import { loginSchema } from '../schema/user-schema';
-import axios from 'axios';
-// import axios, { AxiosError } from 'axios';
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 import { getWorkspaceWithSmallestId } from '@/lib/user-workspace';
 import MessageBox from '@/components/MessageBox';
+
 
 type LoginFormData = {
     email: string;
@@ -23,6 +25,7 @@ const Login = () => {
     const navigate = useNavigate();
     const [messageCode, setMessageCode] = useState<string | null>('');
     const [searchParams] = useSearchParams();
+    const [isLoading, setLoading] = useState(false);
 
     const {
         register,
@@ -51,6 +54,7 @@ const Login = () => {
     }, [searchParams])
 
     const onSubmit = handleSubmit((data: LoginFormData) => {
+        setLoading(true);
         axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/account/login`, data, { withCredentials: true })
             .then((response) => {
                 if (response.data.userId) {
@@ -65,46 +69,65 @@ const Login = () => {
             })
             .catch(() => {
                 setMessageCode('E00001')
+            }).finally(() => {
+                setLoading(false);
             })
     });
 
     return (
         <>
-            <MessageBox messageCode={messageCode} />
-            <form onSubmit={onSubmit}>
-                <div className="w-full mb-5">
-                    <Label htmlFor="email">メールアドレス</Label>
-                    <Input
-                        type="text"
-                        id="email"
-                        placeholder="example@example.com"
-                        className='mt-1'
-                        {...register("email")}
+            {isLoading
+                ? <div className='h-[80px] w-[80px] m-auto'>
+                    <ThreeDots
+                        visible={true}
+                        height="80"
+                        width="80"
+                        color="#0067c0"
+                        radius="9"
+                        ariaLabel="three-dots-loading"
+                        wrapperStyle={{}}
+                        wrapperClass=""
                     />
-                    {errors.email && <p className='text-red-500'>{errors.email.message}</p>}
                 </div>
-                <div className="w-full mb-5">
-                    <Label htmlFor="password">パスワード</Label>
-                    <Input
-                        type="password"
-                        id="password"
-                        placeholder="password"
-                        className='mt-1'
-                        {...register("password")}
-                    />
-                    {errors.password && <p className='text-red-500'>{errors.password.message}</p>}
-                </div>
-                <div className='text-center mb-5'>
-                    <Link to="/account/password/reset-link" className='text-pale-blue text-sm'>
-                        パスワードを忘れた場合
-                    </Link>
-                </div>
-                <Button type='submit' className='btn btn-primary w-full mb-10'>ログイン</Button>
-                <div className='text-center mb-1'>
-                    <p className='text-pale-blue text-sm'>アカウントを持っていない場合</p>
-                </div>
-                <Link to="/account/signup" className='block btn btn-light w-full'>アカウントを作成する</Link>
-            </form>
+
+                : <>
+                    <MessageBox messageCode={messageCode} />
+                    <form onSubmit={onSubmit}>
+                        <div className="w-full mb-5">
+                            <Label htmlFor="email">メールアドレス</Label>
+                            <Input
+                                type="text"
+                                id="email"
+                                placeholder="example@example.com"
+                                className='mt-1'
+                                {...register("email")}
+                            />
+                            {errors.email && <p className='text-red-500'>{errors.email.message}</p>}
+                        </div>
+                        <div className="w-full mb-5">
+                            <Label htmlFor="password">パスワード</Label>
+                            <Input
+                                type="password"
+                                id="password"
+                                placeholder="password"
+                                className='mt-1'
+                                {...register("password")}
+                            />
+                            {errors.password && <p className='text-red-500'>{errors.password.message}</p>}
+                        </div>
+                        <div className='text-center mb-5'>
+                            <Link to="/account/password/reset-link" className='text-pale-blue text-sm'>
+                                パスワードを忘れた場合
+                            </Link>
+                        </div>
+                        <Button type='submit' className='btn btn-primary w-full mb-10'>ログイン</Button>
+                        <div className='text-center mb-1'>
+                            <p className='text-pale-blue text-sm'>アカウントを持っていない場合</p>
+                        </div>
+                        <Link to="/account/signup" className='block btn btn-light w-full'>アカウントを作成する</Link>
+                    </form>
+                </>
+            }
         </>
     )
 }
