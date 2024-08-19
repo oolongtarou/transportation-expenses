@@ -16,7 +16,6 @@ import { SelectOption } from "@/components/SelectBox";
 import { toNumberArray } from "@/lib/select";
 import { CustomPagination } from "@/components/Pagination";
 import { getWorkspaceIdFrom } from "@/lib/user-workspace";
-import { waitFor } from "@/lib/utils";
 import MessageBox from "@/components/MessageBox";
 
 type AppFormListType = 'me' | 'approver';
@@ -80,6 +79,7 @@ const AppFormList = (props: AppFormListProps) => {
     // データを取得する関数
     const fetchData = async (page: number, searchOptions: SearchFormInputs) => {
         try {
+            setLoading(true);
             const endPoint = appFormListType === 'me'
                 ? `${import.meta.env.VITE_SERVER_DOMAIN}/app-forms/me`
                 : appFormListType === 'approver'
@@ -96,10 +96,8 @@ const AppFormList = (props: AppFormListProps) => {
             setTotal(res.data.count);  // totalをセット
 
             if (res.data.loggedIn) {
-                await waitFor(3);
                 setAppForms(fetchedAppForms);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                setLoading(false);
             } else {
                 setIsLoggedIn(false);
                 navigate('/');
@@ -107,6 +105,8 @@ const AppFormList = (props: AppFormListProps) => {
         } catch (error) {
             console.error("データの取得に失敗しました", error);
             setMessageCode('E00001');
+        } finally {
+            setLoading(false);
         }
     };
 
