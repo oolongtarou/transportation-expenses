@@ -83,7 +83,7 @@ const WorkspaceNav = (props: WorkspaceNavProps) => {
 
     return (
         <>
-            <ul className="min-h-screen-custom py-5 pl-5 min-w-72">
+            <ul className="min-h-screen-custom py-5 pl-5 min-w-96">
                 <li className="flex justify-between btn btn-link" onClick={onToggleNav} style={{ padding: '0px' }}>
                     <h2 className="font-bold text-lg ">{currentWorkspace?.workspaceName}</h2>
                     <button className="flex justify-center items-center">

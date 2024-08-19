@@ -14,7 +14,7 @@ const MainLayout = () => {
         <>
             <Header isLoggedin={isLoggedin} />
             <ResizablePanelGroup direction="horizontal">
-                <ResizablePanel minSize={10} maxSize={20} hidden={!isNavigationVisible}>
+                <ResizablePanel minSize={10} maxSize={30} hidden={!isNavigationVisible}>
                     <WorkspaceNav onToggleNav={() => setIsNavigationVisible(!isNavigationVisible)} />
                 </ResizablePanel>
                 <ResizableHandle />

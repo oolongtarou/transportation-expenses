@@ -50,7 +50,7 @@ const Header = (props: HeaderProps) => {
                         <PopoverContent align='start'>
                             <h3 className='mx-1'>現在のワークスペース</h3>
                             <ul className='text-left flex flex-col gap-3'>
-                                <li className='btn my-3 h-14 leading-10' style={{ textAlign: 'left', cursor: 'auto' }}>
+                                <li className='btn my-3 h-14 leading-10' style={{ textAlign: 'left', cursor: 'auto', textWrap: 'nowrap' }}>
                                     {currentWorkspaceName}
                                 </li>
                             </ul>
