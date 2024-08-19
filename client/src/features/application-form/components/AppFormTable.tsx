@@ -10,16 +10,18 @@ import { formatWithCommas } from "@/lib/math"
 import { AppFormDetail, appFormDetailInitialData, ApplicationForm, calculateTotalAmount, Route } from "../app-form"
 import { DialogDescription } from "@radix-ui/react-dialog"
 import { useFieldArray, useFormContext, UseFormSetValue, UseFormWatch } from "react-hook-form"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export interface AppFormTableProps {
     tableRows: AppFormDetail[]
     editing: boolean
     watch: UseFormWatch<ApplicationForm>
     setValue: UseFormSetValue<ApplicationForm>
+    isLoading: boolean
 }
 
 const AppFormTable = (props: AppFormTableProps) => {
-    const { tableRows, editing, setValue } = props;
+    const { tableRows, editing, setValue, isLoading } = props;
     const [rows, setRows] = useState<AppFormDetail[]>(tableRows);
     const [isAddingRow, setIsAddingRow] = useState(false);
     const [totalAmount, setTotalAmount] = useState(0);
@@ -47,7 +49,10 @@ const AppFormTable = (props: AppFormTableProps) => {
 
         return (
             <TableCell className="text-right max-w-32">
-                {formatWithCommas(isRoundTrip ? oneWayAmount * 2 : oneWayAmount)}
+                {isLoading
+                    ? <Skeleton className="h-10 w-full" />
+                    : formatWithCommas(isRoundTrip ? oneWayAmount * 2 : oneWayAmount)
+                }
             </TableCell>
         );
     };
@@ -184,111 +189,132 @@ const AppFormTable = (props: AppFormTableProps) => {
                     {rows.map((row, index) => (
                         <TableRow key={row.id}>
                             <TableCell>
-                                <Input
-                                    type="date"
-                                    disabled={!editing}
-                                    defaultValue={row.date}
-                                    {...register(`details.${index}.date`, {
-                                        onChange: (e) => handleInputChange(index, 'date', e.target.value)
-                                    })}
-                                />
+                                {isLoading
+                                    ? <Skeleton className="h-10 w-full" />
+                                    : <Input
+                                        type="date"
+                                        disabled={!editing}
+                                        defaultValue={row.date}
+                                        {...register(`details.${index}.date`, {
+                                            onChange: (e) => handleInputChange(index, 'date', e.target.value)
+                                        })}
+                                    />
+                                }
                                 {errors.details && errors.details[index]?.date?.message ? <p className="text-red-500">{errors.details[index]?.date?.message}</p> : <></>}
                             </TableCell>
                             <TableCell>
-                                <Input
-                                    type="text"
-                                    disabled={!editing}
-                                    defaultValue={row.description}
-                                    maxLength={20}
-                                    {...register(`details.${index}.description`, {
-                                        onChange: (e) => handleInputChange(index, 'description', e.target.value)
-                                    })}
-                                />
+                                {isLoading
+                                    ? <Skeleton className="h-10 w-full" />
+                                    : <Input
+                                        type="text"
+                                        disabled={!editing}
+                                        defaultValue={row.description}
+                                        maxLength={20}
+                                        {...register(`details.${index}.description`, {
+                                            onChange: (e) => handleInputChange(index, 'description', e.target.value)
+                                        })}
+                                    />
+                                }
                                 {errors.details && errors.details[index]?.description?.message ? <p className="text-red-500">{errors.details[index]?.description?.message}</p> : <></>}
                             </TableCell>
                             <TableCell>
-                                <Select
-                                    defaultValue={row.transportation.toString()}
-                                    disabled={!editing}
-                                    onValueChange={(value) => {
-                                        setValue(`details.${index}.transportation`, parseInt(value))
-                                        handleInputChange(index, 'transportation', parseInt(value))
-                                    }}
-                                >
-                                    <SelectTrigger className="min-w-[80px]">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent >
-                                        <SelectGroup >
-                                            <SelectItem value="1">電車</SelectItem>
-                                            <SelectItem value="2">バス</SelectItem>
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
+                                {isLoading
+                                    ? <Skeleton className="h-10 w-full" />
+                                    : <Select
+                                        defaultValue={row.transportation.toString()}
+                                        disabled={!editing}
+                                        onValueChange={(value) => {
+                                            setValue(`details.${index}.transportation`, parseInt(value))
+                                            handleInputChange(index, 'transportation', parseInt(value))
+                                        }}
+                                    >
+                                        <SelectTrigger className="min-w-[80px]">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent >
+                                            <SelectGroup >
+                                                <SelectItem value="1">電車</SelectItem>
+                                                <SelectItem value="2">バス</SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                }
+
                                 {errors.details && errors.details[index]?.transportation?.message ? <p className="text-red-500">{errors.details[index]?.transportation?.message}</p> : <></>}
                             </TableCell>
                             <TableCell className="min-w-100">
-                                {editing ?
-                                    <Dialog
-                                        open={row.isDialogOpen || false}
-                                        onOpenChange={(isOpen) => handleDialogOpenChange(row.id, isOpen)}
-                                    >
-                                        <DialogTrigger className="w-full text-left" onClick={() => setEditingRowId(row.id)}>
-                                            {row.routes.length === 0 ? (
-                                                <div className="btn btn-sub font-normal w-full">経路を入力する</div>
-                                            ) : (
-                                                row.routes.map((route, index) => (
-                                                    <div key={index}>
-                                                        {route.departureName} - {route.arrivalName} ({route.lineName})
-                                                    </div>
-                                                ))
-                                            )}
-                                        </DialogTrigger>
-                                        {errors.details && errors.details[index]?.routes?.message ? <p className="text-red-500">{errors.details[index]?.routes?.message}</p> : <></>}
-                                        <DialogContent className="max-w-4xl" aria-describedby="申請書明細行の経路を入力する画面です">
-                                            <DialogHeader>
-                                                <DialogTitle className="font-bold text-3xl mb-5">
-                                                    経路を入力する
-                                                </DialogTitle>
-                                                <DialogDescription hidden>
-                                                    申請書明細の経路を入力するための画面です。
-                                                </DialogDescription>
-                                            </DialogHeader>
-                                            {editingRowId === row.id && (
-                                                <RouteInput inputRoutes={row.routes} onComplete={(updatedRoutes) => {
-                                                    handleRoutesUpdate(row.id, updatedRoutes)
-                                                    handleInputChange(index, 'routes', updatedRoutes)
-                                                    handleDialogOpenChange(row.id, false);
-                                                }
-                                                } />
-                                            )}
-                                        </DialogContent>
-                                    </Dialog>
-                                    : row.routes.map((route, index) => (
-                                        <div key={index} >
-                                            {route.departureName} - {route.arrivalName} ({route.lineName})
-                                        </div>
-                                    ))
+                                {isLoading
+                                    ? <Skeleton className="h-10 w-full" />
+                                    :
+                                    editing ?
+                                        <Dialog
+                                            open={row.isDialogOpen || false}
+                                            onOpenChange={(isOpen) => handleDialogOpenChange(row.id, isOpen)}
+                                        >
+                                            <DialogTrigger className="w-full text-left" onClick={() => setEditingRowId(row.id)}>
+                                                {row.routes.length === 0 ? (
+                                                    <div className="btn btn-sub font-normal w-full">経路を入力する</div>
+                                                ) : (
+                                                    row.routes.map((route, index) => (
+                                                        <div key={index}>
+                                                            {route.departureName} - {route.arrivalName} ({route.lineName})
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </DialogTrigger>
+                                            {errors.details && errors.details[index]?.routes?.message ? <p className="text-red-500">{errors.details[index]?.routes?.message}</p> : <></>}
+                                            <DialogContent className="max-w-4xl" aria-describedby="申請書明細行の経路を入力する画面です">
+                                                <DialogHeader>
+                                                    <DialogTitle className="font-bold text-3xl mb-5">
+                                                        経路を入力する
+                                                    </DialogTitle>
+                                                    <DialogDescription hidden>
+                                                        申請書明細の経路を入力するための画面です。
+                                                    </DialogDescription>
+                                                </DialogHeader>
+                                                {editingRowId === row.id && (
+                                                    <RouteInput inputRoutes={row.routes} onComplete={(updatedRoutes) => {
+                                                        handleRoutesUpdate(row.id, updatedRoutes)
+                                                        handleInputChange(index, 'routes', updatedRoutes)
+                                                        handleDialogOpenChange(row.id, false);
+                                                    }
+                                                    } />
+                                                )}
+                                            </DialogContent>
+                                        </Dialog>
+                                        : row.routes.map((route, index) => (
+                                            <div key={index} >
+                                                {route.departureName} - {route.arrivalName} ({route.lineName})
+                                            </div>
+                                        ))
                                 }
                             </TableCell>
                             <TableCell className="w-40">
-                                <Input
-                                    type="number"
-                                    disabled={!editing}
-                                    defaultValue={row.oneWayAmount}
-                                    className="text-right no-spin"
-                                    {...register(`details.${index}.oneWayAmount`, {
-                                        onChange: (e) => handleInputChange(index, 'oneWayAmount', e.target.value)
-                                    })}
-                                />
+                                {isLoading
+                                    ? <Skeleton className="h-10 w-full" />
+                                    : <Input
+                                        type="number"
+                                        disabled={!editing}
+                                        defaultValue={row.oneWayAmount}
+                                        className="text-right no-spin"
+                                        {...register(`details.${index}.oneWayAmount`, {
+                                            onChange: (e) => handleInputChange(index, 'oneWayAmount', e.target.value)
+                                        })}
+                                    />
+                                }
+
                                 {errors.details && errors.details[index]?.oneWayAmount?.message ? <p className="text-red-500">{errors.details[index]?.oneWayAmount?.message}</p> : <></>}
                             </TableCell>
                             <TableCell className="text-center">
-                                <Checkbox
-                                    onCheckedChange={(checked) => handleInputChange(index, 'isRoundTrip', checked)}
-                                    defaultChecked={row.isRoundTrip}
-                                    disabled={!editing}
-                                />
+                                {isLoading
+                                    ? <Skeleton className="h-10 w-full" />
+                                    : <Checkbox
+                                        onCheckedChange={(checked) => handleInputChange(index, 'isRoundTrip', checked)}
+                                        defaultChecked={row.isRoundTrip}
+                                        disabled={!editing}
+                                    />
+                                }
+
                             </TableCell>
                             <DetailAmountCell index={index} />
                             {editing ?
@@ -316,7 +342,12 @@ const AppFormTable = (props: AppFormTableProps) => {
                 <TableFooter>
                     <TableRow>
                         <TableCell colSpan={6} className="font-bold text-lg">合計金額</TableCell>
-                        <TableCell colSpan={1} className="text-right font-bold text-lg">¥{totalAmount.toLocaleString()}</TableCell>
+                        <TableCell colSpan={1} className="text-right font-bold text-lg">
+                            {isLoading
+                                ? <Skeleton className="h-10 w-full" />
+                                : `¥${totalAmount.toLocaleString()}`
+                            }
+                        </TableCell>
                         <TableCell colSpan={2}></TableCell>
                     </TableRow>
                 </TableFooter>

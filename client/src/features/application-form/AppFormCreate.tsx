@@ -13,9 +13,10 @@ import { hasWorkspaceAuthority, User } from "@/lib/user";
 import { useEffect, useState } from "react";
 import MessageBox from "@/components/MessageBox";
 import { Authorities } from "@/lib/auth";
-import { scrollToTop } from "@/lib/utils";
+import { scrollToTop, waitFor } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import AppFormStatus from "./components/AppFormStatus";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface AppFormCreateProps {
     inputAppForm: ApplicationForm
@@ -36,6 +37,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
     const [messageCode, setMessageCode] = useState<string | null>('');
     const [searchParams] = useSearchParams();
     const [user, setUser] = useState<User | null>(null);
+    const [isLoading, setLoading] = useState(true);
     const currentWorkspaceId = getWorkspaceIdFrom(location.pathname);
     const methods = useForm<ApplicationForm>({
         mode: 'all',
@@ -54,6 +56,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
 
 
     const onSubmit = async (data: ApplicationForm, submitType: SubmitType) => {
+        setLoading(true);
         if (submitType === 'draft') {
             setIsDraftSaveDialogOpen(true);
         } else if (submitType === 'draftFix') {
@@ -173,10 +176,12 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                 scrollToTop();
             }
         }
+        setLoading(false);
     };
 
     const deleteDraft = async () => {
         try {
+            setLoading(true);
             const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/draft/delete`, { applicationId: applicationId }, { withCredentials: true });
             if (result.status === 200) {
                 methods.reset(appFormInitialData);
@@ -208,6 +213,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             }
         } finally {
             setIsDraftDeleteDialogOpen(false);
+            setLoading(false);
         }
     }
 
@@ -218,6 +224,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
      */
     const approve = async (applicationId: number) => {
         try {
+            setLoading(true);
             const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/approve`, { applicationId: applicationId, workspaceId: currentWorkspaceId }, { withCredentials: true });
             if (result.status === 200) {
                 const applicationIdQuery = searchParams.get('applicationId');
@@ -239,6 +246,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             }
         } finally {
             setIsApproveDialogOpen(false);
+            setLoading(false);
         }
     }
 
@@ -249,6 +257,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
      */
     const receive = async (applicationId: number) => {
         try {
+            setLoading(true);
             const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/receive`, { applicationId: applicationId, workspaceId: currentWorkspaceId }, { withCredentials: true });
             if (result.status === 200) {
                 const applicationIdQuery = searchParams.get('applicationId');
@@ -270,6 +279,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             }
         } finally {
             setIsReceiveDialogOpen(false);
+            setLoading(false);
         }
     }
 
@@ -280,6 +290,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
      */
     const reject = async (applicationId: number) => {
         try {
+            setLoading(true);
             const result = await axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/reject`, { applicationId: applicationId, workspaceId: currentWorkspaceId }, { withCredentials: true });
             if (result.status === 200) {
                 const applicationIdQuery = searchParams.get('applicationId');
@@ -301,6 +312,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             }
         } finally {
             setIsRejectDialogOpen(false);
+            setLoading(false);
         }
     }
 
@@ -330,69 +342,75 @@ const AppFormCreate = (props: AppFormCreateProps) => {
     }, [variant, methods])
 
     useEffect(() => {
-        const applicationIdQuery = searchParams.get('applicationId');
-        const copyFromQuery = searchParams.get('copyFrom');
-        if (applicationIdQuery) {
-            axios.get<ApplicationForm>(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/review`, { params: { applicationId: applicationIdQuery, workspaceId: currentWorkspaceId }, withCredentials: true })
-                .then(response => {
-                    const data: ApplicationForm = response.data;
-                    if (data) {
-                        setAppForm(data);
-                        methods.reset(data);  // フォームをリセットして新しい値を反映
-                        setApplicationId(data.applicationId);
-                    } else {
-                        setMessageCode('E00011')
-                    }
-                }).catch(err => {
-                    if (err.response?.status === 500) {
-                        setMessageCode('E00001');
-                        setApplicationId(0);
-                    } else if (err.response?.status === 401) {
-                        navigate('/account/login?m=E00006');
-                    } else {
-                        setMessageCode('E00005');
-                    }
-                })
-        } else if (copyFromQuery) {
-            axios.get<ApplicationForm>(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/copy`, { params: { applicationId: copyFromQuery, workspaceId: currentWorkspaceId }, withCredentials: true })
-                .then(response => {
-                    const data: ApplicationForm = response.data;
+        setLoading(true);
+        waitFor(3)
+            .then(() => {
 
-                    setAppForm(data);
-                    methods.reset(data);  // フォームをリセットして新しい値を反映
-                    setMessageCode('S00009')
-                }).catch(err => {
-                    if (err instanceof AxiosError) {
-                        if (err.response?.status === 401) {
-                            navigate('/account/login?m=E00012');
-                            scrollToTop();
-                        } else {
-                            setMessageCode(err.response?.data.messageCode);
-                            scrollToTop();
-                        }
-                    }
-                })
-        } else {
-            axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true })
-                .then(response => {
-                    const user: User = response.data;
-                    if (!user.userId) {
-                        navigate('/account/login?m=E00006');
-                    }
+                const applicationIdQuery = searchParams.get('applicationId');
+                const copyFromQuery = searchParams.get('copyFrom');
+                if (applicationIdQuery) {
+                    axios.get<ApplicationForm>(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/review`, { params: { applicationId: applicationIdQuery, workspaceId: currentWorkspaceId }, withCredentials: true })
+                        .then(response => {
+                            const data: ApplicationForm = response.data;
+                            if (data) {
+                                setAppForm(data);
+                                methods.reset(data);  // フォームをリセットして新しい値を反映
+                                setApplicationId(data.applicationId);
+                            } else {
+                                setMessageCode('E00011')
+                            }
+                        }).catch(err => {
+                            if (err.response?.status === 500) {
+                                setMessageCode('E00001');
+                                setApplicationId(0);
+                            } else if (err.response?.status === 401) {
+                                navigate('/account/login?m=E00006');
+                            } else {
+                                setMessageCode('E00005');
+                            }
+                        })
+                } else if (copyFromQuery) {
+                    axios.get<ApplicationForm>(`${import.meta.env.VITE_SERVER_DOMAIN}/app-form/copy`, { params: { applicationId: copyFromQuery, workspaceId: currentWorkspaceId }, withCredentials: true })
+                        .then(response => {
+                            const data: ApplicationForm = response.data;
 
-                    setUser(user);
-                }).catch(err => {
-                    if (err.response?.status === 500) {
-                        setMessageCode('E00001');
-                        setApplicationId(0);
-                    } else if (err.response?.status === 401) {
-                        navigate('/account/login?m=E00006');
-                    } else {
-                        setMessageCode('E00005');
-                    }
-                })
+                            setAppForm(data);
+                            methods.reset(data);  // フォームをリセットして新しい値を反映
+                            setMessageCode('S00009')
+                        }).catch(err => {
+                            if (err instanceof AxiosError) {
+                                if (err.response?.status === 401) {
+                                    navigate('/account/login?m=E00012');
+                                    scrollToTop();
+                                } else {
+                                    setMessageCode(err.response?.data.messageCode);
+                                    scrollToTop();
+                                }
+                            }
+                        })
+                } else {
+                    axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true })
+                        .then(response => {
+                            const user: User = response.data;
+                            if (!user.userId) {
+                                navigate('/account/login?m=E00006');
+                            }
 
-        }
+                            setUser(user);
+                        }).catch(err => {
+                            if (err.response?.status === 500) {
+                                setMessageCode('E00001');
+                                setApplicationId(0);
+                            } else if (err.response?.status === 401) {
+                                navigate('/account/login?m=E00006');
+                            } else {
+                                setMessageCode('E00005');
+                            }
+                        })
+
+                }
+                setLoading(false);
+            })
     }, [currentWorkspaceId, searchParams, variant, methods, navigate]);
 
     useEffect(() => {
@@ -436,19 +454,31 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                     ? <>
                         <div className="flex items-center mb-5">
                             <label className="font-bold text-lg w-32">申請書ID：</label>
-                            <p className="text-lg">{appForm.applicationId}</p>
+                            {isLoading
+                                ? <Skeleton className="h-8 w-72" />
+                                : <p className="text-lg">{appForm.applicationId}</p>
+                            }
                         </div>
                         <div className="flex items-center mb-5">
                             <label className="font-bold text-lg w-32">申請者：</label>
-                            <p className="text-lg">{appForm.user.userName}</p>
+                            {isLoading
+                                ? <Skeleton className="h-8 w-72" />
+                                : <p className="text-lg">{appForm.user.userName}</p>
+                            }
                         </div>
                         <div className="flex items-center mb-5">
                             <label className="font-bold text-lg w-32">申請日：</label>
-                            <p className="text-lg">{new Date(appForm.applicationDate).toLocaleDateString()}</p>
+                            {isLoading
+                                ? <Skeleton className="h-8 w-72" />
+                                : <p className="text-lg">{new Date(appForm.applicationDate).toLocaleDateString()}</p>
+                            }
                         </div>
                         <div className="flex items-center mb-5">
                             <label className="font-bold text-lg w-32">ステータス：</label>
-                            <AppFormStatus statusId={appForm.statusId} statusName={appForm.status.statusName} />
+                            {isLoading
+                                ? <Skeleton className="h-8 w-72" />
+                                : <AppFormStatus statusId={appForm.statusId} statusName={appForm.status.statusName} />
+                            }
                         </div>
                     </>
                     : null
@@ -456,18 +486,20 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                 <div className="flex items-center mb-5">
                     <label htmlFor="applicationTitle" className="font-bold text-lg w-32">タイトル：</label>
                     <div>
-                        {variant === 'create'
-                            ? <Input
-                                type='text'
-                                id="applicationTitle"
-                                className="w-72"
-                                defaultValue={appForm.title}
-                                disabled={!editing}
-                                {...register('title')}
-                            />
-                            : <p className="text-lg w-72 ">
-                                {appForm.title}
-                            </p>
+                        {isLoading
+                            ? <Skeleton className="h-8 w-72" />
+                            : variant === 'create'
+                                ? <Input
+                                    type='text'
+                                    id="applicationTitle"
+                                    className="w-72"
+                                    defaultValue={appForm.title}
+                                    disabled={!editing}
+                                    {...register('title')}
+                                />
+                                : <p className="text-lg w-72 ">
+                                    {appForm.title}
+                                </p>
                         }
                         {errors && errors.title?.message ? <p className="text-red-500">{errors.title.message}</p> : <></>}
                     </div>
@@ -476,7 +508,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
             </section>
             <FormProvider {...methods}>
                 <form>
-                    <AppFormTable tableRows={appForm.details} editing={editing} watch={methods.watch} setValue={methods.setValue} />
+                    <AppFormTable tableRows={appForm.details} editing={editing} watch={methods.watch} setValue={methods.setValue} isLoading={isLoading} />
                     <div className="flex justify-end gap-5 mt-5 mb-5">
                         {user && canCopy(variant, appForm, user)
                             ?
