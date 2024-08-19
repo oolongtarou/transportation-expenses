@@ -7,17 +7,20 @@ import MemberEdit from './MemberEdit';
 import { useLocation } from 'react-router-dom';
 import { getWorkspaceIdFrom } from '@/lib/user-workspace';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useState } from 'react';
 
 interface MemberTableProps {
     members: User[]
     myAuthorities: Authority[]
     isLoading: boolean
+    setMembers: React.Dispatch<React.SetStateAction<User[]>>; // 追加
 }
 
 const MemberTable = (props: MemberTableProps) => {
     const location = useLocation();
+    const [selectedMember, setSelectedMember] = useState<User | null>(null);
 
-    const { members, myAuthorities, isLoading } = props;
+    const { members, myAuthorities, isLoading, setMembers } = props;
     return (
         <Table className="max-w-[1200px] table-auto text-pale-blue">
             <TableHeader>
@@ -52,7 +55,7 @@ const MemberTable = (props: MemberTableProps) => {
                             {hasAuthority(myAuthorities.filter(authority => authority.workspaceId === getWorkspaceIdFrom(location.pathname)), Authorities.ADMIN)
                                 ?
                                 <TableCell>
-                                    <Dialog>
+                                    <Dialog open={selectedMember?.userId === member.userId} onOpenChange={(open) => open ? setSelectedMember(member) : setSelectedMember(null)}>
                                         <DialogTrigger className="text-right">
                                             <span className='btn btn-link'>編集</span>
                                         </DialogTrigger>
@@ -61,7 +64,7 @@ const MemberTable = (props: MemberTableProps) => {
                                                 <DialogTitle>
                                                 </DialogTitle>
                                             </DialogHeader>
-                                            <MemberEdit user={member} />
+                                            {selectedMember && <MemberEdit user={selectedMember} setDialogOpen={() => setSelectedMember(null)} setMembers={setMembers} />}
                                         </DialogContent>
                                     </Dialog>
                                 </TableCell>

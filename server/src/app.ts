@@ -309,7 +309,6 @@ app.get('/workspace/settings', async (req: Request, res: Response) => {
 });
 
 app.post('/workspace/invite', async (req: Request, res: Response) => {
-    console.log(req.body);
     const workspaceId = req.body.workspaceId;
     const email = req.body.email;
 
@@ -354,6 +353,82 @@ app.post('/workspace/invite', async (req: Request, res: Response) => {
         })
     }
 })
+
+
+app.post('/workspace/member/edit', async (req: Request, res: Response) => {
+    if (!req.session.userId || !req.session.authorities) {
+        res.status(401).json({
+            'messageCode': 'E00006',
+        })
+        return;
+    }
+
+    const targetUserId = req.body.userId;
+    const workspaceId = req.body.workspaceId;
+    const authorities: number[] = req.body.authorities;
+
+    if (!workspaceId) {
+        res.status(400).json({
+            'messageCode': 'E00018',
+        })
+        return;
+    }
+
+    if (!targetUserId) {
+        res.status(400).json({
+            'messageCode': 'E00022',
+        })
+        return;
+    }
+
+
+    if (!hasWorkspaceAuthority(workspaceId, req.session.authorities, Authorities.ADMIN)) {
+        res.status(400).json({
+            'messageCode': 'E00023',
+        })
+        return;
+    }
+
+    try {
+        await AuthorityRepository.replaceAuthorities(targetUserId, workspaceId, authorities)
+        res.status(200).json();
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            'messageCode': 'E00001',
+        })
+    }
+
+
+
+    // const user = await UserRepository.findByEmail(email);
+    // if (!user) {
+    //     res.status(400).json({
+    //         'messageCode': 'E00020',
+    //     })
+    //     return;
+    // }
+
+    // const userWorkspace = await WorkspaceRepository.findUserWorkspace(user.userId, workspaceId);
+    // if (userWorkspace) {
+    //     res.status(400).json({
+    //         'messageCode': 'E00021',
+    //     })
+    //     return;
+    // }
+
+
+    // try {
+    //     await WorkspaceRepository.inviteUser(user.userId, workspaceId);
+    //     res.status(200).json();
+    // } catch (err) {
+    //     console.error(err);
+    //     res.status(500).json({
+    //         'messageCode': 'E00001',
+    //     })
+    // }
+})
+
 
 app.get('/app-form/review', async (req: Request, res: Response) => {
     try {

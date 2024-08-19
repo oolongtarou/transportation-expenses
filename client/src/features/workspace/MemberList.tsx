@@ -84,7 +84,7 @@ const MemberList = () => {
                         ))}
                     </ToggleGroup>
                 </section>
-                <MemberTable members={members} myAuthorities={myAuthorities} isLoading={isLoading} />
+                <MemberTable members={members} myAuthorities={myAuthorities} isLoading={isLoading} setMembers={setMembers} />
                 <Separator className="mb-5 max-w-[1200px]" />
             </main>
         </div>
