@@ -33,20 +33,18 @@ const Login = () => {
         resolver: zodResolver(loginSchema)
     });
 
-    // useEffect(() => {
-    //     axios.get(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true })
-    //         .then((response) => {
-    //             if (response.data.userId) {
-    //                 const defaultWorkspaceId = getWorkspaceWithSmallestId(response.data.workspaces)
-    //                 navigate(`/w/${defaultWorkspaceId?.workspaceId}/app-form/create`);
-    //             } else {
-    //                 navigate('/');
-    //             }
-    //         })
-    //         .catch((err: AxiosError) => {
-    //             window.alert(`サーバーエラーが発生しました：${err.code}`);
-    //         });
-    // }, [navigate]);
+    useEffect(() => {
+        axios.get(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true })
+            .then((response) => {
+                if (response.data.userId) {
+                    const defaultWorkspaceId = getWorkspaceWithSmallestId(response.data.workspaces)
+                    navigate(`/w/${defaultWorkspaceId?.workspaceId}/app-form/create`);
+                }
+            })
+            .catch(() => {
+                setMessageCode('E00001')
+            });
+    }, [navigate]);
 
     useEffect(() => {
         setMessageCode(searchParams.get('m'));
@@ -55,24 +53,17 @@ const Login = () => {
     const onSubmit = handleSubmit((data: LoginFormData) => {
         axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/account/login`, data, { withCredentials: true })
             .then((response) => {
-                console.log('response');
-                console.log(response);
                 if (response.data.userId) {
-                    console.log('response.data')
-                    console.log(response.data)
                     setIsLoggedIn(true);
                     setMyWorkspaces(response.data.workspaces);
                     setCurrentWorkspace(getWorkspaceWithSmallestId(response.data.workspaces));
                     setMyAuthorities(response.data.authorities);
-                    console.log(`getWorkspaceWithSmallestId(response.data.workspaces)?.workspaceId:${getWorkspaceWithSmallestId(response.data.workspaces)?.workspaceId}`);
                     navigate(`/w/${getWorkspaceWithSmallestId(response.data.workspaces)?.workspaceId}/app-form/create`);
                 } else {
                     setMessageCode('E00002');
                 }
             })
-            .catch((err) => {
-                console.error(err)
-                // setError(`サーバーエラーが発生しました：${err.code}`);
+            .catch(() => {
                 setMessageCode('E00001')
             })
     });
