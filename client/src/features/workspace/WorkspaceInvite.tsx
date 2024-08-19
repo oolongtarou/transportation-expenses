@@ -29,7 +29,6 @@ const WorkspaceInvite = () => {
         setLoading(true);
         axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/workspace/invite`, { email: data.email, workspaceId: currentWorkspaceId }, { withCredentials: true })
             .then((response) => {
-                console.log(response)
                 if (response.status === 200) {
                     navigate(`/w/${currentWorkspaceId}/workspace/members?m=S00011`);
                 } else {
@@ -37,13 +36,14 @@ const WorkspaceInvite = () => {
                 }
             })
             .catch((err) => {
-                console.log(err)
                 if (err instanceof AxiosError) {
                     if (err.response?.status && err.response.data.messageCode) {
                         setMessageCode(err.response.data.messageCode)
                     } else {
                         setMessageCode('E00001')
                     }
+                } else {
+                    setMessageCode('E00001')
                 }
             }).finally(() => {
                 setLoading(false);
