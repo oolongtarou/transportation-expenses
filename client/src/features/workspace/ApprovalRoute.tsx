@@ -120,6 +120,11 @@ const ApprovalRoute = () => {
                                 </SelectContent>
                             </Select>
                         )}
+                    {!isLoading && hasWorkspaceAuthority(currentWorkspaceId ?? 0, authorities, Authorities.ADMIN) && (
+                        <div className="mr-4 my-3 mb-5 w-52">
+                            <Button className="btn btn-primary w-full">設定を変更する</Button>
+                        </div>
+                    )}
                 </div>
             </header>
             <main>
@@ -129,11 +134,6 @@ const ApprovalRoute = () => {
                         {renderRows()}
                     </TableBody>
                 </Table>
-                {!isLoading && hasWorkspaceAuthority(currentWorkspaceId ?? 0, authorities, Authorities.ADMIN) && (
-                    <div className="flex justify-end mr-4 mb-5">
-                        <Button className="btn btn-primary">設定を保存する</Button>
-                    </div>
-                )}
             </main>
         </div >
     )
