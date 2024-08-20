@@ -117,7 +117,7 @@ const AccountInfoChange = (props: AccountInfoChangeProps) => {
                             <FormErrorMessage error={errors.email} className="ml-24 mt-1" />
                         </div>
                         <section className="flex justify-evenly">
-                            <span className="btn btn-light">キャンセル</span>
+                            <span onClick={() => setDialogOpen(false)} className="btn btn-light">キャンセル</span>
                             <Button className="btn btn-primary">変更を保存する</Button>
                         </section>
                     </form>
