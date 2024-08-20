@@ -17,6 +17,7 @@ import { getWorkspaceWithSmallestId, Workspace } from "./lib/user-workspace"
 import { Authority } from "./lib/auth"
 import axios, { AxiosError } from "axios"
 import AppFormPrint from "./features/application-form/AppFormPrint"
+import Loading from "./components/Loading"
 
 // 型定義
 interface AuthContextType {
@@ -41,11 +42,12 @@ function App() {
   const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | null>(null);
   const [myWorkspaces, setMyWorkspaces] = useState<Workspace[]>([]);
   const [myAuthorities, setMyAuthorities] = useState<Authority[]>([]);
-
+  const [isLoading, setLoading] = useState(false);
   const navigate = useNavigate();
   const pathname = useLocation().pathname;
 
   useEffect(() => {
+    setLoading(true);
     // サーバーからユーザーのログイン状態やワークスペース、権限情報を取得
     axios.get(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true })
       .then((response) => {
@@ -64,40 +66,47 @@ function App() {
       .catch((err: AxiosError) => {
         console.error(`サーバーエラーが発生しました：${err.code}`);
         navigate("/");
+      }).finally(() => {
+        setLoading(false);
       });
   }, [navigate, pathname]);
 
   return (
-    <AuthContext.Provider value={{
-      isLoggedin, setIsLoggedIn,
-      currentWorkspace, setCurrentWorkspace,
-      myWorkspaces, setMyWorkspaces,
-      myAuthorities, setMyAuthorities
-    }}>
-      <Routes>
-        <Route element={<LoginLayout />}>
-          <Route path='/' element={<Login />} />
-          <Route path='/account/login' element={<Login />} />
-          <Route path='/account/signup' element={<SignUp />} />
-          <Route path='/account/password/reset-link' element={<PasswordResetLink />} />
-        </Route>
-        <Route element={<MainLayout />}>
-          <Route path='/w/:workspaceId/app-form/create' element={<AppFormCreate inputAppForm={appFormInitialData} variant="create" />} />
-          <Route path='/w/:workspaceId/app-form/review' element={<AppFormCreate inputAppForm={appFormInitialData} variant="review" />} />
-          <Route path='/w/:workspaceId/app-form/list/me' element={<AppFormList appFormListType="me" />} />
-          <Route path='/w/:workspaceId/app-form/list/approver' element={<AppFormList appFormListType="approver" />} />
+    <>
+      {isLoading ? <Loading />
+        :
+        <AuthContext.Provider value={{
+          isLoggedin, setIsLoggedIn,
+          currentWorkspace, setCurrentWorkspace,
+          myWorkspaces, setMyWorkspaces,
+          myAuthorities, setMyAuthorities
+        }}>
+          <Routes>
+            <Route element={<LoginLayout />}>
+              <Route path='/' element={<Login />} />
+              <Route path='/account/login' element={<Login />} />
+              <Route path='/account/signup' element={<SignUp />} />
+              <Route path='/account/password/reset-link' element={<PasswordResetLink />} />
+            </Route>
+            <Route element={<MainLayout />}>
+              <Route path='/w/:workspaceId/app-form/create' element={<AppFormCreate inputAppForm={appFormInitialData} variant="create" />} />
+              <Route path='/w/:workspaceId/app-form/review' element={<AppFormCreate inputAppForm={appFormInitialData} variant="review" />} />
+              <Route path='/w/:workspaceId/app-form/list/me' element={<AppFormList appFormListType="me" />} />
+              <Route path='/w/:workspaceId/app-form/list/approver' element={<AppFormList appFormListType="approver" />} />
 
-          <Route path='/w/:workspaceId/workspace/members' element={<MemberList />} />
-          <Route path='/w/:workspaceId/workspace/approval-route' element={<ApprovalRoute />} />
-          <Route path='/w/:workspaceId/workspace/setting' element={<WorkspaceSetting />} />
-          <Route path='/w/:workspaceId/my-page' element={<MyPage />} />
+              <Route path='/w/:workspaceId/workspace/members' element={<MemberList />} />
+              <Route path='/w/:workspaceId/workspace/approval-route' element={<ApprovalRoute />} />
+              <Route path='/w/:workspaceId/workspace/setting' element={<WorkspaceSetting />} />
+              <Route path='/w/:workspaceId/my-page' element={<MyPage />} />
 
-          <Route path='/w/:workspaceId/account/password/change' element={<PasswordChange />} />
-        </Route>
+              <Route path='/w/:workspaceId/account/password/change' element={<PasswordChange />} />
+            </Route>
 
-        <Route path='/w/:workspaceId/app-form/print' element={<AppFormPrint />} />
-      </Routes>
-    </AuthContext.Provider>
+            <Route path='/w/:workspaceId/app-form/print' element={<AppFormPrint />} />
+          </Routes>
+        </AuthContext.Provider>
+      }
+    </>
   )
 }
 
