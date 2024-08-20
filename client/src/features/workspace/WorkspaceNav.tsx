@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Authorities, Authority, getAuthoritiesByWorkspaceId, useAuth } from "@/lib/auth";
-import { getWorkspaceIdFrom } from "@/lib/user-workspace";
+import { getWorkspaceIdFrom, Workspace } from "@/lib/user-workspace";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -56,7 +56,8 @@ interface WorkspaceNavProps {
 
 const WorkspaceNav = (props: WorkspaceNavProps) => {
     const { onToggleNav } = props;
-    const { currentWorkspace, myAuthorities } = useAuth();
+    const { myWorkspaces, myAuthorities } = useAuth();
+    const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | undefined>(undefined);
     const navigate = useNavigate();
     const location = useLocation();  // 現在のURLを取得
     const currentWorkspaceId = getWorkspaceIdFrom(location.pathname);
@@ -66,6 +67,8 @@ const WorkspaceNav = (props: WorkspaceNavProps) => {
     useEffect(() => {
         setLoading(true);
 
+
+        setCurrentWorkspace(myWorkspaces.find(workspace => workspace.workspaceId === currentWorkspaceId));
         const currentWorkspaceAuthorities: Authority[] = getAuthoritiesByWorkspaceId(myAuthorities, currentWorkspaceId ?? 0);
         const currentAuthorityIds = currentWorkspaceAuthorities.map(authority => authority.authorityId);
 
@@ -74,7 +77,7 @@ const WorkspaceNav = (props: WorkspaceNavProps) => {
         ));
         setLoading(false);
 
-    }, [currentWorkspace, myAuthorities, currentWorkspaceId]);
+    }, [currentWorkspace, myAuthorities, currentWorkspaceId, myWorkspaces]);
 
 
     const handleClick = (link: string) => {
