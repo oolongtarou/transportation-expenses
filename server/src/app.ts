@@ -176,6 +176,30 @@ app.post("/account/signup", async (req: Request, res: Response) => {
     }
 });
 
+app.post("/account/password/change", async (req: Request, res: Response) => {
+    if (!req.session.userId) {
+        res.status(401).json({
+            'messageCode': 'E00006',
+        })
+        return;
+    }
+
+    const currentPassword: string = req.body.currentPassword;
+    const newPassword: string = req.body.newPassword;
+
+    const user = await UserRepository.findByUserIdAndPassword(req.session.userId, currentPassword);
+    if (!user) {
+        res.status(400).json({ messageCode: 'E00025' });
+        return;
+    }
+
+    const result = await UserRepository.udpatePassword(req.session.userId, newPassword);
+    if (result) {
+        res.status(200).json();
+    } else {
+        res.status(500).json({ messageCode: 'E00001' })
+    }
+});
 
 // ログイン状態を確認するエンドポイント
 app.get('/auth/status', (req: Request, res: Response) => {
@@ -398,37 +422,7 @@ app.post('/workspace/member/edit', async (req: Request, res: Response) => {
             'messageCode': 'E00001',
         })
     }
-
-
-
-    // const user = await UserRepository.findByEmail(email);
-    // if (!user) {
-    //     res.status(400).json({
-    //         'messageCode': 'E00020',
-    //     })
-    //     return;
-    // }
-
-    // const userWorkspace = await WorkspaceRepository.findUserWorkspace(user.userId, workspaceId);
-    // if (userWorkspace) {
-    //     res.status(400).json({
-    //         'messageCode': 'E00021',
-    //     })
-    //     return;
-    // }
-
-
-    // try {
-    //     await WorkspaceRepository.inviteUser(user.userId, workspaceId);
-    //     res.status(200).json();
-    // } catch (err) {
-    //     console.error(err);
-    //     res.status(500).json({
-    //         'messageCode': 'E00001',
-    //     })
-    // }
 })
-
 
 app.get('/app-form/review', async (req: Request, res: Response) => {
     try {

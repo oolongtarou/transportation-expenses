@@ -37,7 +37,6 @@ const SignUp = () => {
                 setMessageCode('E00001')
             }
         } catch (err) {
-            console.log(err);
             if (err instanceof AxiosError) {
                 if (err.response?.status && err.response.data.messageCode) {
                     setMessageCode(err.response.data.messageCode)

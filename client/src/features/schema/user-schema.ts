@@ -43,3 +43,16 @@ export const workspaceInviteSchema = z.object({
 });
 
 export type WorkspaceInviteFormData = z.infer<typeof workspaceInviteSchema>;
+
+export const passwordChangeSchema = z.object({
+    currentPassword: z.string()
+        .min(1, { message: 'パスワードを入力してください' })
+        .max(50, { message: '50桁以内で入力してください' }),
+    newPassword: passwordSchema,
+    confirmPassword: z.string()
+}).refine(data => data.newPassword === data.confirmPassword, {
+    path: ['confirmPassword'],
+    message: '新しいパスワードが一致していません',
+});
+
+export type PasswordChangeFormData = z.infer<typeof passwordChangeSchema>;

@@ -141,5 +141,34 @@ export class UserRepository {
             throw error;
         }
     }
+
+    static async findByUserIdAndPassword(userId: number, password: string): Promise<User | null> {
+        try {
+            const user: User | null = await prisma.user.findUnique({
+                where: {
+                    userId: userId,
+                    password: toHashed(password)
+                }
+            });
+            return user;
+        } catch (err) {
+            console.error(err);
+            return null;
+        }
+    }
+
+    static async udpatePassword(userId: number, password: string): Promise<User | null> {
+        try {
+            const user = await prisma.user.update({
+                where: { userId: userId },
+                data: { password: toHashed(password) },
+            });
+
+            return user;
+        } catch (err) {
+            console.error(err);
+            return null;
+        }
+    }
 }
 
