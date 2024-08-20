@@ -1,10 +1,12 @@
+import MessageBox from "@/components/MessageBox"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { WorkspaceApprovers } from "@/lib/approver"
-import { useAuth } from "@/lib/auth"
+import { Authorities, Authority, useAuth } from "@/lib/auth"
+import { hasWorkspaceAuthority, User } from "@/lib/user"
 import { getWorkspaceIdFrom } from "@/lib/user-workspace"
 import axios, { AxiosError } from "axios"
 import { useEffect, useState } from "react"
@@ -13,9 +15,12 @@ import { useLocation } from "react-router-dom"
 const ApprovalRoute = () => {
     const { currentWorkspace } = useAuth();
     const location = useLocation();
+    const [messageCode, setMessageCode] = useState<string | null>('');
+    const [authorities, setAuthorities] = useState<Authority[]>([]);
     const [isLoading, setLoading] = useState(true);
     const [approvalStep, setApprovalStep] = useState<number | null>(null);
     const [workspaceApprovers, setWorkspaceApprovers] = useState<WorkspaceApprovers | null>(null);
+    const currentWorkspaceId = getWorkspaceIdFrom(location.pathname);
 
     useEffect(() => {
         setLoading(true);
@@ -24,11 +29,33 @@ const ApprovalRoute = () => {
                 setWorkspaceApprovers(response.data);
                 setApprovalStep(response.data.approvalStep)
             })
-            .catch((err: AxiosError) => {
-                console.error(err.code);
+            .catch((err) => {
+                if (err instanceof AxiosError) {
+                    if (err.response?.status && err.response.data.messageCode) {
+                        setMessageCode(err.response.data.messageCode)
+                    } else {
+                        setMessageCode('E00001')
+                    }
+                }
+            })
+
+        axios.get<User>(`${import.meta.env.VITE_SERVER_DOMAIN}/auth/status`, { withCredentials: true })
+            .then(response => {
+                setAuthorities(response.data.authorities);
+            })
+            .catch((err) => {
+                if (err instanceof AxiosError) {
+                    if (err.response?.status && err.response.data.messageCode) {
+                        setMessageCode(err.response.data.messageCode)
+                    } else {
+                        setMessageCode('E00001')
+                    }
+                }
             }).finally(() => {
                 setLoading(false);
             })
+
+
     }, [currentWorkspace, location.pathname]);
 
     const renderRows = () => {
@@ -56,12 +83,11 @@ const ApprovalRoute = () => {
                             <p>{userNames.join(', ')}</p>
                         </TableCell>
                         <TableCell className="text-right">
-                            {step > (approvalStep ?? 0)
-                                ? <></>
-                                : userNames.length === 0
-                                    ? <Button className="btn btn-action">承認者を設定する</Button>
-                                    : <Button className="btn btn-light">承認者を変更する</Button>
-                            }
+                            {step <= (approvalStep ?? 0) && hasWorkspaceAuthority(currentWorkspaceId ?? 0, authorities, Authorities.ADMIN) && (
+                                <Button className={`btn ${userNames.length === 0 ? 'btn-action' : 'btn-light'}`}>
+                                    {userNames.length === 0 ? '承認者を設定する' : '承認者を変更する'}
+                                </Button>
+                            )}
                         </TableCell>
                     </TableRow>
             );
@@ -72,6 +98,7 @@ const ApprovalRoute = () => {
     return (
         <div className="container">
             <header className="mb-10">
+                <MessageBox messageCode={messageCode} />
                 <h2 className="heading-2">承認ルート</h2>
                 <div className="max-w-52">
                     <Label>必要な承認回数</Label>
@@ -102,12 +129,11 @@ const ApprovalRoute = () => {
                         {renderRows()}
                     </TableBody>
                 </Table>
-                {isLoading
-                    ? <></>
-                    : <div className="flex justify-end mr-4 mb-5">
+                {!isLoading && hasWorkspaceAuthority(currentWorkspaceId ?? 0, authorities, Authorities.ADMIN) && (
+                    <div className="flex justify-end mr-4 mb-5">
                         <Button className="btn btn-primary">設定を保存する</Button>
                     </div>
-                }
+                )}
             </main>
         </div >
     )
