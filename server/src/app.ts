@@ -24,6 +24,8 @@ declare module 'express-session' {
     interface SessionData {
         userId: number;
         userName: string;
+        firstName: string;
+        lastName: string;
         mailAddress: string;
         workspaces: Workspace[];
         authorities: Authority[];
@@ -115,6 +117,8 @@ app.post("/account/login", async (req: Request, res: Response) => {
         // ログイン成功。
         req.session.userId = user.userId;
         req.session.userName = user.userName;
+        req.session.firstName = user.firstName;
+        req.session.lastName = user.lastName;
         req.session.mailAddress = user.email;
         req.session.workspaces = userWorkspaces ?? []
         req.session.authorities = userAuthorities ?? [];
@@ -201,6 +205,52 @@ app.post("/account/password/change", async (req: Request, res: Response) => {
     }
 });
 
+app.post("/account/user-info/change", async (req: Request, res: Response) => {
+    if (!req.session.userId) {
+        res.status(401).json({
+            'messageCode': 'E00006',
+        })
+        return;
+    }
+
+    const user: User = req.body.user;
+    user.userId = req.session.userId;
+
+    const userInfoInDB = await UserRepository.findById(user.userId);
+
+    if (user.email !== userInfoInDB?.email && await UserRepository.findByEmail(user.email)) {
+        res.status(401).json({
+            'messageCode': 'E00015',
+        })
+        return;
+    }
+
+    if (user.userName !== userInfoInDB?.userName && await UserRepository.findByUserName(user.userName)) {
+        res.status(401).json({
+            'messageCode': 'E00026',
+        })
+        return;
+    }
+
+    const updatedUser = await UserRepository.udpateUserInfo(user);
+    if (updatedUser) {
+        req.session.userName = updatedUser.userName;
+        req.session.firstName = updatedUser.firstName;
+        req.session.lastName = updatedUser.lastName;
+        req.session.mailAddress = updatedUser.email;
+        req.session.save((err) => {
+            if (err) {
+                console.error('セッションの保存に失敗しました:', err);
+
+                return res.status(500).json({ messageCode: 'E00001' })
+            }
+            res.redirect('/auth/status');
+        });
+    } else {
+        res.status(500).json({ messageCode: 'E00001' })
+    }
+});
+
 // ログイン状態を確認するエンドポイント
 app.get('/auth/status', (req: Request, res: Response) => {
     if (req.session.userId) {
@@ -209,6 +259,8 @@ app.get('/auth/status', (req: Request, res: Response) => {
                 loggedIn: true,
                 userId: req.session.userId,
                 userName: req.session.userName,
+                firstName: req.session.firstName,
+                lastName: req.session.lastName,
                 mailAddress: req.session.mailAddress,
                 workspaces: req.session.workspaces,
                 authorities: req.session.authorities,

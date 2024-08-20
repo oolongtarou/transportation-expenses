@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+const nameSchema = z.string()
+    .min(1, '入力してください')
+    .max(50, '50字以内で入力してください');
+
 export const emailSchema = z.string()
     .min(1, { message: 'メールアドレスを入力してください' })
     .email({ message: '有効なメールアドレスを入力してください' })
@@ -23,9 +27,9 @@ export const loginSchema = z.object({
 
 
 export const signupSchema = z.object({
-    firstName: z.string().min(1, '入力してください').max(50, '50字以内で入力してください'),
-    lastName: z.string().min(1, '入力してください').max(50, '50字以内で入力してください'),
-    userName: z.string().min(1, '入力してください').max(50, '50字以内で入力してください'),
+    firstName: nameSchema,
+    lastName: nameSchema,
+    userName: nameSchema,
     email: emailSchema,
     password: passwordSchema,
     confirmPassword: z.string()
@@ -33,7 +37,6 @@ export const signupSchema = z.object({
     path: ['confirmPassword'],
     message: 'パスワードが一致していません',
 });
-
 
 export type SignupFormData = z.infer<typeof signupSchema>;
 
@@ -56,3 +59,12 @@ export const passwordChangeSchema = z.object({
 });
 
 export type PasswordChangeFormData = z.infer<typeof passwordChangeSchema>;
+
+export const accountInfoChangeSchema = z.object({
+    firstName: nameSchema,
+    lastName: nameSchema,
+    userName: nameSchema,
+    email: emailSchema,
+})
+
+export type AccountInfoChangeFormData = z.infer<typeof accountInfoChangeSchema>
