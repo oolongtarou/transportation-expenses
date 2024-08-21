@@ -16,8 +16,10 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install dependencies client
+        run: |
+          cd client
+          npm install
 
       - name: Deploy to Heroku (client)
         env:
@@ -28,7 +30,12 @@ jobs:
         run: |
           git push https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ env.HEROKU_APP_NAME }}.git `git subtree split --prefix client`:refs/heads/main --force
 
-      - name: Deploy to Heroku (App 2)
+      - name: Install dependencies client
+        run: |
+          cd server
+          npm install
+        
+      - name: Deploy to Heroku (server)
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME_CLIENT }}
