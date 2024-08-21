@@ -2,6 +2,9 @@ name: Deploy to Heroku
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -11,43 +14,30 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Set Heroku APP_BASE for client
-        run: |
-          heroku config:set APP_BASE=client --app ${{ secrets.HEROKU_APP_NAME_CLIENT }}
-
-      - name: Install dependencies client
+      - name: Set up Node.js for client
         run: |
           cd client
           npm install
+          npm run build
 
       - name: Deploy to Heroku (client)
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME_CLIENT }}
           HEROKU_EMAIL: ${{ secrets.HEROKU_MAIL_ADDRESS }}
-          GIT_COMMIT: ${{ github.sha }}
         run: |
-          git push https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ env.HEROKU_APP_NAME }}.git `git subtree split --prefix client`:refs/heads/main --force
+          git push https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ secrets.HEROKU_APP_NAME_CLIENT }}.git `git subtree split --prefix client`:refs/heads/main --force
 
-      - name: Set Heroku APP_BASE for server
-        run: |
-          heroku config:set APP_BASE=server --app ${{ secrets.HEROKU_APP_NAME_SERVER }}
-
-      - name: Install dependencies server
+      - name: Set up Node.js for server
         run: |
           cd server
           npm install
-        
+          npm run build
+
       - name: Deploy to Heroku (server)
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
           HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME_SERVER }}
           HEROKU_EMAIL: ${{ secrets.HEROKU_MAIL_ADDRESS }}
-          GIT_COMMIT: ${{ github.sha }}
         run: |
-          git push https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ env.HEROKU_APP_NAME }}.git `git subtree split --prefix server`:refs/heads/main --force
+          git push https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ secrets.HEROKU_APP_NAME_SERVER }}.git `git subtree split --prefix server`:refs/heads/main --force
