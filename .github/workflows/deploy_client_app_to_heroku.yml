@@ -1,7 +1,12 @@
-name: Deploy to Heroku
+name: Deploy Client App to Heroku
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'client/**
 
 jobs:
   deploy-client:
