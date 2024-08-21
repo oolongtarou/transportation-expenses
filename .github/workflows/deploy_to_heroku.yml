@@ -16,6 +16,10 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Set Heroku APP_BASE for client
+        run: |
+          heroku config:set APP_BASE=client --app ${{ secrets.HEROKU_APP_NAME_CLIENT }}
+
       - name: Install dependencies client
         run: |
           cd client
@@ -30,7 +34,11 @@ jobs:
         run: |
           git push https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ env.HEROKU_APP_NAME }}.git `git subtree split --prefix client`:refs/heads/main --force
 
-      - name: Install dependencies client
+      - name: Set Heroku APP_BASE for server
+        run: |
+          heroku config:set APP_BASE=server --app ${{ secrets.HEROKU_APP_NAME_SERVER }}
+
+      - name: Install dependencies server
         run: |
           cd server
           npm install
