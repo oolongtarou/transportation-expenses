@@ -19,6 +19,11 @@ jobs:
       with:
         node-version: '20'
 
+    - name: Login to Heroku
+      uses: heroku/authentication-action@v2
+      with:
+        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+
     - name: Install client dependencies
       run: |
         cd client
@@ -30,8 +35,6 @@ jobs:
         npm run build
 
     - name: Deploy to Heroku (client)
-      env:
-        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       run: |
         heroku git:remote -a ${{ secrets.HEROKU_APP_NAME_CLIENT }}
         git subtree push --prefix client heroku main
@@ -49,6 +52,11 @@ jobs:
       with:
         node-version: '20'
 
+    - name: Login to Heroku
+      uses: heroku/authentication-action@v2
+      with:
+        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+
     - name: Install server dependencies
       run: |
         cd server
@@ -60,8 +68,7 @@ jobs:
         npm run build
 
     - name: Deploy to Heroku (server)
-      env:
-        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       run: |
         heroku git:remote -a ${{ secrets.HEROKU_APP_NAME_SERVER }}
         git subtree push --prefix server heroku main
+
