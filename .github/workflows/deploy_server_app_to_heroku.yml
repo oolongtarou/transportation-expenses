@@ -24,7 +24,7 @@ jobs:
         run: cd client && npm install
 
       - name: Build Server
-        run: cd server && npm run build
+        run: cd server && npm install typescript && npm run build
 
       - name: Deploy Server to Heroku
         env:
