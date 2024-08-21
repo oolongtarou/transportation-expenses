@@ -28,7 +28,7 @@ jobs:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
           git remote add heroku https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ secrets.HEROKU_APP_NAME_CLIENT }}.git
-          git push heroku main
+          git push https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/test-client-app.git main
 
   deploy-server:
     runs-on: ubuntu-latest
