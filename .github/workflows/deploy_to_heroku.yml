@@ -38,7 +38,7 @@ jobs:
       - name: Deploy to Heroku (server)
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME_CLIENT }}
+          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME_SERVER }}
           HEROKU_EMAIL: ${{ secrets.HEROKU_MAIL_ADDRESS }}
           GIT_COMMIT: ${{ github.sha }}
         run: |
