@@ -1,0 +1,38 @@
+name: Deploy to Heroku
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy to Heroku (client)
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME_CLIENT }}
+          HEROKU_EMAIL: ${{ secrets.HEROKU_MAIL_ADDRESS }}
+          GIT_COMMIT: ${{ github.sha }}
+        run: |
+          git push https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ env.HEROKU_APP_NAME }}.git `git subtree split --prefix client`:refs/heads/main --force
+
+      - name: Deploy to Heroku (App 2)
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME_CLIENT }}
+          HEROKU_EMAIL: ${{ secrets.HEROKU_MAIL_ADDRESS }}
+          GIT_COMMIT: ${{ github.sha }}
+        run: |
+          git push https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ env.HEROKU_APP_NAME }}.git `git subtree split --prefix server`:refs/heads/main --force
