@@ -28,7 +28,7 @@ jobs:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
           git remote add heroku https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ secrets.HEROKU_APP_NAME_CLIENT }}.git
-          git subtree push --prefix client heroku main
+          git push heroku main
 
   deploy-server:
     runs-on: ubuntu-latest
@@ -50,4 +50,4 @@ jobs:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
           git remote add heroku https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ secrets.HEROKU_APP_NAME_SERVER }}.git
-          git subtree push --prefix server heroku main
+          git push heroku main
