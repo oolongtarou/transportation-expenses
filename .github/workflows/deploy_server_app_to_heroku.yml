@@ -1,0 +1,31 @@
+name: Deploy Server App to Heroku
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'server/**'
+
+jobs:
+  deploy-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js for Client
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Server dependencies
+        run: cd server && npm install
+        
+      - name: Deploy Server to Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          git fetch --all --unshallow
+          git push https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/${{ secrets.HEROKU_APP_NAME_SERVER }}.git main
