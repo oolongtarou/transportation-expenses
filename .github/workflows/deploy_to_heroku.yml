@@ -33,7 +33,7 @@ jobs:
       env:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       run: |
-        heroku git:remote -a ${{ vars.HEROKU_APP_NAME_CLIENT }}
+        heroku git:remote -a ${{ secrets.HEROKU_APP_NAME_CLIENT }}
         git subtree push --prefix client heroku main
 
   deploy-server:
@@ -63,5 +63,5 @@ jobs:
       env:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       run: |
-        heroku git:remote -a ${{ vars.HEROKU_APP_NAME_SERVER }}
+        heroku git:remote -a ${{ secrets.HEROKU_APP_NAME_SERVER }}
         git subtree push --prefix server heroku main
