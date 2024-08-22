@@ -6,6 +6,20 @@ import { Authorities } from "../lib/auth";
 
 
 export class UserRepository {
+    static async findById(userId: number): Promise<User | null> {
+        try {
+            const user: User | null = await prisma.user.findUnique({
+                where: {
+                    userId: userId,
+                }
+            });
+            return user;
+        } catch (err) {
+            console.trace(err);
+            return null;
+        }
+    }
+
     static async findByEmailAndPassword(email: string, password: string): Promise<User | null> {
         try {
             const user: User | null = await prisma.user.findUnique({
@@ -62,6 +76,28 @@ export class UserRepository {
             const user = await prisma.user.findUnique({
                 where: {
                     email: email,
+                },
+                include: {
+                    userWorkspaces: true,
+                    userAuthorities: true,
+                    applications: true,
+                    WorkspaceApprovers: true,
+                    AuditLog: true,
+                },
+            });
+
+            return user;
+        } catch (error) {
+            console.error('Error retrieving user:', error);
+            throw error;
+        }
+    }
+
+    static async findByUserName(userName: string): Promise<User | null> {
+        try {
+            const user = await prisma.user.findUnique({
+                where: {
+                    userName: userName,
                 },
                 include: {
                     userWorkspaces: true,
@@ -165,6 +201,25 @@ export class UserRepository {
             });
 
             return user;
+        } catch (err) {
+            console.error(err);
+            return null;
+        }
+    }
+
+    static async udpateUserInfo(user: User): Promise<User | null> {
+        try {
+            const updatedUser = await prisma.user.update({
+                where: { userId: user.userId },
+                data: {
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    userName: user.userName,
+                    email: user.email,
+                },
+            });
+
+            return updatedUser;
         } catch (err) {
             console.error(err);
             return null;

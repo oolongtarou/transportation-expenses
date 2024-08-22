@@ -6,14 +6,20 @@ import { User } from "@/lib/user";
 import { getWorkspaceIdFrom } from "@/lib/user-workspace";
 import axios, { AxiosError } from "axios";
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import AccountInfoChange from "./AccountInfoChange";
+import MessageBox from "@/components/MessageBox";
 
 const MyPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [isLoading, setLoading] = useState(true);
     const [user, setUser] = useState<User | null>(null);
+    const [isDialogOpen, setDialogOpen] = useState(false);
+    const [messageCode, setMessageCode] = useState<string | null>('');
+    const [searchParams] = useSearchParams();
 
     useEffect(() => {
         setLoading(true);
@@ -30,12 +36,14 @@ const MyPage = () => {
                 navigate("/");
             }).
             finally(() => {
+                setMessageCode(searchParams.get('m'));
                 setLoading(false);
             })
-    }, [navigate]);
+    }, [navigate, searchParams]);
 
     return (
         <div className="container max-w-3xl">
+            <MessageBox messageCode={messageCode} />
             <h2 className="heading-2">マイページ</h2>
             <div className="flex mb-5">
                 {isLoading
@@ -51,17 +59,32 @@ const MyPage = () => {
                                 : user?.userName
                             }
                         </h3>
-                        {isLoading
-                            ? <></>
-                            : <img src="/icons/edit.svg" className="btn-img btn-link" />
+                        {!isLoading && user
+                            ? <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
+                                <DialogTrigger className="text-right">
+                                    <div className="flex">
+                                        <img src="/icons/edit.svg" className="btn-img btn-link" />
+                                    </div>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-xl" aria-describedby="アカウント情報を変更するための確認ダイアログです">
+                                    <DialogHeader>
+                                        <DialogTitle className="heading-2 text-center">
+                                            アカウント情報を変更する
+                                        </DialogTitle>
+                                        <DialogDescription hidden>
+                                            アカウント情報を変更するための確認ダイアログです
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <AccountInfoChange user={user} className="container" setUser={setUser} setDialogOpen={setDialogOpen} />
+                                </DialogContent>
+                            </Dialog>
+                            : null
                         }
                     </div>
-                    <p className="text-pale-blue">
-                        {isLoading
-                            ? <Skeleton className="h-8 w-52 mt-3" />
-                            : user?.mailAddress
-                        }
-                    </p>
+                    {isLoading
+                        ? <Skeleton className="h-8 w-52 mt-3" />
+                        : <p className="text-pale-blue">{user?.mailAddress}</p>
+                    }
                 </div>
             </div>
 

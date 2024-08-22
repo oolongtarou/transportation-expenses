@@ -450,28 +450,28 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                 {variant === 'review'
                     ? <>
                         <div className="flex items-center mb-5">
-                            <label className="font-bold text-lg w-32">申請書ID：</label>
+                            <label className="font-bold text-lg min-w-32">申請書ID：</label>
                             {isLoading
                                 ? <Skeleton className="h-8 w-72" />
                                 : <p className="text-lg">{appForm.applicationId}</p>
                             }
                         </div>
                         <div className="flex items-center mb-5">
-                            <label className="font-bold text-lg w-32">申請者：</label>
+                            <label className="font-bold text-lg min-w-32">申請者：</label>
                             {isLoading
                                 ? <Skeleton className="h-8 w-72" />
                                 : <p className="text-lg">{appForm.user.userName}</p>
                             }
                         </div>
                         <div className="flex items-center mb-5">
-                            <label className="font-bold text-lg w-32">申請日：</label>
+                            <label className="font-bold text-lg min-w-32">申請日：</label>
                             {isLoading
                                 ? <Skeleton className="h-8 w-72" />
                                 : <p className="text-lg">{new Date(appForm.applicationDate).toLocaleDateString()}</p>
                             }
                         </div>
                         <div className="flex items-center mb-5">
-                            <label className="font-bold text-lg w-32">ステータス：</label>
+                            <label className="font-bold text-lg min-w-32">ステータス：</label>
                             {isLoading
                                 ? <Skeleton className="h-8 w-72" />
                                 : <AppFormStatus statusId={appForm.statusId} statusName={appForm.status.statusName} />
@@ -485,7 +485,7 @@ const AppFormCreate = (props: AppFormCreateProps) => {
                 <div className=" mb-5">
                     {editing ? <MustBadge /> : null}
                     <div className="flex items-center">
-                        <div className="w-32">
+                        <div className="min-w-32">
                             <label htmlFor="applicationTitle" className="font-bold text-lg ml-1">タイトル：</label>
                         </div>
                         <div>
