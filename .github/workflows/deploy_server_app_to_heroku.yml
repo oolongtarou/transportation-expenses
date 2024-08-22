@@ -21,11 +21,8 @@ jobs:
           node-version: '20'
 
       - name: Install Server dependencies
-        run: cd client && npm install
-
-      - name: Build Server
-        run: cd server && npm install typescript && npx prisma migrate deploy && npm run build
-
+        run: cd server && npm install
+        
       - name: Deploy Server to Heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
