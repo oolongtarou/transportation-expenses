@@ -8,4 +8,5 @@ export interface WorkspaceApprovers {
     workspaceId: number;
     approvalStep: number;
     approvers: Approver[];
+    allApprovers: Approver[];
 }

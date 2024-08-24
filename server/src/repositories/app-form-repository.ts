@@ -362,6 +362,22 @@ export class AppFormRepository {
         }
     }
 
+    static async findApplicationsByWorkspaceAndStatus(workspaceId: number, statusId: number): Promise<Application[]> {
+        try {
+            const applications = await prisma.application.findMany({
+                where: {
+                    workspaceId: workspaceId,
+                    statusId: statusId,
+                },
+            });
+
+            return applications;
+        } catch (error) {
+            console.error('workspaceIdとstatusIdが一致するレコードを抽出する処理でエラーが発生しました。:', error);
+            throw error;
+        }
+    }
+
     /**
      * 申請書を承認する(ステータスを受領待ちに変える)
      *

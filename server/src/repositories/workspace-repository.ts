@@ -2,6 +2,7 @@ import { UserWorkspace } from "@prisma/client";
 import prisma from "../infra/db";
 import { Authorities } from "../lib/auth";
 import { Workspace, WorkspaceMember } from "../lib/workspace";
+import { Approver } from "../schema/post";
 
 export class WorkspaceRepository {
     static async findByUserId(userId: number): Promise<Workspace[] | null> {
@@ -68,6 +69,20 @@ export class WorkspaceRepository {
                         approvalStep: true,
                     },
                 },
+                userAuthorities: {
+                    where: {
+                        workspaceId: workspaceId,
+                        authorityId: Authorities.APPROVAL,
+                    },
+                    select: {
+                        user: {
+                            select: {
+                                userId: true,
+                                userName: true,
+                            },
+                        },
+                    },
+                },
             },
         });
 
@@ -78,6 +93,10 @@ export class WorkspaceRepository {
                 userId: approver.user.userId,
                 userName: approver.user.userName,
                 approvalStep: approver.approvalStep,
+            })),
+            allApprovers: workspace.userAuthorities.map((authority) => ({
+                userId: authority.user.userId,
+                userName: authority.user.userName,
             })),
         }));
 
@@ -177,4 +196,55 @@ export class WorkspaceRepository {
             throw error;
         }
     }
+
+    static async updateApprovalStep(workspaceId: number, newApprovalStep: number) {
+        try {
+            const updatedWorkspace = await prisma.workspace.update({
+                where: {
+                    workspaceId: workspaceId,
+                },
+                data: {
+                    approvalStep: newApprovalStep,
+                },
+            });
+
+            return updatedWorkspace;
+        } catch (error) {
+            console.error('approvalStepを更新する処理でエラーが発生しました。:', error);
+            throw error;
+        }
+    }
+
+    static async updateWorkspaceApprovalStepAndApprovers(workspaceId: number, newApprovalStep: number, approvers: Approver[]) {
+        try {
+            await prisma.$transaction(async (tx) => {
+                // WorkspaceテーブルのapprovalStepを更新
+                await tx.workspace.update({
+                    where: { workspaceId },
+                    data: { approvalStep: newApprovalStep },
+                });
+
+                // WorkspaceApproversテーブルの既存レコードを削除
+                await tx.workspaceApprovers.deleteMany({
+                    where: { workspaceId },
+                });
+
+                // 新しいApproverデータを挿入
+                const approverInserts = approvers.map(approver => ({
+                    workspaceId: workspaceId,
+                    userId: approver.userId,
+                    approvalStep: approver.approvalStep,
+                }));
+
+                await tx.workspaceApprovers.createMany({
+                    data: approverInserts,
+                });
+            });
+
+        } catch (error) {
+            console.error('承認ルートを更新する処理でエラーが発生しました：', error);
+            throw error;
+        }
+    }
+
 }

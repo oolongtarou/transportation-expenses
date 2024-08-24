@@ -14,7 +14,7 @@ import { WorkspaceRepository } from "./repositories/workspace-repository";
 import { User } from "@prisma/client";
 import { AuthorityRepository } from "./repositories/authority-repository";
 import { AppFormRepository } from "./repositories/app-form-repository";
-import { ApplicationForm, SearchOption, SignupFormData } from "./schema/post";
+import { ApplicationForm, Approver, SearchOption, SignupFormData } from "./schema/post";
 import { toNumber } from "./lib/converter";
 import { ApplicationStatus } from "./enum/app-form";
 import { Authorities, Authority, hasAuthority, hasWorkspaceAuthority } from './lib/auth';
@@ -94,8 +94,6 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.post("/account/login", async (req: Request, res: Response) => {
-    console.log(req)
-    console.log(req.body)
     const email: string = req.body.email;
     const password: string = toHashed(req.body.password);
 
@@ -281,7 +279,6 @@ app.post("/app-forms/me", async (req: Request, res: Response) => {
     try {
         const searchOption: SearchOption = req.body.searchOptions;
         searchOption.page = req.body.page;
-        console.log(searchOption)
         const workspaceId: number = parseInt(req.body.workspaceId);
         const appForms = await AppFormRepository.findBySearchOption(workspaceId, searchOption, req.session.userId);
         const count = await AppFormRepository.fetchCountBySearchOption(workspaceId, searchOption, req.session.userId);
@@ -308,7 +305,6 @@ app.post("/app-forms/approver", async (req: Request, res: Response) => {
     try {
         const searchOption: SearchOption = req.body.searchOptions;
         searchOption.page = req.body.page;
-        console.log(searchOption)
         const workspaceId: number = parseInt(req.body.workspaceId);
         const appForms = await AppFormRepository.findBySearchOption(workspaceId, searchOption);
         const count = await AppFormRepository.fetchCountBySearchOption(workspaceId, searchOption);
@@ -350,7 +346,7 @@ app.get('/workspace/approvers', async (req: Request, res: Response) => {
             const approvers = await WorkspaceRepository.findApproversBy(workspaceId);
             res.status(200).json(approvers);
         } catch (err) {
-            console.log(err);
+            console.error(err);
             res.status(500).json({
                 'message': 'サーバーでエラーが発生しています。',
             })
@@ -371,7 +367,7 @@ app.get('/workspace/settings', async (req: Request, res: Response) => {
             const approvers = await WorkspaceRepository.findWorkspaceInfoBy(workspaceId);
             res.status(200).json(approvers);
         } catch (err) {
-            console.log(err);
+            console.error(err);
             res.status(500).json({
                 'messageCode': 'E00001',
             })
@@ -463,7 +459,6 @@ app.post('/workspace/invite', async (req: Request, res: Response) => {
     }
 })
 
-
 app.post('/workspace/member/edit', async (req: Request, res: Response) => {
     if (!req.session.userId || !req.session.authorities) {
         res.status(401).json({
@@ -509,6 +504,64 @@ app.post('/workspace/member/edit', async (req: Request, res: Response) => {
     }
 })
 
+app.post('/workspace/approval-step/change', async (req: Request, res: Response) => {
+    const workspaceId = req.body.workspaceId;
+    const approvalStep = req.body.approvalStep;
+
+    if (!workspaceId) {
+        return res.status(400).json({
+            'messageCode': 'E00018',
+        })
+    }
+
+    if (approvalStep < 1 || 5 < approvalStep) {
+        return res.status(400).json({ messageCode: 'E00030' });
+    }
+
+    try {
+
+        const applicationsApproving = await AppFormRepository.findApplicationsByWorkspaceAndStatus(workspaceId, ApplicationStatus.Approving);
+        if (applicationsApproving.length > 0) {
+            return res.status(400).json({ messageCode: 'E00029' });
+        }
+        const result = await WorkspaceRepository.updateApprovalStep(workspaceId, approvalStep);
+
+        return res.status(200).json(result);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ messageCode: 'E00001' });
+    }
+})
+
+app.post('/workspace/approval-route/change', async (req: Request, res: Response) => {
+    const workspaceId: number = req.body.workspaceId;
+    const approvalStep: number = req.body.approvalStep;
+    const approvers: Approver[] = req.body.approvers;
+
+    if (!workspaceId) {
+        return res.status(400).json({
+            'messageCode': 'E00018',
+        })
+    }
+
+    if (approvalStep < 1 || 5 < approvalStep) {
+        return res.status(400).json({ messageCode: 'E00030' });
+    }
+
+    try {
+        const applicationsApproving = await AppFormRepository.findApplicationsByWorkspaceAndStatus(workspaceId, ApplicationStatus.Approving);
+        if (applicationsApproving.length > 0) {
+            return res.status(400).json({ messageCode: 'E00029' });
+        }
+
+        await WorkspaceRepository.updateWorkspaceApprovalStepAndApprovers(workspaceId, approvalStep, approvers);
+        return res.status(200).json({ messageCode: 'S00016' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ messageCode: 'E00001' });
+    }
+})
+
 app.get('/app-form/review', async (req: Request, res: Response) => {
     try {
         if (!req.session.userName) {
@@ -550,7 +603,6 @@ app.post('/app-form/new', async (req: Request, res: Response) => {
             return;
         }
         const appForm: ApplicationForm = req.body.appForm;
-        // console.log(req.session.userName);  
         if (!appForm.user || !appForm.user.userName) {
             appForm.user = { userName: req.session.userName }
         }
@@ -581,14 +633,10 @@ app.post('/app-form/draft/save', async (req: Request, res: Response) => {
 
         if (appForm.applicationId) {
             const updatedAppForm = await AppFormRepository.updateDraft(appForm);
-            console.log('下書きを更新しました');
-            console.log(updatedAppForm);
             res.status(200).json(updatedAppForm);
         } else {
             const savedAppForm = await AppFormRepository.saveDraft(appForm);
             res.status(200).json(savedAppForm);
-            console.log('下書きを保存しました');
-            console.log(savedAppForm);
         }
     } catch (err) {
         console.error(err);

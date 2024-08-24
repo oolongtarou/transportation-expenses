@@ -66,3 +66,9 @@ export type SignupFormData = {
     password: string;
     confirmPassword: string;
 }
+
+export interface Approver {
+    userId: number;
+    userName: string;
+    approvalStep: number;
+}
