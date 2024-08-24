@@ -36,7 +36,6 @@ const AccountInfoChange = (props: AccountInfoChangeProps) => {
     });
 
     const onSubmit = handleSubmit((data: AccountInfoChangeFormData) => {
-        console.log(data);
         setLoading(true);
         axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/account/user-info/change`, { user: data }, { withCredentials: true })
             .then((response) => {
@@ -63,6 +62,7 @@ const AccountInfoChange = (props: AccountInfoChangeProps) => {
 
     return (
         <div className={`${className}`}>
+            3
             {isLoading
                 ? <Loading />
                 : <>

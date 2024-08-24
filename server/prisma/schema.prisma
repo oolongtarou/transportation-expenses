@@ -34,7 +34,7 @@ model User {
 
 model Workspace {
   workspaceId   Int      @id @default(autoincrement()) @map("workspace_id")
-  workspaceName String   @map("workspace_name") @db.VarChar(50)
+  workspaceName String   @unique @map("workspace_name") @db.VarChar(50)
   description   String?  @map("description") @db.VarChar(50)
   approvalStep  Int      @default(1) @map("approval_step")
   createdAt     DateTime @default(now()) @map("created_at")
@@ -50,7 +50,7 @@ model Workspace {
 
 model Authority {
   authorityId   Int      @id @map("authority_id")
-  authorityName String   @map("authority_name") @db.VarChar(50)
+  authorityName String   @unique @map("authority_name") @db.VarChar(50)
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -61,7 +61,7 @@ model Authority {
 
 model Transportation {
   transportationId   Int      @id @default(autoincrement()) @map("transportation_id")
-  transportationName String   @map("transportation_name") @db.VarChar(50)
+  transportationName String   @unique @map("transportation_name") @db.VarChar(50)
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -87,7 +87,7 @@ model UserWorkspace {
 
 model ApplicationStatus {
   statusId   Int      @id @map("status_id")
-  statusName String   @map("status_name") @db.VarChar(50)
+  statusName String   @unique @map("status_name") @db.VarChar(50)
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
 

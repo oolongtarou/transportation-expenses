@@ -384,6 +384,39 @@ app.get('/workspace/settings', async (req: Request, res: Response) => {
     }
 });
 
+app.post('/workspace/settings/change', async (req: Request, res: Response) => {
+    const workspaceId = req.body.workspaceId;
+    const workspaceName = req.body.workspaceName;
+    const description = req.body.description;
+    if (workspaceId) {
+        try {
+            const sameNameWorkspace = await WorkspaceRepository.findWorkspaceByName(workspaceName);
+            if (sameNameWorkspace && sameNameWorkspace.workspaceId != workspaceId) {
+                return res.status(400).json({
+                    'messageCode': 'E00027',
+                })
+            }
+
+            const result = await WorkspaceRepository.updateWorkspace(workspaceId, workspaceName, description);
+
+            if (req.session.userId) {
+                const userWorkspace = await WorkspaceRepository.findByUserId(req.session.userId);
+                req.session.workspaces = userWorkspace ?? undefined;
+            }
+
+            res.redirect('/auth/status');
+        } catch (err) {
+            res.status(500).json({
+                'messageCode': 'E00001',
+            })
+        }
+    } else {
+        res.status(400).json({
+            'messageCode': 'E00010',
+        })
+    }
+});
+
 app.post('/workspace/invite', async (req: Request, res: Response) => {
     const workspaceId = req.body.workspaceId;
     const email = req.body.email;

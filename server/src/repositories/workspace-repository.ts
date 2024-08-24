@@ -143,4 +143,38 @@ export class WorkspaceRepository {
             throw error;
         }
     }
+
+    static async findWorkspaceByName(workspaceName: string): Promise<Workspace | null> {
+        try {
+            const workspace = await prisma.workspace.findUnique({
+                where: {
+                    workspaceName: workspaceName
+                },
+            });
+
+            return workspace;
+        } catch (error) {
+            console.error('ワークスペース名をキーにしてワークスペース情報を取得する処理でエラーが発生しました。:', error);
+            throw error;
+        }
+    }
+
+    static async updateWorkspace(workspaceId: number, newWorkspaceName: string, newDescription: string) {
+        try {
+            const updatedWorkspace = await prisma.workspace.update({
+                where: {
+                    workspaceId: workspaceId,
+                },
+                data: {
+                    workspaceName: newWorkspaceName,
+                    description: newDescription,
+                },
+            });
+
+            return updatedWorkspace;
+        } catch (error) {
+            console.error('ワークスペース情報を更新する処理でエラーが発生しました。:', error);
+            throw error;
+        }
+    }
 }
