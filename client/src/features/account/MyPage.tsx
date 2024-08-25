@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { getLabelByAuthorityId } from "@/lib/auth";
@@ -8,9 +7,11 @@ import axios, { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import AccountInfoChange from "./AccountInfoChange";
 import MessageBox from "@/components/MessageBox";
+import { Input } from "@/components/ui/input";
 
 const MyPage = () => {
     const navigate = useNavigate();
@@ -20,6 +21,8 @@ const MyPage = () => {
     const [isDialogOpen, setDialogOpen] = useState(false);
     const [messageCode, setMessageCode] = useState<string | null>('');
     const [searchParams] = useSearchParams();
+    const [deleteConfirmText, setDeleteConfirmText] = useState('');
+    const [isDeleteAlertOpen, setDeleteAlertOpen] = useState(false);
 
     useEffect(() => {
         setLoading(true);
@@ -40,6 +43,38 @@ const MyPage = () => {
                 setLoading(false);
             })
     }, [navigate, searchParams]);
+
+
+    const handleDeleteAlertOpenChange = (open: boolean) => {
+        setDeleteAlertOpen(open);
+        if (!open) {
+            setDeleteConfirmText('');
+        }
+    };
+
+    const handleDeleteClicked = () => {
+        setLoading(true);
+        axios.get(`${import.meta.env.VITE_SERVER_DOMAIN}/account/delete`, { withCredentials: true })
+            .then((response) => {
+                if (response.status === 200) {
+                    navigate('/?m=S00017')
+                } else {
+                    setMessageCode('E00001')
+                }
+            })
+            .catch((err) => {
+                if (err instanceof AxiosError) {
+                    if (err.response?.status && err.response.data.messageCode) {
+                        setMessageCode(err.response.data.messageCode)
+                    } else {
+                        setMessageCode('E00001')
+                    }
+                }
+            }).
+            finally(() => {
+                setLoading(false);
+            })
+    };
 
     return (
         <div className="container max-w-3xl">
@@ -125,7 +160,35 @@ const MyPage = () => {
                 ? <></>
                 : <div className="flex justify-end gap-5 mb-5">
                     <Link to={`/w/${getWorkspaceIdFrom(location.pathname)}/account/password/change`} className="btn btn-light">パスワードを変更する</Link>
-                    <Button className="btn btn-danger">アカウントを削除する</Button>
+                    <AlertDialog open={isDeleteAlertOpen} onOpenChange={handleDeleteAlertOpenChange}>
+                        <AlertDialogTrigger>
+                            <span className="btn btn-danger">アカウントを削除する</span>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>本当に削除しますか？</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    この操作は元に戻せません。申請書データは消えませんが、ワークスペース所属情報と権限情報はサーバーから削除されます。<br />
+                                    {`削除するためには"${user?.mailAddress}"と入力してください。`}
+                                    <Input
+                                        type="text"
+                                        className="my-3"
+                                        onChange={(data) => setDeleteConfirmText(data.target.value)}
+                                    />
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                                <AlertDialogAction
+                                    className="btn btn-danger"
+                                    disabled={deleteConfirmText !== user?.mailAddress}
+                                    onClick={handleDeleteClicked}
+                                >
+                                    削除
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             }
         </div >

@@ -62,7 +62,6 @@ const AccountInfoChange = (props: AccountInfoChangeProps) => {
 
     return (
         <div className={`${className}`}>
-            3
             {isLoading
                 ? <Loading />
                 : <>

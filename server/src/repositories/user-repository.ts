@@ -11,6 +11,7 @@ export class UserRepository {
             const user: User | null = await prisma.user.findUnique({
                 where: {
                     userId: userId,
+                    isDeleted: false,
                 }
             });
             return user;
@@ -25,7 +26,8 @@ export class UserRepository {
             const user: User | null = await prisma.user.findUnique({
                 where: {
                     email: email,
-                    password: password
+                    password: password,
+                    isDeleted: false,
                 }
             });
             return user;
@@ -76,6 +78,7 @@ export class UserRepository {
             const user = await prisma.user.findUnique({
                 where: {
                     email: email,
+                    isDeleted: false,
                 },
                 include: {
                     userWorkspaces: true,
@@ -98,6 +101,7 @@ export class UserRepository {
             const user = await prisma.user.findUnique({
                 where: {
                     userName: userName,
+                    isDeleted: false,
                 },
                 include: {
                     userWorkspaces: true,
@@ -183,7 +187,8 @@ export class UserRepository {
             const user: User | null = await prisma.user.findUnique({
                 where: {
                     userId: userId,
-                    password: toHashed(password)
+                    password: toHashed(password),
+                    isDeleted: false,
                 }
             });
             return user;
@@ -196,7 +201,10 @@ export class UserRepository {
     static async udpatePassword(userId: number, password: string): Promise<User | null> {
         try {
             const user = await prisma.user.update({
-                where: { userId: userId },
+                where: {
+                    userId: userId,
+                    isDeleted: false,
+                },
                 data: { password: toHashed(password) },
             });
 
@@ -210,7 +218,10 @@ export class UserRepository {
     static async udpateUserInfo(user: User): Promise<User | null> {
         try {
             const updatedUser = await prisma.user.update({
-                where: { userId: user.userId },
+                where: {
+                    userId: user.userId,
+                    isDeleted: false,
+                },
                 data: {
                     firstName: user.firstName,
                     lastName: user.lastName,
@@ -223,6 +234,34 @@ export class UserRepository {
         } catch (err) {
             console.error(err);
             return null;
+        }
+    }
+
+    static async deleteUser(userId: number) {
+        try {
+            await prisma.$transaction(async (prisma) => {
+                // 1. users.is_deletedをtrueにする
+                await prisma.user.update({
+                    where: {
+                        userId,
+                        isDeleted: false,
+                    },
+                    data: { isDeleted: true },
+                });
+
+                // 2. user_workspacesのuser_idが一致するレコードを削除
+                await prisma.userWorkspace.deleteMany({
+                    where: { userId },
+                });
+
+                // 3. user_authoritiesのuser_idが一致するレコードを削除
+                await prisma.userAuthority.deleteMany({
+                    where: { userId },
+                });
+            });
+        } catch (error) {
+            console.error('Error occurred while deleting user and related records:', error);
+            throw error;
         }
     }
 }

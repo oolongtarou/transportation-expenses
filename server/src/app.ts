@@ -250,6 +250,22 @@ app.post("/account/user-info/change", async (req: Request, res: Response) => {
     }
 });
 
+app.get("/account/delete", async (req: Request, res: Response) => {
+    if (!req.session.userId) {
+        res.status(401).json({
+            'messageCode': 'E00006',
+        })
+        return;
+    }
+
+    try {
+        await UserRepository.deleteUser(req.session.userId);
+        res.redirect('/account/logout');
+    } catch (err) {
+        res.status(500).json({ messageCode: 'E00001' })
+    }
+})
+
 // ログイン状態を確認するエンドポイント
 app.get('/auth/status', (req: Request, res: Response) => {
     if (req.session.userId) {
