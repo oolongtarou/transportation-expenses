@@ -62,7 +62,12 @@ const Login = () => {
                     setMyWorkspaces(response.data.workspaces);
                     setCurrentWorkspace(getWorkspaceWithSmallestId(response.data.workspaces));
                     setMyAuthorities(response.data.authorities);
-                    navigate(`/w/${getWorkspaceWithSmallestId(response.data.workspaces)?.workspaceId}/app-form/create`);
+                    const smallestWorkspaceId = getWorkspaceWithSmallestId(response.data.workspaces)?.workspaceId;
+                    if (smallestWorkspaceId) {
+                        navigate(`/w/${smallestWorkspaceId}/app-form/create`);
+                    } else {
+                        navigate('/account/my-page');
+                    }
                 } else {
                     setMessageCode('E00002');
                 }

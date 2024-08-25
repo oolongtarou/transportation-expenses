@@ -8,7 +8,7 @@ const LoginLayout = () => {
         <>
             <Header isLoggedin={isLoggedin} />
             <div className="flex items-center justify-center main-content">
-                <div className="container max-w-xl">
+                <div className="container max-w-2xl">
                     <Outlet />
                 </div >
             </div >

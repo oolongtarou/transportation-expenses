@@ -137,7 +137,7 @@ const MyPage = () => {
                                     </TableCell>
                                 </TableRow>
                             </>
-                            : user
+                            : user && user.workspaces.length > 0
                                 ? user.workspaces.map(workspace => (
                                     <TableRow key={workspace.workspaceId} className="flex justify-between items-center">
                                         <TableCell className="flex flex-row gap-3">
@@ -151,7 +151,9 @@ const MyPage = () => {
                                             </div>
                                         </TableCell>
                                     </TableRow>))
-                                : null
+                                : <TableRow>
+                                    <TableCell><p className="font-bold text-pale-blue">ワークスペースに所属していません</p></TableCell>
+                                </TableRow>
                         }
 
                     </TableBody>
