@@ -130,31 +130,31 @@ const RouteInput = (props: RouteInputProps) => {
 export default RouteInput
 
 const stationOptions: SelectOption[] = [
-    {
-        label: '池袋',
-        value: '1'
-    },
-    {
-        label: '東池袋',
-        value: '2'
-    },
-    {
-        label: '新宿',
-        value: '3'
-    },
+    // {
+    //     label: '池袋',
+    //     value: '1'
+    // },
+    // {
+    //     label: '東池袋',
+    //     value: '2'
+    // },
+    // {
+    //     label: '新宿',
+    //     value: '3'
+    // },
 ]
 
 const lineOptions: SelectOption[] = [
-    {
-        label: 'JR山手線',
-        value: '1'
-    },
-    {
-        label: '東京メトロ有楽町線',
-        value: '2'
-    },
-    {
-        label: 'JR埼京線',
-        value: '3'
-    },
+    // {
+    //     label: 'JR山手線',
+    //     value: '1'
+    // },
+    // {
+    //     label: '東京メトロ有楽町線',
+    //     value: '2'
+    // },
+    // {
+    //     label: 'JR埼京線',
+    //     value: '3'
+    // },
 ]
