@@ -2,6 +2,7 @@ import { Application } from "@prisma/client";
 import prisma from "../infra/db";
 import { AppFormDetail, ApplicationForm, Route, SearchOption } from "../schema/post";
 import { ApplicationStatus } from "../enum/app-form";
+import { getStatusIdAfterApprove } from "../lib/app-form";
 
 export class AppFormRepository {
     static async findBy(applicationId: number): Promise<ApplicationForm | null> {
@@ -362,12 +363,14 @@ export class AppFormRepository {
         }
     }
 
-    static async findApplicationsByWorkspaceAndStatus(workspaceId: number, statusId: number): Promise<Application[]> {
+    static async findApplicationsByWorkspaceAndStatus(workspaceId: number, statusIds: number[]): Promise<Application[]> {
         try {
             const applications = await prisma.application.findMany({
                 where: {
                     workspaceId: workspaceId,
-                    statusId: statusId,
+                    statusId: {
+                        in: statusIds,
+                    },
                 },
             });
 
@@ -379,7 +382,7 @@ export class AppFormRepository {
     }
 
     /**
-     * 申請書を承認する(ステータスを受領待ちに変える)
+     * 申請書を承認する
      *
      * @static
      * @param {number} applicationId
@@ -387,7 +390,18 @@ export class AppFormRepository {
      * @memberof AppFormRepository
      */
     static async approve(applicationId: number): Promise<number> {
-        return await this.updateStatus(applicationId, ApplicationStatus.Receiving);
+        const application = await prisma.application.findUnique({
+            where: { applicationId },
+            include: { workspace: true }
+        });
+
+        if (!application) {
+            throw new Error(`ApplicationID：${applicationId}の申請書が見つかりませんでした。`);
+        }
+
+        const currentStatusId = application.statusId;
+        const approvalStep = application.workspace.approvalStep;
+        return await this.updateStatus(applicationId, getStatusIdAfterApprove(currentStatusId, approvalStep));
     }
 
     /**

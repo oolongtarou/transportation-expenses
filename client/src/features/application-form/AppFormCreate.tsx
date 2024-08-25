@@ -3,7 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
 
 import AppFormTable from "./components/AppFormTable"
-import { appFormInitialData, ApplicationForm, ApplicationStatuses, calculateTotalAmount } from "./app-form";
+import { appFormInitialData, ApplicationForm, ApplicationStatuses, calculateTotalAmount, isApproving } from "./app-form";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
 import { applicationFormSchema } from "../schema/app-form-schema";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
@@ -718,9 +718,8 @@ function isMakingSure(variant: AppFormVariant, editing: boolean): boolean {
  */
 function needApprove(appForm: ApplicationForm, user: User, currentWorkspaceId: number): boolean {
     const isMyAppForm = appForm.userId === user.userId;
-    const isApproving = appForm.statusId == ApplicationStatuses.APPROVING;
     const hasApprovalAuthority = hasWorkspaceAuthority(currentWorkspaceId, user.authorities, Authorities.APPROVAL);
-    return !isMyAppForm && isApproving && hasApprovalAuthority;
+    return !isMyAppForm && isApproving(appForm.statusId) && hasApprovalAuthority;
 }
 
 /**

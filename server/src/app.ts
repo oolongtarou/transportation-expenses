@@ -16,8 +16,9 @@ import { AuthorityRepository } from "./repositories/authority-repository";
 import { AppFormRepository } from "./repositories/app-form-repository";
 import { ApplicationForm, Approver, SearchOption, SignupFormData } from "./schema/post";
 import { toNumber } from "./lib/converter";
-import { ApplicationStatus } from "./enum/app-form";
+import { ApplicationStatus, statusesApproving } from "./enum/app-form";
 import { Authorities, Authority, hasAuthority, hasWorkspaceAuthority } from './lib/auth';
+import { canApprove } from "./lib/app-form";
 
 
 declare module 'express-session' {
@@ -519,8 +520,7 @@ app.post('/workspace/approval-step/change', async (req: Request, res: Response) 
     }
 
     try {
-
-        const applicationsApproving = await AppFormRepository.findApplicationsByWorkspaceAndStatus(workspaceId, ApplicationStatus.Approving);
+        const applicationsApproving = await AppFormRepository.findApplicationsByWorkspaceAndStatus(workspaceId, statusesApproving);
         if (applicationsApproving.length > 0) {
             return res.status(400).json({ messageCode: 'E00029' });
         }
@@ -549,7 +549,7 @@ app.post('/workspace/approval-route/change', async (req: Request, res: Response)
     }
 
     try {
-        const applicationsApproving = await AppFormRepository.findApplicationsByWorkspaceAndStatus(workspaceId, ApplicationStatus.Approving);
+        const applicationsApproving = await AppFormRepository.findApplicationsByWorkspaceAndStatus(workspaceId, statusesApproving);
         if (applicationsApproving.length > 0) {
             return res.status(400).json({ messageCode: 'E00029' });
         }
@@ -606,7 +606,7 @@ app.post('/app-form/new', async (req: Request, res: Response) => {
         if (!appForm.user || !appForm.user.userName) {
             appForm.user = { userName: req.session.userName }
         }
-        appForm.statusId = ApplicationStatus.Approving;
+        appForm.statusId = ApplicationStatus.Approving1;
         const savedAppForm = await AppFormRepository.createNewAppForm(appForm);
         res.status(200).json(savedAppForm);
     } catch (err) {
@@ -708,7 +708,7 @@ app.post('/app-form/approve', async (req: Request, res: Response) => {
         }
 
         // 承認していい申請書かどうかを確認する
-        if (req.session.authorities && appForm.userId !== req.session.userId && appForm.statusId === ApplicationStatus.Approving && hasWorkspaceAuthority(workspaceId, req.session.authorities, Authorities.APPROVAL)) {
+        if (req.session.userId && req.session.authorities && appForm.userId !== req.session.userId && await canApprove(req.session.userId, workspaceId, appForm.statusId) && hasWorkspaceAuthority(workspaceId, req.session.authorities, Authorities.APPROVAL)) {
             const result = await AppFormRepository.approve(applicationId);
             res.status(200).json(result);
         } else {
@@ -760,7 +760,7 @@ app.post('/app-form/reject', async (req: Request, res: Response) => {
         }
 
         // 却下していい申請書かどうかを確認する
-        if (req.session.authorities && appForm.userId !== req.session.userId && appForm.statusId === ApplicationStatus.Approving && hasWorkspaceAuthority(workspaceId, req.session.authorities, Authorities.APPROVAL)) {
+        if (req.session.authorities && appForm.userId !== req.session.userId && statusesApproving.includes(appForm.statusId) && hasWorkspaceAuthority(workspaceId, req.session.authorities, Authorities.APPROVAL)) {
             const result = await AppFormRepository.reject(applicationId);
             res.status(200).json(result);
         } else {

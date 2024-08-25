@@ -1,4 +1,4 @@
-import { UserAuthority } from "@prisma/client";
+import { UserAuthority, WorkspaceApprovers } from "@prisma/client";
 import prisma from "../infra/db";
 
 export class AuthorityRepository {
@@ -49,5 +49,40 @@ export class AuthorityRepository {
             console.error(`user_id:${userId},workspace_id:${workspaceId}の権限を更新する処理に失敗しました:`, error);
             throw error;
         }
+    }
+
+
+    /**
+     * 指定したuserIdのユーザーがcurrentStatusIdの申請書を承認するための権限を持っているかを探す
+     *
+     * @static
+     * @param {number} userId
+     * @param {number} currentStatusId
+     * @return {*}  {(Promise<WorkspaceApprovers | null>)}
+     * @memberof AuthorityRepository
+     */
+    static async findApprovalAuthority(userId: number, workspaceId: number, currentStatusId: number): Promise<WorkspaceApprovers | null> {
+        const statusApprovalMapping: { [key: number]: number } = {
+            11: 1,
+            12: 2,
+            13: 3,
+            14: 4,
+            15: 5,
+        };
+
+        const approvalStep = statusApprovalMapping[currentStatusId];
+
+        if (!approvalStep)
+            return null;
+
+        const approver = await prisma.workspaceApprovers.findFirst({
+            where: {
+                userId: userId,
+                workspaceId: workspaceId,
+                approvalStep: approvalStep,
+            },
+        });
+
+        return approver;
     }
 }

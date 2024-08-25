@@ -91,19 +91,44 @@ export const calculateTotalAmount = (rows: AppFormDetail[]): number => {
 
 export const ApplicationStatuses = {
     DRAFT: 0,
-    APPROVING: 1,
-    RECEIVING: 2,
-    RECEIVED: 3,
-    REJECTED: 10,
+    APPROVING1: 11,
+    APPROVING2: 12,
+    APPROVING3: 13,
+    APPROVING4: 14,
+    APPROVING5: 15,
+    RECEIVING: 30,
+    RECEIVED: 31,
+    REJECTED: 50,
 } as const;
 
 export const ApplicationStatusLabels: { [key in keyof typeof ApplicationStatuses]: string } = {
     DRAFT: "下書き",
-    APPROVING: "承認中",
+    APPROVING1: "承認中1",
+    APPROVING2: "承認中2",
+    APPROVING3: "承認中3",
+    APPROVING4: "承認中4",
+    APPROVING5: "承認中5",
     RECEIVING: "受領待ち",
     RECEIVED: "受領済み",
     REJECTED: "却下"
 };
+
+export const isApproving = (currentStatusId: number): boolean => {
+    switch (currentStatusId) {
+        case ApplicationStatuses.APPROVING1:
+            return true;
+        case ApplicationStatuses.APPROVING2:
+            return true;
+        case ApplicationStatuses.APPROVING3:
+            return true;
+        case ApplicationStatuses.APPROVING4:
+            return true;
+        case ApplicationStatuses.APPROVING5:
+            return true;
+        default:
+            return false;
+    }
+}
 
 export const statusSelectOptions: SelectOption[] = Object.keys(ApplicationStatuses).map(key => ({
     label: ApplicationStatusLabels[key as keyof typeof ApplicationStatuses],
