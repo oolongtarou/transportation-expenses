@@ -247,4 +247,14 @@ export class WorkspaceRepository {
         }
     }
 
+    static async deleteWorkspace(workspaceId: number) {
+        try {
+            await prisma.workspace.delete({
+                where: { workspaceId },
+            });
+        } catch (error) {
+            console.error('ワークスペースを削除する処理でエラーが発生しました:', error);
+            throw error;
+        }
+    }
 }

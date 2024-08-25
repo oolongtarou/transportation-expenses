@@ -80,6 +80,7 @@ function App() {
             <Route path='/account/login' element={<Login />} />
             <Route path='/account/signup' element={<SignUp />} />
             <Route path='/account/password/reset-link' element={<PasswordResetLink />} />
+            <Route path='/account/my-page' element={<MyPage />} />
           </Route>
           <Route element={<MainLayout />}>
             <Route path='/w/:workspaceId/app-form/create' element={<AppFormCreate inputAppForm={appFormInitialData} variant="create" />} />

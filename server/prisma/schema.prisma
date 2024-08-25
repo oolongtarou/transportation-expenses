@@ -124,7 +124,7 @@ model UserAuthority {
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
 
   user      User      @relation(fields: [userId], references: [userId])
-  workspace Workspace @relation(fields: [workspaceId], references: [workspaceId])
+  workspace Workspace @relation(fields: [workspaceId], references: [workspaceId], onDelete: Cascade)
   authority Authority @relation(fields: [authorityId], references: [authorityId])
 
   @@id([userId, authorityId, workspaceId])
@@ -143,7 +143,7 @@ model Application {
   updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
 
   user      User                @relation(fields: [userId], references: [userId])
-  workspace Workspace           @relation(fields: [workspaceId], references: [workspaceId])
+  workspace Workspace           @relation(fields: [workspaceId], references: [workspaceId], onDelete: Cascade)
   status    ApplicationStatus   @relation(fields: [statusId], references: [statusId])
   details   ApplicationDetail[]
   AuditLog  AuditLog[]
@@ -212,7 +212,7 @@ model AuditLog {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
 
-  application    Application       @relation(fields: [applicationId], references: [applicationId])
+  application    Application       @relation(fields: [applicationId], references: [applicationId], onDelete: Cascade)
   afterStatusRel ApplicationStatus @relation(fields: [afterStatus], references: [statusId])
   user           User              @relation(fields: [userId], references: [userId])
 

@@ -80,6 +80,7 @@ app.use(session({
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', process.env.CLIENT_DOMAIN)
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Credentials', 'true')
     next()
 })
@@ -550,6 +551,32 @@ app.post('/workspace/approval-route/change', async (req: Request, res: Response)
     } catch (err) {
         console.error(err);
         return res.status(500).json({ messageCode: 'E00001' });
+    }
+})
+
+app.delete("/workspace/delete", async (req: Request, res: Response) => {
+    if (!req.session.userId || !req.session.authorities) {
+        return res.status(401).json({
+            'messageCode': 'E00006',
+        })
+    }
+
+    const workspaceId = req.body.workspaceId;
+
+    if (!hasWorkspaceAuthority(workspaceId, req.session.authorities, Authorities.ADMIN)) {
+        return res.status(403).json({
+            'messageCode': 'E00031',
+        })
+    }
+
+
+    try {
+        await WorkspaceRepository.deleteWorkspace(workspaceId);
+        const userWorkspaces = await WorkspaceRepository.findByUserId(req.session.userId);
+        req.session.workspaces = userWorkspaces ?? undefined;
+        res.status(200).json(req.session.workspaces)
+    } catch (err) {
+        res.status(500).json({ messageCode: 'E00001' })
     }
 })
 

@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import AccountInfoChange from "./AccountInfoChange";
 import MessageBox from "@/components/MessageBox";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const MyPage = () => {
     const navigate = useNavigate();
@@ -136,9 +137,8 @@ const MyPage = () => {
                                     </TableCell>
                                 </TableRow>
                             </>
-                            : !user
-                                ? <></>
-                                : user.workspaces.map(workspace => (
+                            : user
+                                ? user.workspaces.map(workspace => (
                                     <TableRow key={workspace.workspaceId} className="flex justify-between items-center">
                                         <TableCell className="flex flex-row gap-3">
                                             <img src="/icons/default_workspace_icon.svg" className="btn-img btn-light" style={{ cursor: 'auto' }} />
@@ -150,8 +150,9 @@ const MyPage = () => {
                                                 </p>
                                             </div>
                                         </TableCell>
-                                    </TableRow>
-                                ))}
+                                    </TableRow>))
+                                : null
+                        }
 
                     </TableBody>
                 </Table>
@@ -159,7 +160,6 @@ const MyPage = () => {
             {isLoading
                 ? <></>
                 : <div className="flex justify-end gap-5 mb-5">
-                    <Link to={`/w/${getWorkspaceIdFrom(location.pathname)}/account/password/change`} className="btn btn-light">パスワードを変更する</Link>
                     <AlertDialog open={isDeleteAlertOpen} onOpenChange={handleDeleteAlertOpenChange}>
                         <AlertDialogTrigger>
                             <span className="btn btn-danger">アカウントを削除する</span>
@@ -189,6 +189,8 @@ const MyPage = () => {
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
+                    <Link to={`/w/${getWorkspaceIdFrom(location.pathname)}/account/password/change`} className="btn btn-light">パスワードを変更する</Link>
+                    <Button className="btn btn-primary">ワークスペースを作成する</Button>
                 </div>
             }
         </div >
