@@ -257,4 +257,54 @@ export class WorkspaceRepository {
             throw error;
         }
     }
+
+    static async createWorkspace(userId: number, workspaceName: string, description: string): Promise<Workspace | null> {
+        try {
+            const createdWorkspace = await prisma.$transaction(async (prisma) => {
+                // 1. workspace_idとdescriptionをもとにworkspacesにレコードを追加
+                const newWorkspace = await prisma.workspace.create({
+                    data: {
+                        workspaceName: workspaceName,
+                        description,
+                    },
+                });
+
+                // 2. user_idとworkspace_idをもとにuser_workspacesにレコードを追加
+                await prisma.userWorkspace.create({
+                    data: {
+                        userId,
+                        workspaceId: newWorkspace.workspaceId,
+                    },
+                });
+
+                // 3. user_idとworkspace_idをもとにuser_authoritiesにレコードを追加。
+                const authorityIds = [Authorities.APPLICATION, Authorities.APPROVAL, Authorities.ADMIN];
+                for (const authorityId of authorityIds) {
+                    await prisma.userAuthority.create({
+                        data: {
+                            userId,
+                            workspaceId: newWorkspace.workspaceId,
+                            authorityId,
+                        },
+                    });
+                }
+
+                // 4. user_idとworkspace_idをもとにworkspace_approversにレコードを追加。approval_stepには1を入れる。
+                await prisma.workspaceApprovers.create({
+                    data: {
+                        userId,
+                        workspaceId: newWorkspace.workspaceId,
+                        approvalStep: 1,
+                    },
+                });
+
+                return newWorkspace;
+            });
+
+            return createdWorkspace;
+        } catch (error) {
+            console.error('ワークスペースを作成する処理でエラーが発生しました:', error);
+            throw error;
+        }
+    }
 }

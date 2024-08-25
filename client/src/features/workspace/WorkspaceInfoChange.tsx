@@ -3,7 +3,6 @@ import { Workspace } from "@/lib/user-workspace"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useLocation, useNavigate } from "react-router-dom"
-import { WorkspaceInfoChangeFormData, workspaceInfoChangeSchema } from "../schema/user-schema"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
 import FormErrorMessage from "@/components/FormErrorMessage"
@@ -12,6 +11,7 @@ import axios, { AxiosError } from "axios"
 import { Label } from "@radix-ui/react-label"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/lib/auth"
+import { WorkspaceInfoChangeFormData, workspaceSchema } from "../schema/workspace-schema"
 
 interface WorkspaceInfoChangeProps {
     workspace: Workspace | null
@@ -35,7 +35,7 @@ const WorkspaceInfoChange = (props: WorkspaceInfoChangeProps) => {
         handleSubmit,
     } = useForm<WorkspaceInfoChangeFormData>({
         mode: "onSubmit",
-        resolver: zodResolver(workspaceInfoChangeSchema)
+        resolver: zodResolver(workspaceSchema)
     });
 
     const onSubmit = handleSubmit((data: WorkspaceInfoChangeFormData) => {

@@ -340,6 +340,31 @@ app.post("/app-forms/approver", async (req: Request, res: Response) => {
     }
 });
 
+app.post('/workspace/create', async (req: Request, res: Response) => {
+    if (!req.session.userId) {
+        return res.status(401).json({
+            'messageCode': 'E00006',
+        })
+    }
+    const { workspaceName, description } = req.body.data;
+
+    try {
+        const sameNameWorkspace = await WorkspaceRepository.findWorkspaceByName(workspaceName);
+        if (sameNameWorkspace) {
+            return res.status(400).json({ messageCode: 'E00027' })
+        }
+
+        const createdWorkspace = await WorkspaceRepository.createWorkspace(req.session.userId, workspaceName, description);
+        const userWorkspaces = await WorkspaceRepository.findByUserId(req.session.userId);
+        const userAuthorities = await AuthorityRepository.findByUserId(req.session.userId);
+        req.session.workspaces = userWorkspaces ?? undefined;
+        req.session.authorities = userAuthorities ?? undefined;
+        res.status(200).json(createdWorkspace)
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ messageCode: 'E00001' })
+    }
+})
 
 app.get('/workspace/member-list', async (req: Request, res: Response) => {
     const workspaceIdQuery = req.query.workspaceId;

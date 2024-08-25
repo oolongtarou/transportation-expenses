@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import AccountInfoChange from "./AccountInfoChange";
 import MessageBox from "@/components/MessageBox";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import WorkspaceCreate from "../workspace/WorkspaceCreate";
 
 const MyPage = () => {
     const navigate = useNavigate();
@@ -25,6 +25,7 @@ const MyPage = () => {
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
     const [isDeleteAlertOpen, setDeleteAlertOpen] = useState(false);
     const currentWorkspaceId = getWorkspaceIdFrom(location.pathname);
+    const [isWorkspaceCreateOpen, setWorkspaceCreateOpen] = useState(false);
 
     useEffect(() => {
         setLoading(true);
@@ -198,7 +199,25 @@ const MyPage = () => {
                     >
                         パスワードを変更する
                     </Link>
-                    <Button className="btn btn-primary">ワークスペースを作成する</Button>
+                    <Dialog
+                        open={isWorkspaceCreateOpen}
+                        onOpenChange={setWorkspaceCreateOpen}
+                    >
+                        <DialogTrigger className="text-left">
+                            <span className="btn btn-primary">ワークスペースを作成する</span>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl" aria-describedby="申請書明細行の経路を入力する画面です">
+                            <DialogHeader>
+                                <DialogTitle className="font-bold text-3xl mb-5" hidden>
+                                    ワークスペースを作成する
+                                </DialogTitle>
+                                <DialogDescription hidden>
+                                    ワークスペースを作成するための画面です。
+                                </DialogDescription>
+                            </DialogHeader>
+                            <WorkspaceCreate setDialogOpen={setWorkspaceCreateOpen} />
+                        </DialogContent>
+                    </Dialog>
                 </div>
             }
         </div >
