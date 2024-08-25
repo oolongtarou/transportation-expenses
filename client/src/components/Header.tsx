@@ -13,7 +13,6 @@ interface HeaderProps {
 const Header = (props: HeaderProps) => {
     const { myWorkspaces, setIsLoggedIn } = useAuth();
     const navigate = useNavigate();
-    const location = useLocation();
     const currentWorkspaceId = getWorkspaceIdFrom(useLocation().pathname);
     const currentWorkspaceName = getWorkspaceById(myWorkspaces, currentWorkspaceId ? Number(currentWorkspaceId) : 0)?.workspaceName;
     const workspacesWithoutCurrent = getWorkspacesExcludingId(myWorkspaces, currentWorkspaceId ? Number(currentWorkspaceId) : 0);
@@ -86,7 +85,7 @@ const Header = (props: HeaderProps) => {
                             <img src='/icons/help.svg' className='btn-img btn-light' />
                         </li>
                         <li>
-                            <Link to={`w/${getWorkspaceIdFrom(location.pathname)}/my-page`}>
+                            <Link to={currentWorkspaceId ? `/w/${currentWorkspaceId}/my-page` : '/account/my-page'}>
                                 <img src='/icons/default_user_icon.svg' className='btn-img btn-link' />
                             </Link>
                         </li>

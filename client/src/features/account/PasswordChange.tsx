@@ -12,6 +12,7 @@ import FormErrorMessage from "@/components/FormErrorMessage"
 import MessageBox from "@/components/MessageBox"
 import axios, { AxiosError } from "axios"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog"
+import { getWorkspaceIdFrom } from "@/lib/user-workspace"
 
 type SubmitType = 'confirm' | 'complete';
 
@@ -21,6 +22,7 @@ const PasswordChange = () => {
     const [messageCode, setMessageCode] = useState<string | null>('');
     const [isLoading, setLoading] = useState(false);
     const [isDialogOpen, setDialogOpen] = useState(false);
+    const currentWorkspaceId = getWorkspaceIdFrom(location.pathname);
 
     const {
         register,
@@ -31,7 +33,13 @@ const PasswordChange = () => {
         resolver: zodResolver(passwordChangeSchema)
     });
 
-    const onCancel = () => navigate(location.pathname.replace('account/password/change', 'my-page'));
+    const onCancel = () => {
+        if (currentWorkspaceId) {
+            navigate(location.pathname.replace('account/password/change', 'my-page'));
+        } else {
+            navigate('/account/my-page');
+        }
+    }
 
     const onSubmit = (data: PasswordChangeFormData, submitType: SubmitType) => {
         switch (submitType) {

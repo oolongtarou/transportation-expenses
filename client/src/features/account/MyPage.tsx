@@ -24,6 +24,7 @@ const MyPage = () => {
     const [searchParams] = useSearchParams();
     const [deleteConfirmText, setDeleteConfirmText] = useState('');
     const [isDeleteAlertOpen, setDeleteAlertOpen] = useState(false);
+    const currentWorkspaceId = getWorkspaceIdFrom(location.pathname);
 
     useEffect(() => {
         setLoading(true);
@@ -191,7 +192,12 @@ const MyPage = () => {
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
-                    <Link to={`/w/${getWorkspaceIdFrom(location.pathname)}/account/password/change`} className="btn btn-light">パスワードを変更する</Link>
+                    <Link
+                        to={currentWorkspaceId ? `/w/${currentWorkspaceId}/account/password/change` : '/account/password/change'}
+                        className="btn btn-light"
+                    >
+                        パスワードを変更する
+                    </Link>
                     <Button className="btn btn-primary">ワークスペースを作成する</Button>
                 </div>
             }
