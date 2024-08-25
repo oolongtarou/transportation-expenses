@@ -230,6 +230,15 @@ export class AppFormRepository {
                     },
                 });
 
+                const user = await prisma.user.findUnique({
+                    where: { userId: form.userId },
+                    select: { userName: true }
+                });
+
+                if (!user) {
+                    throw new Error(`UserID：${form.userId}のユーザーが見つかりませんでした。`);
+                }
+
                 // audit_logテーブルにデータをインサート
                 await prisma.auditLog.create({
                     data: {
@@ -237,10 +246,9 @@ export class AppFormRepository {
                         beforeStatus: null,
                         afterStatus: form.statusId,
                         userId: form.userId,
-                        userName: '山田 太郎',
+                        userName: user.userName, // userNameをインサート
                     },
                 });
-
                 return application;
             });
 
@@ -389,7 +397,7 @@ export class AppFormRepository {
      * @return {*}  {Promise<number>}
      * @memberof AppFormRepository
      */
-    static async approve(applicationId: number): Promise<number> {
+    static async approve(userId: number, applicationId: number): Promise<number> {
         const application = await prisma.application.findUnique({
             where: { applicationId },
             include: { workspace: true }
@@ -401,7 +409,7 @@ export class AppFormRepository {
 
         const currentStatusId = application.statusId;
         const approvalStep = application.workspace.approvalStep;
-        return await this.updateStatus(applicationId, getStatusIdAfterApprove(currentStatusId, approvalStep));
+        return await this.updateStatus(userId, applicationId, getStatusIdAfterApprove(currentStatusId, approvalStep));
     }
 
     /**
@@ -412,8 +420,8 @@ export class AppFormRepository {
      * @return {*}  {Promise<number>}
      * @memberof AppFormRepository
      */
-    static async receive(applicationId: number): Promise<number> {
-        return await this.updateStatus(applicationId, ApplicationStatus.Received);
+    static async receive(userId: number, applicationId: number): Promise<number> {
+        return await this.updateStatus(userId, applicationId, ApplicationStatus.Received);
     }
 
     /**
@@ -424,32 +432,55 @@ export class AppFormRepository {
      * @return {*}  {Promise<number>}
      * @memberof AppFormRepository
      */
-    static async reject(applicationId: number): Promise<number> {
-        return await this.updateStatus(applicationId, ApplicationStatus.Rejected);
+    static async reject(userId: number, applicationId: number): Promise<number> {
+        return await this.updateStatus(userId, applicationId, ApplicationStatus.Rejected);
     }
 
-    /**
-     * 指定されたapplicationIdのレコードのstatusIdを更新し、更新後のstatusIdを返す関数
-     *
-     * @private
-     * @static
-     * @param {number} applicationId - 更新対象のアプリケーションID
-     * @param {number} statusId - 更新するステータスID
-     * @return {Promise<number>} - 更新後のステータスIDを返すPromise
-     * @memberof AppFormRepository
-     */
-    private static async updateStatus(applicationId: number, statusId: number): Promise<number> {
+    private static async updateStatus(userId: number, applicationId: number, statusId: number): Promise<number> {
         try {
-            const updatedApplication = await prisma.application.update({
-                where: { applicationId: applicationId },
-                data: { statusId: statusId },
-                select: { statusId: true }, // 更新後のstatusIdのみを取得
-            });
+            return await prisma.$transaction(async (prisma) => {
+                // 更新前のstatus_idを取得する
+                const previousStatusLog = await prisma.auditLog.findFirst({
+                    where: { applicationId: applicationId },
+                    orderBy: { createdAt: 'desc' },
+                    select: { afterStatus: true }
+                });
 
-            return updatedApplication.statusId;
+                const beforeStatus = previousStatusLog?.afterStatus ?? null;
+
+                // applicationのstatus_idを更新する
+                const updatedApplication = await prisma.application.update({
+                    where: { applicationId: applicationId },
+                    data: { statusId: statusId },
+                    select: { statusId: true }, // 更新後のstatusIdのみを取得
+                });
+
+                // ユーザー名を取得する
+                const user = await prisma.user.findUnique({
+                    where: { userId: userId },
+                    select: { userName: true },
+                });
+
+                if (!user) {
+                    throw new Error(`User ID ${userId}のユーザーが見つかりません`);
+                }
+
+                // audit_logにインサートする
+                await prisma.auditLog.create({
+                    data: {
+                        applicationId: applicationId,
+                        beforeStatus: beforeStatus,
+                        afterStatus: updatedApplication.statusId,
+                        userId: userId,
+                        userName: user.userName,
+                    },
+                });
+
+                return updatedApplication.statusId;
+            });
         } catch (error) {
             console.error(error);
-            throw new Error(`Application ID ${applicationId} のステータス更新に失敗しました:`);
+            throw new Error(`Application ID ${applicationId} のステータス更新に失敗しました: ${error}`);
         }
     }
 }

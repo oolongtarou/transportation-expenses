@@ -103,7 +103,7 @@ export class WorkspaceRepository {
         return formattedResult[0];
     }
 
-    static async findWorkspaceInfoBy(workspaceId: number): Promise<Workspace | null> {
+    static async findWorkspaceInfoBy(workspaceId: number) {
         try {
             const workspace = await prisma.workspace.findUnique({
                 where: {

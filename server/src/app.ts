@@ -505,34 +505,6 @@ app.post('/workspace/member/edit', async (req: Request, res: Response) => {
     }
 })
 
-app.post('/workspace/approval-step/change', async (req: Request, res: Response) => {
-    const workspaceId = req.body.workspaceId;
-    const approvalStep = req.body.approvalStep;
-
-    if (!workspaceId) {
-        return res.status(400).json({
-            'messageCode': 'E00018',
-        })
-    }
-
-    if (approvalStep < 1 || 5 < approvalStep) {
-        return res.status(400).json({ messageCode: 'E00030' });
-    }
-
-    try {
-        const applicationsApproving = await AppFormRepository.findApplicationsByWorkspaceAndStatus(workspaceId, statusesApproving);
-        if (applicationsApproving.length > 0) {
-            return res.status(400).json({ messageCode: 'E00029' });
-        }
-        const result = await WorkspaceRepository.updateApprovalStep(workspaceId, approvalStep);
-
-        return res.status(200).json(result);
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ messageCode: 'E00001' });
-    }
-})
-
 app.post('/workspace/approval-route/change', async (req: Request, res: Response) => {
     const workspaceId: number = req.body.workspaceId;
     const approvalStep: number = req.body.approvalStep;
@@ -549,9 +521,12 @@ app.post('/workspace/approval-route/change', async (req: Request, res: Response)
     }
 
     try {
-        const applicationsApproving = await AppFormRepository.findApplicationsByWorkspaceAndStatus(workspaceId, statusesApproving);
-        if (applicationsApproving.length > 0) {
-            return res.status(400).json({ messageCode: 'E00029' });
+        const workspaceInfo = await WorkspaceRepository.findWorkspaceInfoBy(workspaceId);
+        if (workspaceInfo && workspaceInfo.approvalStep !== approvalStep) {
+            const applicationsApproving = await AppFormRepository.findApplicationsByWorkspaceAndStatus(workspaceId, statusesApproving);
+            if (applicationsApproving.length > 0) {
+                return res.status(400).json({ messageCode: 'E00029' });
+            }
         }
 
         await WorkspaceRepository.updateWorkspaceApprovalStepAndApprovers(workspaceId, approvalStep, approvers);
@@ -709,7 +684,7 @@ app.post('/app-form/approve', async (req: Request, res: Response) => {
 
         // 承認していい申請書かどうかを確認する
         if (req.session.userId && req.session.authorities && appForm.userId !== req.session.userId && await canApprove(req.session.userId, workspaceId, appForm.statusId) && hasWorkspaceAuthority(workspaceId, req.session.authorities, Authorities.APPROVAL)) {
-            const result = await AppFormRepository.approve(applicationId);
+            const result = await AppFormRepository.approve(req.session.userId, applicationId);
             res.status(200).json(result);
         } else {
             res.status(403).json({
@@ -760,8 +735,8 @@ app.post('/app-form/reject', async (req: Request, res: Response) => {
         }
 
         // 却下していい申請書かどうかを確認する
-        if (req.session.authorities && appForm.userId !== req.session.userId && statusesApproving.includes(appForm.statusId) && hasWorkspaceAuthority(workspaceId, req.session.authorities, Authorities.APPROVAL)) {
-            const result = await AppFormRepository.reject(applicationId);
+        if (req.session.userId && req.session.authorities && appForm.userId !== req.session.userId && statusesApproving.includes(appForm.statusId) && hasWorkspaceAuthority(workspaceId, req.session.authorities, Authorities.APPROVAL)) {
+            const result = await AppFormRepository.reject(req.session.userId, applicationId);
             res.status(200).json(result);
         } else {
             res.status(403).json({
@@ -814,7 +789,7 @@ app.post('/app-form/receive', async (req: Request, res: Response) => {
 
         // 受領登録していい申請書かどうかを確認する
         if (appForm.userId === req.session.userId && appForm.statusId === ApplicationStatus.Receiving) {
-            const result = await AppFormRepository.receive(applicationId);
+            const result = await AppFormRepository.receive(req.session.userId, applicationId);
             res.status(200).json(result);
         } else {
             res.status(403).json({
