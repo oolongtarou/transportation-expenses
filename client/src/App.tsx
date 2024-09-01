@@ -15,7 +15,7 @@ import { createContext, useEffect, useState } from "react"
 import MyPage from "./features/account/MyPage"
 import { getWorkspaceWithSmallestId, Workspace } from "./lib/user-workspace"
 import { Authority } from "./lib/auth"
-import axios, { AxiosError } from "axios"
+import axios from "axios"
 import AppFormPrint from "./features/application-form/AppFormPrint"
 
 // 型定義
@@ -60,8 +60,7 @@ function App() {
           }
         }
       })
-      .catch((err: AxiosError) => {
-        console.error(`サーバーエラーが発生しました：${err.code}`);
+      .catch(() => {
         navigate("/");
       })
   }, [navigate, pathname]);
