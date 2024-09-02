@@ -65,8 +65,8 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         httpOnly: true,
-        secure: process.env.MODE_ENV === 'production',
-        sameSite: process.env.MODE_ENV === 'production' ? 'none' : 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 1000 * 60 * 60 * 24,
     },
     store: new RedisStore({
@@ -92,7 +92,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.get("/", (req: Request, res: Response) => {
-    res.status(200).send("Hello World");
+    res.status(200).send(process.env.NODE_ENV);
 });
 
 app.post("/account/login", async (req: Request, res: Response) => {
