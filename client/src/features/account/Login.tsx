@@ -55,8 +55,6 @@ const Login = () => {
 
     const onSubmit = handleSubmit((data: LoginFormData) => {
         setLoading(true);
-        console.log('エンドポイント')
-        console.log(`${import.meta.env.VITE_SERVER_DOMAIN}/account/login`);
         axios.post(`${import.meta.env.VITE_SERVER_DOMAIN}/account/login`, data, { withCredentials: true })
             .then((response) => {
                 if (response.data.userId) {
