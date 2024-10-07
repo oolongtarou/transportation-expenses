@@ -57,14 +57,13 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-// app.set('trust proxy', 3);
+app.set('trust proxy', 3);
 
 app.use(session({
     secret: process.env.SESSION_SECRET as string,
     resave: false,
     saveUninitialized: false,
     cookie: {
-        proxy: true,
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'none',
