@@ -57,7 +57,7 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-app.set('trust proxy', 3);
+app.set('trust proxy', 1);
 
 app.use(session({
     secret: process.env.SESSION_SECRET as string,
@@ -66,8 +66,8 @@ app.use(session({
     cookie: {
         httpOnly: true,
         // secure: process.env.NODE_ENV === 'production',
-        secure: true,
-        sameSite: 'none',
+        secure: false,
+        sameSite: 'lax',
         maxAge: 1000 * 60 * 60 * 24,
     },
     store: new RedisStore({
