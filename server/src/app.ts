@@ -57,7 +57,7 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-app.set('trust proxy', 1);
+app.set('trust proxy', true);
 
 app.use(session({
     secret: process.env.SESSION_SECRET as string,
@@ -66,7 +66,7 @@ app.use(session({
     cookie: {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        sameSite: 'lax',
         maxAge: 1000 * 60 * 60 * 24,
     },
     store: new RedisStore({
@@ -78,7 +78,8 @@ app.use(session({
 
 // CORSの許可
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', process.env.CLIENT_DOMAIN)
+    // res.header('Access-Control-Allow-Origin', process.env.CLIENT_DOMAIN)
+    res.header('Access-Control-Allow-Origin', "*")
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Credentials', 'true')
