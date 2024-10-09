@@ -41,7 +41,7 @@ build
 # ignore yarn.lock
 yarn.lock
 
-docs
+backup
 
 # Logs
 *.log
